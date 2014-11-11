@@ -1,13 +1,11 @@
-"""medgen.pubmed -- tools to deal with NCBI's E-utilities interface to PubMed"""
+from __future__ import absolute_import
 
-# The PubMedArticle class wraps an interface to eutils to fetch articles
-#   and maintains an sqlite cache of previously loaded articles.
-# 
-# The equivalent operation for fetching article with PMID 19483685 would be:
-# curl 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=19483685'
+"""metapub.pubmedarticle -- PubMedArticle class instantiated by supplying ncbi XML string."""
 
 import grp, logging, os, pprint, sys
 import xml.etree.ElementTree as ET
+
+from .exceptions import MetaPubError
 
 logger = logging.getLogger()
 
@@ -26,7 +24,7 @@ class PubMedArticle(object):
         if not xmlstr:
             if xmlstr == '':
                 xmlstr = 'empty'
-            raise Exception('Cannot build PubMedArticle object; xml string was %s' % xmlstr)
+            raise MetaPubError('Cannot build PubMedArticle object; xml string was %s' % xmlstr)
         self.article = self._parse_ncbi_xml(xmlstr)
 
     def _parse_ncbi_xml(self, xmlstr):
