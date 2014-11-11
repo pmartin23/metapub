@@ -34,8 +34,12 @@ class PubMedArticle(object):
         return dom.find('PubmedArticle')
 
     @property
+    def pmid(self):
+        return self._get('MedlineCitation/PMID')
+
+    @property
     def abstract(self):
-        return( self._get('MedlineCitation/Article/Abstract/AbstractText') )
+        return self._get('MedlineCitation/Article/Abstract/AbstractText')
 
     @property
     # N.B. Citations may have 0 authors. e.g., pmid:7550356
@@ -45,7 +49,7 @@ class PubMedArticle(object):
 
     @property
     def authors_str(self):
-        return( '; '.join(self.authors) )
+        return '; '.join(self.authors) 
 
     @property
     def author1_last_fm(self):
@@ -70,7 +74,7 @@ class PubMedArticle(object):
 
     @property
     def pages(self):
-        return( self._get('MedlineCitation/Article/Pagination/MedlinePgn') )
+        return self._get('MedlineCitation/Article/Pagination/MedlinePgn') 
 
     @property
     def first_page(self):
@@ -81,7 +85,7 @@ class PubMedArticle(object):
 
     @property
     def title(self):
-        return( self._get('MedlineCitation/Article/ArticleTitle') )
+        return self._get('MedlineCitation/Article/ArticleTitle') 
 
     @property
     def volume(self):
@@ -101,12 +105,12 @@ class PubMedArticle(object):
     def volume_issue(self):
         ji = self.article.find('MedlineCitation/Article/Journal/JournalIssue')
         try:
-            return( '%s(%s)' % (ji.find('Volume').text,
-                                ji.find('Issue').text) )
+            return '%s(%s)' % (ji.find('Volume').text, ji.find('Issue').text)
+                               
         except AttributeError:
             pass
         try:
-            return( ji.find('Volume').text )
+            return ji.find('Volume').text
         except AttributeError:
             pass
         # electronic pubs may not have volume or issue
@@ -157,16 +161,16 @@ def _au_to_last_fm(au):
     if au is None:
         return
     try:
-        return( au.find('LastName').text
-                + u' ' + au.find('Initials').text )
+        return au.find('LastName').text + u' ' + au.find('Initials').text
+                
     except AttributeError:
         pass
     try:
-        return( au.find('CollectiveName').text )
+        return au.find('CollectiveName').text 
     except AttributeError:
         pass
     try:
-        return( au.find('LastName').text )
+        return au.find('LastName').text
     except AttributeError:
         pass
     raise Exception("Author structure not recognized")
