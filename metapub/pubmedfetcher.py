@@ -33,7 +33,7 @@ class PubMedFetcher(Borg):
 
     Similar methods exist for returning papers by DOI and PM Central id:
 
-        paper = fetch.article_by_doi('10.1186/1750-1172-1-3')
+        paper = fetch.article_by_doi('10.1038/ng.379')
         paper = fetch.article_by_pmcid('PMC3458974')
     '''
 
