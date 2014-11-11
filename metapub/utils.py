@@ -12,6 +12,7 @@ EMAIL = 'naomi@nthmost.com'
 ID_CONVERSION_URI = 'http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool='+PKGNAME+'&email='+EMAIL+'&ids=%s'
 
 def get_tmp_xml_path(someid):
+    someid = someid.replace('/', '__')
     return os.path.join(TMPDIR, '%s.xml' % someid)
 
 def _id_conversion_api(input_id):
