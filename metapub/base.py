@@ -14,7 +14,6 @@ class MetaPubObject(object):
     def _parse_xml(self, xmlstr, root=None):
         dom = ET.fromstring(xmlstr)
         if root:
-            #return dom.getchildren()[0].find(root)
             return dom.find(root)
         else:
             return dom.getchildren()[0]    

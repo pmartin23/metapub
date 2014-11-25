@@ -134,7 +134,7 @@ class PubMedArticle(MetaPubObject):
             return None
     
     def __str__(self):
-        return( '%s (%s. %s, %s:%s)'.format(
+        return( '%s (%s. %s, %s:%s)' % (
             self.title, self.authors_str, self.journal, self.volume_issue, self.pages) )
 
 ############################################################################
