@@ -42,6 +42,7 @@ class MedGenFetcher(Borg):
             self.qs = ec.QueryService()
             self.ids_by_term = self._eutils_ids_by_term
             self.concept_by_id = self._eutils_concept_by_id
+            self.id_for_cuid = self._eutils_id_for_cuid
         else:
             raise NotImplementedError('coming soon: fetch from local medgen via medgen-mysql.')
 
@@ -68,3 +69,18 @@ class MedGenFetcher(Borg):
         id = str(id)
         result = self.qs.esummary( { 'db': 'medgen', 'id': id } )
         return MedGenConcept(result)
+
+    def _eutils_id_for_cuid(self, cuid):
+        '''given a ConceptID (cuid), return a medgen ID.'''
+        #http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=medgen&term=C0000039
+        if not cuid.startswith('C'):
+            raise MetaPubError('Invalid CUID: must start with C (e.g. C0000039)')
+
+        result = self.qs.esearch( { 'db': 'medgen', 'term': cuid } )
+        dom = etree.fromstring(result)
+        try:
+            cuid = dom.find('IdList').find('Id').strip()
+        except AttributeError:
+            raise MetaPubError('Invalid CUID: did not return MedGen id.')
+        return cuid
+

@@ -47,7 +47,10 @@ class PubMedFetcher(Borg):
             raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql.')
 
     def _eutils_article_by_pmid(self, pmid):
-        return PubMedArticle(self.qs.efetch(args={'db': 'pubmed', 'id': pmid}))
+        result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
+        if result.find('ERROR') > -1:
+            raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle (no such PMID)' % pmid)
+        return PubMedArticle(result)
 
     def _eutils_article_by_pmcid(self, pmcid):
         pmid = get_pmid_for_otherid(pmcid)
@@ -60,3 +63,4 @@ class PubMedFetcher(Borg):
         if pmid is None:
             raise MetaPubError('No PMID available for doi %s' % doi)
         return self._eutils_article_by_pmid(pmid)
+
