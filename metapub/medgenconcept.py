@@ -42,15 +42,23 @@ class MedGenConcept(MetaPubObject):
         return self._get('SemanticType')
         
     @property
+    def uid(self):
+        return self.content.get('uid')
+        
+    @property
     def modes_of_inheritance(self):
         '''returns a list of all known ModesOfInheritance, in format:
-        [ { 'cui': 'CNxxxx', 'name': 'some name' }, ...  ]
+        [ { 'cui': 'CNxxxx', 'name': 'some name', 'uid': 'xxxxxx', 'tui': 'A000 }, ...  ]
         '''
         modes = []
         try:
             for item in self.meta.find('ModesOfInheritance').getchildren():
                 modes.append({ 'cui': item.get('CUI'), 
-                               'name': item.find('Name').text })
+                               'name': item.find('Name').text,
+                               'tui': item.get('TUI'),
+                               'uid': item.get('uid'),
+                               'semantic_type': item.find('SemanticType').text,
+                               'definition': item.find('Definition').text })
             return modes
         except AttributeError:
             return None
@@ -58,7 +66,9 @@ class MedGenConcept(MetaPubObject):
     @property
     def associated_genes(self):
         '''returns a list of AssociatedGenes, in format:
-        [ { 'gene_id': 'xxx', 'chromosome': 'X', 'cytogen_loc': 'X9234235', 'hgnc': 'ABCD' }, ] 
+        [ { 'gene_id': 'xxx', 'chromosome': 'X', 'cytogen_loc': 'X9234235', 'hgnc': 'GENE' }, ]
+        
+        if not available, returns None. 
         '''
         genes = []
         try:
@@ -72,28 +82,56 @@ class MedGenConcept(MetaPubObject):
             return None
 
 
+    @property
+    def names(self):
+        '''returns a list of this concept's equivalent Names in various dictionaries,
+        in format:
+        
+        { 'SDUI': '300555', 'SCUI': 'xxx', 'CODE': '300555', 'SAB': 'OMIM' 'TTY': 'PT' 'type': 'syn', 'name': 'DENT DISEASE 2' }
+        
+        '''
+        names = []
 
-  
-    # TODO
-    # Associated Genes / Gene
-    # <AssociatedGenes><Gene gene_id="4952" chromosome="X" cytogen_loc="Xq26.1">OCRL</Gene></AssociatedGenes>
-    # 
-    
-    # TODO
-    # Names
-    # <Names><Name SDUI="300555" CODE="300555" SAB="OMIM" TTY="PT" type="syn">DENT DISEASE 2</Name><Name SDUI="C564487" SCUI="M0564787" CODE="C564487" SAB="MSH" TTY="NM" type="syn">Dent Disease 2</Name><Name SDUI="GTRT000001952" CODE="AN0084357" SAB="GTR" TTY="PT" type="preferred">Dent disease 2</Name><Name SDUI="GTRT000001952" CODE="AN0348120" SAB="GTR" TTY="SYN" type="syn">Dent Disease Type II</Name><Name SDUI="Orphanet_93623" CODE="AN0449423" SAB="ORDO" TTY="PT" type="syn">Dent disease type 2</Name><Name SDUI="Orphanet_93623" CODE="AN0470672" SAB="ORDO" TTY="SYN" type="syn">Nephrolithiasis type 2</Name></Names>
-    
+        # not every ID is present in each Name (e.g. SCUI only appears sometimes).        
+        possible_keys = ['SDUI', 'SCUI', 'CODE', 'SAB', 'TTY', 'PT', 'type']
+        
+        for name in self.meta.find('Names').getchildren():
+            outd = { 'name': name.text }
+            for key in possible_keys:
+                try:
+                    outd[key] = name.get(key)            
+                except AttributeError:
+                    pass
+            names.append(outd)
+        return names
+        
+    @property
+    def omim(self):
+        '''returns this concept's OMIM id (string), when available, else returns None.'''
+        try:
+            return self.meta.find('OMIM').find('MIM').text
+        except AttributeError:
+            return None
+        
+    @property
+    def chromosome(self):
+        '''returns this concept's affected chromosome, if applicable/available'''
+        try:
+            return self.meta.find('Chromosome').text
+        except AttributeError:
+            return None
+
+    @property
+    def cytogenic(self):
+        '''returns this concept's cytogenic property, if applicable/available'''
+        try:
+            return self.meta.find('Cytogenic').text
+        except AttributeError:
+            return None
+
     # TODO
     # Definitions
     # <Definitions><Definition source="GeneReviews">Dent disease, an X-linked disorder of proximal renal tubular dysfunction, is characterized by low molecular-weight (LMW) proteinuria, hypercalciuria, nephrocalcinosis, nephrolithiasis, and chronic kidney disease (CKD). Males younger than age ten years may manifest only low molecular-weight (LMW) proteinuria and/or hypercalciuria, which are usually asymptomatic. Thirty to 80% of affected males develop end-stage renal disease (ESRD) between ages 30 and 50 years; in some instances ESRD does not develop until the sixth decade of life or later. Rickets or osteomalacia are occasionally observed, and mild short stature, although underappreciated, may be a common occurrence. Disease severity can vary within the same family. Males with Dent disease 2 (caused by mutation of OCRL) are at increased risk for intellectual disability. Due to random X-chromosome inactivation, some female carriers may manifest hypercalciuria and, rarely, renal calculi and moderate LMW proteinuria. Females rarely if ever develop CKD.</Definition></Definitions>
-    
-    # TODO
-    # Chromosome
-    # <Chromosome>X</Chromosome>
-    
-    # TODO
-    # Cytogenic
-    # <Cytogenetic>Xq26.1</Cytogenetic>
     
     # TODO
     # ClinicalFeatures / ClinicalFeature
