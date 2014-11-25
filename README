@@ -1,0 +1,46 @@
+Metapub is a Python library that provides python objects fetched via eutils 
+that represent papers and concepts found within the NLM.
+
+PubMedArticle / PubMedFetcher
+
+Basic usage::
+
+  fetch = PubMedFetcher()
+  article = fetch.article_by_pmid('123456')
+  print article.title
+  print article.journal, article.year, article.volume, article.issue
+  print article.authors
+
+MedGenConcept / MedGenFetcher
+
+Basic usage::
+
+  fetch = MedGenFetcher()
+  concept = fetch.concept_by_id('336867')
+  print concept.name
+  print concept.description
+  print concept.associated_genes
+  print concept.modes_of_inheritance
+
+
+These objects abstract some interactions with pubmed, and intends to 
+encompass as many types of database lookups and summaries as can be 
+provided via Eutils / Entrez.
+
+Metapub relies on the very neat eutils package created by Reece
+Hart, which you can check out here:
+
+http://bitbucket.org/uta/eutils
+
+This library is in its very early stages and there's a lot that may
+change, and quite a bit planned for implementation in 2014-2015.
+
+Feel free to use the library with confidence that each released version 
+is well tested -- and in a couple of cases, some of its code is already
+in production -- but until (say) version 0.5, don't expect consistency
+between versions.
+
+YMMV, At your own risk, etc.
+
+--Naomi Most (@nthmost)
+
