@@ -27,6 +27,12 @@ def get_pmid_for_otherid(otherid):
     record = _id_conversion_api(otherid)
     return record.get('pmid')
 
+# singleton class used by the fetchers.
+class Borg:
+  _shared_state = {}
+  def __init__(self):
+    self.__dict__ = self._shared_state
+
 # PMID: http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=my_tool&email=my_email@example.com&ids=23193287
 # PMCID: http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=my_tool&email=my_email@example.com&ids=PMC3531190
 # Manuscript ID: http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=my_tool&email=my_email@example.com&ids=NIHMS311352

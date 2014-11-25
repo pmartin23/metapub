@@ -2,14 +2,15 @@ from __future__ import absolute_import
 
 """metapub.pubmedarticle -- PubMedArticle class instantiated by supplying ncbi XML string."""
 
-import grp, logging, os, pprint, sys
+import logging
 import xml.etree.ElementTree as ET
 
+from .base import MetaPubObject
 from .exceptions import MetaPubError
 
 logger = logging.getLogger()
 
-class PubMedArticle(object):
+class PubMedArticle(MetaPubObject):
     '''This PubMedArticle class receives an XML string as its required argument
     and parses it into its constituent parts, exposing them as attributes. 
 
@@ -21,15 +22,7 @@ class PubMedArticle(object):
     '''
 
     def __init__(self, xmlstr, *args, **kwargs):
-        if not xmlstr:
-            if xmlstr == '':
-                xmlstr = 'empty'
-            raise MetaPubError('Cannot build PubMedArticle object; xml string was %s' % xmlstr)
-        self.article = self._parse_ncbi_xml(xmlstr)
-
-    def _parse_ncbi_xml(self, xmlstr):
-        dom = ET.fromstring(xmlstr)
-        return dom.find('PubmedArticle')
+        super(PubMedArticle, self).__init__(xmlstr, 'PubmedArticle', args, kwargs)
 
     @property
     def pmid(self):
@@ -42,7 +35,7 @@ class PubMedArticle(object):
     @property
     # N.B. Citations may have 0 authors. e.g., pmid:7550356
     def authors(self):
-        authors = [ _au_to_last_fm(au) for au in self.article.findall('MedlineCitation/Article/AuthorList/Author') ]
+        authors = [ _au_to_last_fm(au) for au in self.content.findall('MedlineCitation/Article/AuthorList/Author') ]
         return authors
 
     @property
@@ -52,7 +45,7 @@ class PubMedArticle(object):
     @property
     def author1_last_fm(self):
         """return first author's name, in format Last INITS (space between surname and inits)"""
-        return _au_to_last_fm(self.article.find('MedlineCitation/Article/AuthorList/Author'))
+        return _au_to_last_fm(self.content.find('MedlineCitation/Article/AuthorList/Author'))
 
     @property
     def author1_lastfm(self):
@@ -88,20 +81,20 @@ class PubMedArticle(object):
     @property
     def volume(self):
         try:
-            return self.article.find('MedlineCitation/Article/Journal/JournalIssue/Volume').text
+            return self.content.find('MedlineCitation/Article/Journal/JournalIssue/Volume').text
         except AttributeError:
             return None
 
     @property
     def issue(self):
         try:
-            return self.article.find('MedlineCitation/Article/Journal/JournalIssue/Issue').text
+            return self.content.find('MedlineCitation/Article/Journal/JournalIssue/Issue').text
         except AttributeError:
             return None
 
     @property
     def volume_issue(self):
-        ji = self.article.find('MedlineCitation/Article/Journal/JournalIssue')
+        ji = self.content.find('MedlineCitation/Article/Journal/JournalIssue')
         try:
             return '%s(%s)' % (ji.find('Volume').text, ji.find('Issue').text)
                                
@@ -139,14 +132,6 @@ class PubMedArticle(object):
             return self._get('PubmedData/ArticleIdList/ArticleId[@IdType="pmc"]')[3:]
         except TypeError:
             return None
-
-    ######################################################################
-    ## INTERNAL CLASS FUNCTIONS
-    def _get(self,tag):
-        n = self.article.find(tag)
-        if n is not None:
-            return n.text
-        return None
     
     def __str__(self):
         return( '%s (%s. %s, %s:%s)'.format(

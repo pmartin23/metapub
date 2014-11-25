@@ -2,19 +2,11 @@ from __future__ import absolute_import
 
 """metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed"""
 
-import grp, logging, os, pprint, sys
 import xml.etree.ElementTree as ET
 
-logger = logging.getLogger()
-
 from .pubmedarticle import PubMedArticle
-from .utils import get_pmid_for_otherid
+from .utils import Borg, get_pmid_for_otherid
 from .exceptions import MetaPubError
-
-class Borg:
-  _shared_state = {}
-  def __init__(self):
-    self.__dict__ = self._shared_state
 
 class PubMedFetcher(Borg):
     '''PubMedFetcher (a Borg singleton object)
@@ -53,7 +45,7 @@ class PubMedFetcher(Borg):
             self.article_by_doi = self._eutils_article_by_doi
 
         else:
-            raise NotImplementedError('coming soon: fetch from local pubmed index.')
+            raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql.')
 
     def _eutils_article_by_pmid(self, pmid):
         return PubMedArticle(self.qs.efetch(args={'db': 'pubmed', 'id': pmid } ))
