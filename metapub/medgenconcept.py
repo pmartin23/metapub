@@ -44,20 +44,40 @@ class MedGenConcept(MetaPubObject):
     @property
     def modes_of_inheritance(self):
         '''returns a list of all known ModesOfInheritance, in format:
-        [ { 'cui': 'CNxxxx', 'name': 'some name' }, { }  ]
+        [ { 'cui': 'CNxxxx', 'name': 'some name' }, ...  ]
         '''
         modes = []
         try:
             for item in self.meta.find('ModesOfInheritance').getchildren():
-                modes.append({ 'cui': item.get('CUI'), 'name': item.find('Name').text })
+                modes.append({ 'cui': item.get('CUI'), 
+                               'name': item.find('Name').text })
             return modes
         except AttributeError:
             return None
-    
+            
+    @property
+    def associated_genes(self):
+        '''returns a list of AssociatedGenes, in format:
+        [ { 'gene_id': 'xxx', 'chromosome': 'X', 'cytogen_loc': 'X9234235', 'hgnc': 'ABCD' }, ] 
+        '''
+        genes = []
+        try:
+            for gene in self.meta.find('AssociatedGenes').getchildren():
+                genes.append({ 'gene_id': gene.get('gene_id'), 
+                               'hgnc': gene.text,
+                               'chromosome': gene.get('chromosome'),
+                               'cytogen_loc': gene.get('cytogen_loc') })
+            return genes
+        except AttributeError:
+            return None
 
+
+
+  
     # TODO
-    # ModesOfInheritance
-    # <ModesOfInheritance><ModeOfInheritance uid="425042" CUI="CN001297" TUI="T045"><Name>X-linked recessive inheritance</Name><SemanticType>Genetic Function</SemanticType><Definition>A mode of inheritance that is observed for recessive traits related to a gene encoded on the X chromosome. In the context of medical genetics, X-linked recessive disorders manifest in males (who have one copy of the X chromosome and are thus hemizygotes), but generally not in female heterozygotes who have one mutant and one normal allele.</Definition></ModeOfInheritance></ModesOfInheritance>
+    # Associated Genes / Gene
+    # <AssociatedGenes><Gene gene_id="4952" chromosome="X" cytogen_loc="Xq26.1">OCRL</Gene></AssociatedGenes>
+    # 
     
     # TODO
     # Names
@@ -82,12 +102,7 @@ class MedGenConcept(MetaPubObject):
     # TODO
     # PhenotypicAbnormalities 
     # <PhenotypicAbnormalities><Category CUI="CN000115" name="Abnormality of the genitourinary system"><ClinicalFeature uid="504348" CUI="CN000117" TUI="T033" SDUI="HP:0000121"><SemanticType>Finding</SemanticType><Name>Nephrocalcinosis</Name><Definition>Nephrocalcinosis is the deposition of calcium salts in renal parenchyma.</Definition></ClinicalFeature><ClinicalFeature uid="425142" CUI="CN003029" TUI="T033" SDUI="HP:0003355"><SemanticType>Finding</SemanticType><Name>Aminoaciduria</Name><Definition>An increased concentration of an amino acid in the urine.</Definition></ClinicalFeature><ClinicalFeature uid="776439" CUI="CN183891" TUI="T033" SDUI="HP:0012622"><SemanticType>Finding</SemanticType><Name>Chronic kidney disease</Name><Definition>Functional anomaly of the kidney persisting for at least three months.</Definition></ClinicalFeature></Category><Category CUI="CN000664" name="Abnormality of the nervous system"><ClinicalFeature uid="504774" CUI="CN001157" TUI="T033" SDUI="HP:0001263"><SemanticType>Finding</SemanticType><Name>Global developmental delay</Name><Definition>A delay in the achievement of motor or mental milestones in the domains of development of a child, including motor skills, speech and language, cognitive skills, and social and emotional skills. This term should only be used to describe children younger than five years of age.</Definition></ClinicalFeature></Category><Category CUI="CN001754" name="Abnormality of metabolism/homeostasis"><ClinicalFeature uid="505493" CUI="CN002923" TUI="T033" SDUI="HP:0003236"><SemanticType>Finding</SemanticType><Name>Elevated serum creatine phosphokinase</Name><Definition>An elevation of the level of the enzyme creatine kinase (also known as creatine phosphokinase, CPK; EC 2.7.3.2) in the blood. CPK levels can be elevated in a number of clinical disorders such as myocardial infarction, rhabdomyolysis, and muscular dystrophy.</Definition></ClinicalFeature><ClinicalFeature uid="425142" CUI="CN003029" TUI="T033" SDUI="HP:0003355"><SemanticType>Finding</SemanticType><Name>Aminoaciduria</Name><Definition>An increased concentration of an amino acid in the urine.</Definition></ClinicalFeature></Category></PhenotypicAbnormalities>
-
-    # TODO
-    # Associated Genes / Gene
-    # <AssociatedGenes><Gene gene_id="4952" chromosome="X" cytogen_loc="Xq26.1">OCRL</Gene></AssociatedGenes>
-    # 
-    
+        
     # TODO
     # <RelatedDisorders></RelatedDisorders>
     
