@@ -156,5 +156,5 @@ def _au_to_last_fm(au):
         return au.find('LastName').text
     except AttributeError:
         pass
-    raise Exception("Author structure not recognized")
+    raise MetaPubError("Author structure not recognized")
 
