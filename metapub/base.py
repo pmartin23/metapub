@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import xml.etree.ElementTree as ET
+from lxml import etree
 
 class MetaPubObject(object):
 
@@ -12,7 +12,7 @@ class MetaPubObject(object):
         self.content = self._parse_xml(xmlstr, root)
 
     def _parse_xml(self, xmlstr, root=None):
-        dom = ET.fromstring(xmlstr)
+        dom = etree.fromstring(xmlstr)
         if root:
             return dom.find(root)
         else:

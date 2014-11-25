@@ -43,12 +43,11 @@ class PubMedFetcher(Borg):
             self.article_by_pmid = self._eutils_article_by_pmid
             self.article_by_pmcid = self._eutils_article_by_pmcid
             self.article_by_doi = self._eutils_article_by_doi
-
         else:
             raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql.')
 
     def _eutils_article_by_pmid(self, pmid):
-        return PubMedArticle(self.qs.efetch(args={'db': 'pubmed', 'id': pmid } ))
+        return PubMedArticle(self.qs.efetch(args={'db': 'pubmed', 'id': pmid}))
 
     def _eutils_article_by_pmcid(self, pmcid):
         pmid = get_pmid_for_otherid(pmcid)
@@ -61,4 +60,3 @@ class PubMedFetcher(Borg):
         if pmid is None:
             raise MetaPubError('No PMID available for doi %s' % doi)
         return self._eutils_article_by_pmid(pmid)
-

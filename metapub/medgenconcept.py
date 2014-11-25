@@ -3,7 +3,7 @@ from __future__ import absolute_import
 """metapub.medgenconcept -- MedGenConcept class instantiated by supplying ESummary XML string."""
 
 import logging
-import xml.etree.ElementTree as ET
+from lxml import etree
 
 from .base import MetaPubObject
 from .exceptions import MetaPubError
@@ -13,13 +13,16 @@ logger = logging.getLogger()
 class MedGenConcept(MetaPubObject):
 
     def __init__(self, xmlstr, *args, **kwargs):
-        super(MedGenConcept, self).__init__(xmlstr, 'DocumentSummary', args, kwargs)
+        super(MedGenConcept, self).__init__(xmlstr, 'DocumentSummarySet/DocumentSummary', args, kwargs)
 
         if self._get('error'):
             raise MetaPubError('Supplied XML for MedGenConcept contained explicit error: %s' % self._get('error') )
 
+        # ConceptMeta is an XML document embedded within the XML response. Boo-urns. 
+        self.meta = etree.fromstring('<ConceptMeta>'+self.content.find('ConceptMeta').text+'</ConceptMeta>')
+
     @property
-    def concept_id(self):
+    def cui(self):
         return self._get('ConceptId')
     
     @property
@@ -38,9 +41,18 @@ class MedGenConcept(MetaPubObject):
     def semantic_type(self):
         return self._get('SemanticType')
         
-    #@property
-    #def modes_of_inheritance(self):
-        
+    @property
+    def modes_of_inheritance(self):
+        '''returns a list of all known ModesOfInheritance, in format:
+        [ { 'cui': 'CNxxxx', 'name': 'some name' }, { }  ]
+        '''
+        modes = []
+        try:
+            for item in self.meta.find('ModesOfInheritance').getchildren():
+                modes.append({ 'cui': item.get('CUI'), 'name': item.find('Name').text })
+            return modes
+        except AttributeError:
+            return None
     
 
     # TODO

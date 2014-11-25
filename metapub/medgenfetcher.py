@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 """metapub.MedGenFetcher -- tools to deal with NCBI's E-utilities interface to the MedGen db"""
 
-import xml.etree.ElementTree as ET
+from lxml import etree
 
 from .exceptions import MetaPubError
 from .medgenconcept import MedGenConcept
@@ -33,17 +33,15 @@ class MedGenFetcher(Borg):
         paper = fetch.article_by_pmcid('PMC3458974')
     '''
 
-    def __init__(self, method='eutils', webenv='blah'):
+    def __init__(self, method='eutils'):
         Borg.__init__(self)
         self.method = method
-        self.webenv = webenv
 
         if method=='eutils':
             import eutils.client as ec
             self.qs = ec.QueryService()
             self.ids_by_term = self._eutils_ids_by_term
             self.concept_by_id = self._eutils_concept_by_id
-
         else:
             raise NotImplementedError('coming soon: fetch from local medgen via medgen-mysql.')
 
@@ -54,7 +52,7 @@ class MedGenFetcher(Borg):
         '''
         # http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=medgen&term=OCRL
         result = self.qs.esearch( { 'db': 'medgen', 'term': term } )
-        dom = ET.fromstring(result)
+        dom = etree.fromstring(result)
         ids = []
         idlist = dom.find('IdList')
         for item in idlist.findall('Id'):
@@ -62,7 +60,7 @@ class MedGenFetcher(Borg):
         return ids
     
     def _eutils_concept_by_id(self, id):
-        '''wraps results of an esummary fcgi call to medgen when ID is known
+        '''wraps results of an esummary fcgi call to medgen when ID is known.
         
         :return: MedGenConcept object
         '''
