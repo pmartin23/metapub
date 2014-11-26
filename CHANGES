@@ -3,3 +3,4 @@
 11/25/2014, 0.0.3, Adds MedGenFetcher / MedGenConcept, demo_pubmed.py and demo_medgen.py CLI scripts, actual README kinda.
 11/25/2014, 0.0.4, Catching PubMedFetcher edge conditions, raise MetaPubError w/ nicer error messages more often.
 11/25/2014, 0.0.5, MetaPubObject class now stores xmlstr in an attribute (I mean, why not).
+11/25/2014, 0.0.5.1, Put last_page attribute into PubMedArticle class.
