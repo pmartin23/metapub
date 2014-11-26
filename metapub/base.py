@@ -9,6 +9,7 @@ class MetaPubObject(object):
             if xmlstr == '':
                 xmlstr = 'empty'
             raise MetaPubError('Cannot build MetaPubObject; xml string was %s' % xmlstr)
+        self.xmlstr = xmlstr
         self.content = self._parse_xml(xmlstr, root)
 
     def _parse_xml(self, xmlstr, root=None):

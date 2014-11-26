@@ -20,5 +20,15 @@ fetch = PubMedFetcher()
 
 article = fetch.article_by_pmid(pmid)
 print article.pmid, article.title
-print ','.join(article.authors)
+#print 'pages: '+article.pages
+print 'authors: '+','.join(article.authors)
 
+#print article.xmlstr
+
+try:
+    startpage, endpage = article.pages.split('-')
+except AttributeError:
+    # this article is just one page long.
+    startpage = endpage = article.pages
+
+print startpage
