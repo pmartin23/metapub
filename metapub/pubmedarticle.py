@@ -72,6 +72,13 @@ class PubMedArticle(MetaPubObject):
         try:
             return self.pages.partition('-')[0]
         except AttributeError:
+            return self.pages
+
+    @property
+    def last_page(self):
+        try:
+            return self.pages.partition('-')[1]
+        except AttributeError:
             return None
 
     @property
