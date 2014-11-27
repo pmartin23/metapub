@@ -27,7 +27,7 @@ class MedGenConcept(MetaPubObject):
                  'semantic_id': self.semantic_id, 'semantic_type': self.semantic_type,
                  'modes_of_inheritance': self.modes_of_inheritance, 
                  'associated_genes': self.associated_genes, 'medgen_uid': self.medgen_uid,
-                 'name': self.names, 'OMIM': self.OMIM, 'cytogenic': self.cytogenic,
+                 'names': self.names, 'OMIM': self.OMIM, 'cytogenic': self.cytogenic,
                  'chromosome': self.chromosome }
                   
     @property
@@ -65,7 +65,7 @@ class MedGenConcept(MetaPubObject):
                 modes.append({ 'CUI': item.get('CUI'), 
                                'name': item.find('Name').text,
                                'TUI': item.get('TUI'),
-                               'uid': item.get('uid'),
+                               'uid': item.get('medgen_uid'),
                                'semantic_type': item.find('SemanticType').text,
                                'definition': item.find('Definition').text })
             return modes
