@@ -4,3 +4,4 @@
 11/25/2014, 0.0.4, Catching PubMedFetcher edge conditions, raise MetaPubError w/ nicer error messages more often.
 11/25/2014, 0.0.5, MetaPubObject class now stores xmlstr in an attribute (I mean, why not).
 11/25/2014, 0.0.5.1, Put last_page attribute into PubMedArticle class.
+11/25/2014, 0.0.5.3, Nomenclature fixes for clarity.
