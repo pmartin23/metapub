@@ -21,8 +21,17 @@ class MedGenConcept(MetaPubObject):
         # ConceptMeta is an XML document embedded within the XML response. Boo-urns. 
         self.meta = etree.fromstring('<ConceptMeta>'+self.content.find('ConceptMeta').text+'</ConceptMeta>')
 
+    def to_dict(self):
+        'returns a dictionary composed of all extractable properties of this concept.'
+        return { 'CUI': self.CUI, 'title': self.title, 'definition': self.definition,
+                 'semantic_id': self.semantic_id, 'semantic_type': self.semantic_type,
+                 'modes_of_inheritance': self.modes_of_inheritance, 
+                 'associated_genes': self.associated_genes, 'medgen_uid': self.medgen_uid,
+                 'name': self.names, 'OMIM': self.OMIM, 'cytogenic': self.cytogenic,
+                 'chromosome': self.chromosome }
+                  
     @property
-    def cui(self):
+    def CUI(self):
         return self._get('ConceptId')
     
     @property
@@ -42,20 +51,20 @@ class MedGenConcept(MetaPubObject):
         return self._get('SemanticType')
         
     @property
-    def uid(self):
+    def medgen_uid(self):
         return self.content.get('uid')
         
     @property
     def modes_of_inheritance(self):
         '''returns a list of all known ModesOfInheritance, in format:
-        [ { 'cui': 'CNxxxx', 'name': 'some name', 'uid': 'xxxxxx', 'tui': 'A000 }, ...  ]
+        [ { 'CUI': 'CNxxxx', 'name': 'some name', 'medgen_uid': 'xxxxxx', 'tui': 'A000 }, ...  ]
         '''
         modes = []
         try:
             for item in self.meta.find('ModesOfInheritance').getchildren():
-                modes.append({ 'cui': item.get('CUI'), 
+                modes.append({ 'CUI': item.get('CUI'), 
                                'name': item.find('Name').text,
-                               'tui': item.get('TUI'),
+                               'TUI': item.get('TUI'),
                                'uid': item.get('uid'),
                                'semantic_type': item.find('SemanticType').text,
                                'definition': item.find('Definition').text })
@@ -106,7 +115,7 @@ class MedGenConcept(MetaPubObject):
         return names
         
     @property
-    def omim(self):
+    def OMIM(self):
         '''returns this concept's OMIM id (string), when available, else returns None.'''
         try:
             return self.meta.find('OMIM').find('MIM').text

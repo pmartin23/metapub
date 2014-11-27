@@ -23,12 +23,5 @@ print article.pmid, article.title
 #print 'pages: '+article.pages
 print 'authors: '+','.join(article.authors)
 
-#print article.xmlstr
+print article.xmlstr
 
-try:
-    startpage, endpage = article.pages.split('-')
-except AttributeError:
-    # this article is just one page long.
-    startpage = endpage = article.pages
-
-print startpage
