@@ -5,3 +5,4 @@
 11/25/2014, 0.0.5, MetaPubObject class now stores xmlstr in an attribute (I mean, why not).
 11/25/2014, 0.0.5.1, Put last_page attribute into PubMedArticle class.
 11/25/2014, 0.0.5.3, Nomenclature fixes for clarity.
+11/30/2014, 0.0.5.4, MedGenFetcher.get_uid_for_cui. Nomenclature normalization: medgen "id" to "uid", "cuid" to "cui".
