@@ -16,7 +16,7 @@ logging.getLogger("eutils").setLevel(logging.INFO)
 ####
 
 fetch = MedGenFetcher()
-ids = fetch.ids_by_term(input_gene)
+uids = fetch.uids_by_term(input_gene)
 #print ids
 
 # TODO: Term Hierarchy Children (only 1 tier below), Term Hierarchy Parents (only 1 tier above)
@@ -26,8 +26,8 @@ headers = ['CUI', 'Hugo', 'Medgen Disease or Syndrome', 'MedGenUID',
 
 table = []
 
-for this_id in ids:
-    concept = fetch.concept_by_id(this_id)
+for this_id in uids:
+    concept = fetch.concept_by_uid(this_id)
     #print concept.to_dict()
     if concept.semantic_type=='Disease or Syndrome':
         assert concept.medgen_uid == this_id
