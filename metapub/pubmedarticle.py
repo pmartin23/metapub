@@ -63,11 +63,11 @@ class PubMedArticle(MetaPubObject):
         return '; '.join(self.authors) 
 
     def _get_author1_last_fm(self):
-        """return first author's name, in format Last INITS (space between surname and inits)"""
+        '''return first author's name, in format Last INITS (space between surname and inits)'''
         return _au_to_last_fm(self.content.find('MedlineCitation/Article/AuthorList/Author'))
 
     def _get_author1_lastfm(self):
-        """return first author's name, in format LastINITS"""
+        '''return first author's name, in format LastINITS'''
         if self.author1_last_fm is not None:
             return self.author1_last_fm.replace(' ','')
         return None
@@ -85,13 +85,20 @@ class PubMedArticle(MetaPubObject):
 
     def _get_first_page(self):
         try:
-            return self.pages.partition('-')[0]
+            return self.pages.split('-')[0]
         except AttributeError:
             return self.pages
 
     def _get_last_page(self):
         try:
-            return self.pages.partition('-')[1]
+            lastnum = self.pages.split('-')[1]
+            return lastnum
+            
+            #TODO: return true last page in situations like self.pages = "148-52"
+            #           i.e. we want last_page = "152", not "52"
+            #if lastnum < self.first_page:
+            #    len(lastnum)....
+
         except AttributeError:
             return None
 
