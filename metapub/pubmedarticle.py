@@ -99,7 +99,7 @@ class PubMedArticle(MetaPubObject):
             #if lastnum < self.first_page:
             #    len(lastnum)....
 
-        except AttributeError:
+        except IndexError, AttributeError:
             return None
 
     def _get_title(self):

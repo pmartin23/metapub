@@ -7,3 +7,4 @@
 11/25/2014, 0.0.5.3, Nomenclature fixes for clarity.
 11/30/2014, 0.0.5.4, MedGenFetcher.get_uid_for_cui. Nomenclature normalization: medgen "id" to "uid", "cuid" to "cui".
 11/30/2014, 0.0.5.5, PubMedArticle gets to_dict() method. Attributes now set at __init__ (instead of magic properties)
+12/01/2014, 0.0.5.6, Minor fixes for PubMedArticle pages attributes.

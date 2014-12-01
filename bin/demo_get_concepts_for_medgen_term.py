@@ -17,7 +17,7 @@ logging.getLogger("eutils").setLevel(logging.INFO)
 
 fetch = MedGenFetcher()
 uids = fetch.uids_by_term(input_gene)
-#print ids
+print uids
 
 # TODO: Term Hierarchy Children (only 1 tier below), Term Hierarchy Parents (only 1 tier above)
 
