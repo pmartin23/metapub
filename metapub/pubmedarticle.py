@@ -43,6 +43,9 @@ class PubMedArticle(MetaPubObject):
         self.pmc = self._get_pmc()
 
     def to_dict(self):
+        outd = self.__dict__
+        outd.pop('content')
+        outd.pop('xmlstr')
         return self.__dict__
 
     def _get_pmid(self):
