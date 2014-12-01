@@ -16,7 +16,7 @@ MedGenConcept / MedGenFetcher
 Basic usage::
 
   fetch = MedGenFetcher()
-  concept = fetch.concept_by_id('336867')
+  concept = fetch.concept_by_uid('336867')
   print concept.name
   print concept.description
   print concept.associated_genes
@@ -43,4 +43,3 @@ between versions.
 YMMV, At your own risk, etc.
 
 --Naomi Most (@nthmost)
-
