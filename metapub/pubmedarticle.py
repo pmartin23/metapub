@@ -29,10 +29,11 @@ class PubMedArticle(MetaPubObject):
         self.authors_str = self._get_authors_str()
         self.author1_last_fm = self._get_author1_last_fm()        
         self.author1_lastfm = self._get_author1_lastfm()
+        self.title = self._get_title()
         self.journal = self._get_journal()
         self.pages = self._get_pages()
-        self.first_page = self._get_firstpage()
-        self.last_page = self._get_lastpage()
+        self.first_page = self._get_first_page()
+        self.last_page = self._get_last_page()
         self.volume = self._get_volume()
         self.issue = self._get_issue()
         self.volume_issue = self._get_volume_issue()
@@ -40,6 +41,9 @@ class PubMedArticle(MetaPubObject):
         self.doi = self._get_doi()
         self.pii = self._get_pii()
         self.pmc = self._get_pmc()
+
+    def to_dict(self):
+        return self.__dict__
 
     def _get_pmid(self):
         return self._get('MedlineCitation/PMID')
@@ -130,11 +134,9 @@ class PubMedArticle(MetaPubObject):
     def _get_doi(self):
         return self._get('PubmedData/ArticleIdList/ArticleId[@IdType="doi"]')
 
-    @property
     def _get_pii(self):
         return self._get('PubmedData/ArticleIdList/ArticleId[@IdType="pii"]')
 
-    @property
     def _get_pmc(self):
         try:
             return self._get('PubmedData/ArticleIdList/ArticleId[@IdType="pmc"]')[3:]
