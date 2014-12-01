@@ -20,5 +20,8 @@ fetch = PubMedFetcher()
 
 article = fetch.article_by_pmid(pmid)
 print article.pmid, article.title
-print ','.join(article.authors)
+#print 'pages: '+article.pages
+print 'authors: '+','.join(article.authors)
+
+#print article.xmlstr
 
