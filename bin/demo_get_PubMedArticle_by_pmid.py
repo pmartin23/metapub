@@ -22,6 +22,10 @@ article = fetch.article_by_pmid(pmid)
 print article.pmid, article.title
 #print 'pages: '+article.pages
 print 'authors: '+','.join(article.authors)
+if article.pii:
+    print 'pii: '+article.pii
+if article.doi:
+    print 'doi: '+article.doi
 
 #print article.xmlstr
 
