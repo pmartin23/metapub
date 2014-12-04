@@ -20,6 +20,20 @@ class MedGenConcept(MetaPubObject):
 
         # ConceptMeta is an XML document embedded within the XML response. Boo-urns. 
         self.meta = etree.fromstring('<ConceptMeta>'+self.content.find('ConceptMeta').text+'</ConceptMeta>')
+        
+        self.modes_of_inheritance = self._get_modes_of_inheritance()
+        self.OMIM = self._get_OMIM()
+        self.names = self._get_names()
+        self.CUI = self._get_CUI()
+        self.title = self._get_title()
+        self.definition = self._get_definition()
+        self.semantic_id = self._get_semantic_id()
+        self.semantic_type = self._get_semantic_type()
+        self.associated_genes = self._get_associated_genes()
+        self.cytogenic = self._get_cytogenic()
+        self.chromosome = self._get_chromosome()
+        self.medgen_uid = self._get_medgen_uid()
+
 
     def to_dict(self):
         'returns a dictionary composed of all extractable properties of this concept.'
@@ -29,51 +43,59 @@ class MedGenConcept(MetaPubObject):
                  'associated_genes': self.associated_genes, 'medgen_uid': self.medgen_uid,
                  'names': self.names, 'OMIM': self.OMIM, 'cytogenic': self.cytogenic,
                  'chromosome': self.chromosome }
-                  
-    @property
-    def CUI(self):
+
+    def _get_CUI(self):
         return self._get('ConceptId')
     
-    @property
-    def title(self):
+    def _get_title(self):
         return self._get('Title')
         
-    @property
-    def definition(self):
+    def _get_definition(self):
         return self._get('Definition')
     
-    @property
-    def semantic_id(self):
+    def _get_semantic_id(self):
         return self._get('SemanticId')
     
-    @property
-    def semantic_type(self):
+    def _get_semantic_type(self):
         return self._get('SemanticType')
         
-    @property
-    def medgen_uid(self):
+    def _get_medgen_uid(self):
         return self.content.get('uid')
-        
-    @property
-    def modes_of_inheritance(self):
+    
+    def _get_modes_of_inheritance(self):
+    
         '''returns a list of all known ModesOfInheritance, in format:
         [ { 'CUI': 'CNxxxx', 'name': 'some name', 'medgen_uid': 'xxxxxx', 'tui': 'A000 }, ...  ]
         '''
-        modes = []
-        try:
-            for item in self.meta.find('ModesOfInheritance').getchildren():
-                modes.append({ 'CUI': item.get('CUI'), 
-                               'name': item.find('Name').text,
-                               'TUI': item.get('TUI'),
-                               'uid': item.get('medgen_uid'),
-                               'semantic_type': item.find('SemanticType').text,
-                               'definition': item.find('Definition').text })
-            return modes
-        except AttributeError:
-            return None
-            
-    @property
-    def associated_genes(self):
+        output_list = []
+        modes = self.meta.find('ModesOfInheritance').getchildren()
+        
+        extra_key_dict = { 'CUI': None, 
+                           'TUI': None,
+                           'medgen_uid': None, 
+                         }
+        for mode in modes:
+            mode_dict = extra_key_dict.copy()
+            try:
+                mode_dict['semantic_type'] = mode.find('SemanticType').text
+            except AttributeError:
+                pass
+            try:
+                mode_dict['definition'] = mode.find('Definition').text
+            except AttributeError:
+                pass
+            mode_dict['name'] = mode.find('Name').text
+
+            for item in extra_key_dict.keys():
+                try:
+                    mode.get(item)
+                except AttributeError:
+                    pass
+                
+            output_list.append(mode_dict)
+        return output_list
+             
+    def _get_associated_genes(self):
         '''returns a list of AssociatedGenes, in format:
         [ { 'gene_id': 'xxx', 'chromosome': 'X', 'cytogen_loc': 'X9234235', 'hgnc': 'GENE' }, ]
         
@@ -90,9 +112,7 @@ class MedGenConcept(MetaPubObject):
         except AttributeError:
             return None
 
-
-    @property
-    def names(self):
+    def _get_names(self):
         '''returns a list of this concept's equivalent Names in various dictionaries,
         in format:
         
@@ -114,24 +134,21 @@ class MedGenConcept(MetaPubObject):
             names.append(outd)
         return names
         
-    @property
-    def OMIM(self):
+    def _get_OMIM(self):
         '''returns this concept's OMIM id (string), when available, else returns None.'''
         try:
             return self.meta.find('OMIM').find('MIM').text
         except AttributeError:
             return None
         
-    @property
-    def chromosome(self):
+    def _get_chromosome(self):
         '''returns this concept's affected chromosome, if applicable/available'''
         try:
             return self.meta.find('Chromosome').text
         except AttributeError:
             return None
 
-    @property
-    def cytogenic(self):
+    def _get_cytogenic(self):
         '''returns this concept's cytogenic property, if applicable/available'''
         try:
             return self.meta.find('Cytogenic').text
