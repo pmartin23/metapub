@@ -22,7 +22,7 @@ class MedGenConcept(MetaPubObject):
         self.meta = etree.fromstring('<ConceptMeta>'+self.content.find('ConceptMeta').text+'</ConceptMeta>')
         
         self.modes_of_inheritance = self._get_modes_of_inheritance()
-        self.OMIM = self._get_OMIM()
+        self.OMIM = self._get_OMIM()        # is a list, since sometimes there are more than one.
         self.names = self._get_names()
         self.CUI = self._get_CUI()
         self.title = self._get_title()
@@ -135,11 +135,17 @@ class MedGenConcept(MetaPubObject):
         return names
         
     def _get_OMIM(self):
-        '''returns this concept's OMIM id (string), when available, else returns None.'''
-        try:
-            return self.meta.find('OMIM').find('MIM').text
-        except AttributeError:
-            return None
+        '''returns this concept's OMIM ids (list of strings), when available, else returns [].'''
+        #from IPython import embed; embed()
+        omim_root = self.meta.find('OMIM')
+        #print omim_root.find('MIM').text
+        outp = []
+        for item in omim_root.get_children():
+            try:
+                outp.append(item.text)
+            except AttributeError:
+                pass
+        return outp
         
     def _get_chromosome(self):
         '''returns this concept's affected chromosome, if applicable/available'''
