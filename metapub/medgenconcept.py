@@ -136,10 +136,15 @@ class MedGenConcept(MetaPubObject):
         
     def _get_OMIM(self):
         '''returns this concept's OMIM ids (list of strings), when available, else returns [].'''
-        #from IPython import embed; embed()
         omim_root = self.meta.find('OMIM')
+        #from IPython import embed; embed()
         #print omim_root.find('MIM').text
         outp = []
+        try:
+            mims = omim_root.get_children()
+        except AttributeError:
+            return None
+
         for item in omim_root.get_children():
             try:
                 outp.append(item.text)

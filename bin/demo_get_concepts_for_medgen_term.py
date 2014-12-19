@@ -21,30 +21,31 @@ print uids
 
 # TODO: Term Hierarchy Children (only 1 tier below), Term Hierarchy Parents (only 1 tier above)
 
-headers = ['CUI', 'Hugo', 'Medgen Disease or Syndrome', 'MedGenUID', 
+headers = ['CUI', 'Hugo', 'Title', 'Semantic Type', 'MedGenUID', 
            'OMIM ID', 'Modes of Inheritance', 'Assoc Genes', ]
 
 table = []
 
+def _join_or_NA(some_list, select=None, joiner=','):
+    'returns a joined string or NA if empty'
+    if some_list and select:
+        return joiner.join(item[select] for item in some_list)
+    elif some_list:
+        return joiner.join([item for item in some_list])
+    else:
+        return 'NA'
+
 for this_id in uids:
     concept = fetch.concept_by_uid(this_id)
     #print concept.to_dict()
-    if concept.semantic_type=='Disease or Syndrome':
-        assert concept.medgen_uid == this_id
-        line = [concept.CUI, input_gene, concept.title, concept.medgen_uid, concept.OMIM]
-        modes = concept.modes_of_inheritance
-        if modes:
-            line.append(','.join([mode['name'] for mode in modes]))
-        else:
-            line.append('NA')
+    assert concept.medgen_uid == this_id
+    line = [concept.CUI, input_gene, concept.title, concept.semantic_type, concept.medgen_uid]
 
-        genes = concept.associated_genes
-        if genes:
-            line.append(','.join([gene['hgnc'] for gene in genes]))
-        else:
-            line.append('NA')
+    line.append(_join_or_NA(concept.OMIM))
+    line.append(_join_or_NA(concept.modes_of_inheritance, 'name'))
+    line.append(_join_or_NA(concept.associated_genes, 'hgnc')) 
 
-        table.append(line)
+    table.append(line)
 
 print tabulate(table, headers, tablefmt="simple")
 
