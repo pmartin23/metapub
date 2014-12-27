@@ -3,6 +3,7 @@ from __future__ import absolute_import
 """metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed"""
 
 import xml.etree.ElementTree as ET
+import requests
 
 from .pubmedarticle import PubMedArticle
 from .utils import Borg, get_pmid_for_otherid
@@ -63,4 +64,44 @@ class PubMedFetcher(Borg):
         if pmid is None:
             raise MetaPubError('No PMID available for doi %s' % doi)
         return self._eutils_article_by_pmid(pmid)
+
+    def pmids_for_citation(self, **kwargs):
+        '''returns list of pmids for given citation. requires at least 4/5 of these keyword arguments:
+            journal_title
+            year
+            volume
+            first_page
+            author_name (works best with only Author1's last name supplied)
+        '''
+
+        # output format in return:
+        # journal_title|year|volume|first_page|author_name|your_key|
+        base_uri = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/ecitmatch.cgi?db=pubmed&retmode=xml&bdata={journal_title}|{year}|{volume}|{first_page}|{author_name}|Art1|'
+        inp_dict = { 'journal_title': kwargs.get('journal_title', '').replace(' ', '+'),
+                     'year': str(kwargs.get('year', '')), 
+                     'volume': str(kwargs.get('volume', '')),
+                     'first_page': str(kwargs.get('first_page', '')),
+                     'author_name': _reduce_author_string(kwargs.get('author_name', '')).replace(' ', '+'),
+                   }
+
+        req = base_uri.format(**inp_dict)
+        content = requests.get(req).text
+        pmids = []
+        for item in content.split('\n'):
+            if item.strip():
+                pmid = item.split('|')[-1]
+                pmids.append(pmid.strip())
+        return pmids
+                
+
+def _reduce_author_string(author_string):
+    # try splitting by commas
+    authors = author_string.split(',')
+    if len(authors)<2:
+        # try splitting by semicolons
+        authors = author_string.split(';')
+
+    author1 = authors[0]
+    # presume last name is at the end of the string
+    return author1.split(' ')[-1]
 
