@@ -11,7 +11,7 @@ except IndexError:
 
 
 fetch = PubMedFetcher()
-article = fetch.article_by_pmcid('PMC3479421')
+article = fetch.article_by_pmcid(someid)
 
 print article.title
 print ', '.join(article.authors)
