@@ -41,6 +41,7 @@ class PubMedArticle(MetaPubObject):
         self.doi = self._get_doi()
         self.pii = self._get_pii()
         self.pmc = self._get_pmc()
+        self.issn = self._get_issn()
 
     def to_dict(self):
         outd = self.__dict__
@@ -152,6 +153,9 @@ class PubMedArticle(MetaPubObject):
             return self._get('PubmedData/ArticleIdList/ArticleId[@IdType="pmc"]')[3:]
         except TypeError:
             return None
+
+    def _get_issn(self):
+        return self._get('MedlineCitation/Article/Journal/ISSN')
     
     def __str__(self):
         return( '%s (%s. %s, %s:%s)' % (

@@ -11,3 +11,4 @@
 12/04/2014, 0.0.6, MedGenConcept attribuets now preprocessed at __init__. Bugfix for modes_of_inheritance.
 12/19/2014, 0.0.7, MedGenConcept.OMIM is now a list. Better exception catching for OMIM data handling.
 12/27/2014, 0.0.8, PubMedFetcher.pmids_for_citation (fetch list of PMIDs for given citation strings).
+1/12/2015, 0.0.8, PubMedArticle.ISSN attribute parsed.
