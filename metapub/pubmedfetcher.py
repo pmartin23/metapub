@@ -3,6 +3,7 @@ from __future__ import absolute_import
 """metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed"""
 
 import xml.etree.ElementTree as ET
+from eutils.exceptions import EutilsBadRequestError
 import requests
 
 from .pubmedarticle import PubMedArticle
@@ -32,6 +33,12 @@ class PubMedFetcher(Borg):
 
         paper = fetch.article_by_doi('10.1038/ng.379')
         paper = fetch.article_by_pmcid('PMC3458974')
+
+    Finally, you can search for PMIDs via citation details by using the pmids_for_citation
+    method, for which you only need 3 out of 5 details as a list of one or more PMIDs:
+
+        pmids = fetch.pmids_for_citation(journal='Science', year='2008', volume='4', 
+                first_page='7', author_name='Grant')
     '''
 
     def __init__(self, method='eutils'):
@@ -48,7 +55,10 @@ class PubMedFetcher(Borg):
             raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql.')
 
     def _eutils_article_by_pmid(self, pmid):
-        result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
+        try:
+            result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
+        except EutilsBadRequestError:
+            raise MetaPubError('Invalid ID "%s" (rejected by Eutils); please check the number and try again.' % pmid)
         if result.find('ERROR') > -1:
             raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle (no such PMID)' % pmid)
         return PubMedArticle(result)
@@ -66,7 +76,7 @@ class PubMedFetcher(Borg):
         return self._eutils_article_by_pmid(pmid)
 
     def pmids_for_citation(self, **kwargs):
-        '''returns list of pmids for given citation. requires at least 4/5 of these keyword arguments:
+        '''returns list of pmids for given citation. requires at least 3/5 of these keyword arguments:
             journal_title
             year
             volume
@@ -76,7 +86,7 @@ class PubMedFetcher(Borg):
 
         # output format in return:
         # journal_title|year|volume|first_page|author_name|your_key|
-        base_uri = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/ecitmatch.cgi?db=pubmed&retmode=xml&bdata={journal_title}|{year}|{volume}|{first_page}|{author_name}|Art1|'
+        base_uri = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/ecitmatch.cgi?db=pubmed&retmode=xml&bdata={journal_title}|{year}|{volume}|{first_page}|{author_name}|metapub|'
         inp_dict = { 'journal_title': kwargs.get('journal_title', '').replace(' ', '+'),
                      'year': str(kwargs.get('year', '')), 
                      'volume': str(kwargs.get('volume', '')),

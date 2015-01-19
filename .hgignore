@@ -10,3 +10,4 @@ ve/
 dist/
 *.egg-info
 build/
+sandbox/
