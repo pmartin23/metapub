@@ -14,3 +14,4 @@
 1/12/2015, 0.0.8, PubMedArticle.ISSN attribute parsed.
 1/15/2015, 0.0.9, Various minor bugfixes.
 1/19/2015, 0.1.0, PubMedArticle raises MetaPubError if given bad PMID. Minor docstring improvements.
+1/20/2015, 0.1.1, bugfix in PubMedArticle pages processing.

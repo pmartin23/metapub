@@ -8,8 +8,6 @@ import xml.etree.ElementTree as ET
 from .base import MetaPubObject
 from .exceptions import MetaPubError
 
-logger = logging.getLogger()
-
 class PubMedArticle(MetaPubObject):
     '''This PubMedArticle class receives an XML string as its required argument
     and parses it into its constituent parts, exposing them as attributes. 
@@ -91,16 +89,14 @@ class PubMedArticle(MetaPubObject):
             return self.pages
 
     def _get_last_page(self):
+        #TODO: return true last page in situations like self.pages = "148-52"
+        #           i.e. we want last_page = "152", not "52"
+        #if lastnum < self.first_page:
+        #    len(lastnum)....
         try:
             lastnum = self.pages.split('-')[1]
             return lastnum
-            
-            #TODO: return true last page in situations like self.pages = "148-52"
-            #           i.e. we want last_page = "152", not "52"
-            #if lastnum < self.first_page:
-            #    len(lastnum)....
-
-        except IndexError, AttributeError:
+        except (IndexError, AttributeError):
             return None
 
     def _get_title(self):
@@ -131,7 +127,6 @@ class PubMedArticle(MetaPubObject):
             pass
         # electronic pubs may not have volume or issue
         # e.g., http://www.ncbi.nlm.nih.gov/pubmed?term=20860988
-        logger.info("No volume for "+self.pmid)
         return None
 
     def _get_year(self):
