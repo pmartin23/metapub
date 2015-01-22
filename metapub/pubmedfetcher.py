@@ -7,8 +7,11 @@ from eutils.exceptions import EutilsBadRequestError
 import requests
 
 from .pubmedarticle import PubMedArticle
-from .utils import Borg, get_pmid_for_otherid
+from .utils import get_pmid_for_otherid
 from .exceptions import MetaPubError
+from .base import Borg
+
+DEFAULT_EMAIL='metapub@nthmost.com'
 
 class PubMedFetcher(Borg):
     '''PubMedFetcher (a Borg singleton object)
@@ -41,18 +44,18 @@ class PubMedFetcher(Borg):
                 first_page='7', author_name='Grant')
     '''
 
-    def __init__(self, method='eutils'):
+    def __init__(self, method='eutils', email=DEFAULT_EMAIL):
         Borg.__init__(self)
         self.method = method
 
         if method=='eutils':
             import eutils.client as ec
-            self.qs = ec.QueryService()
+            self.qs = ec.QueryService(tool='metapub', email=email)
             self.article_by_pmid = self._eutils_article_by_pmid
             self.article_by_pmcid = self._eutils_article_by_pmcid
             self.article_by_doi = self._eutils_article_by_doi
         else:
-            raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql.')
+            raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql or filesystem cache.')
 
     def _eutils_article_by_pmid(self, pmid):
         try:

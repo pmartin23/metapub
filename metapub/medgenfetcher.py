@@ -6,7 +6,9 @@ from lxml import etree
 
 from .exceptions import MetaPubError
 from .medgenconcept import MedGenConcept
-from .utils import Borg
+from .base import Borg
+
+DEFAULT_EMAIL='metapub@nthmost.com'
 
 class MedGenFetcher(Borg):
     '''PubMedFetcher (a Borg singleton object)
@@ -33,13 +35,13 @@ class MedGenFetcher(Borg):
         paper = fetch.article_by_pmcid('PMC3458974')
     '''
 
-    def __init__(self, method='eutils'):
+    def __init__(self, method='eutils', email=DEFAULT_EMAIL):
         Borg.__init__(self)
         self.method = method
 
         if method=='eutils':
             import eutils.client as ec
-            self.qs = ec.QueryService()
+            self.qs = ec.QueryService(email=email)
             self.uids_by_term = self._eutils_uids_by_term
             self.concept_by_uid = self._eutils_concept_by_uid
             self.uid_for_cui = self._eutils_uid_for_cui

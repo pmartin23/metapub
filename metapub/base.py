@@ -25,3 +25,10 @@ class MetaPubObject(object):
             return n.text
         return None
 
+# singleton class used by the fetchers.
+class Borg(object):
+    _shared_state = {}
+    def __init__(self):
+        self.__dict__ = self._shared_state
+
+

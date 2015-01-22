@@ -30,12 +30,12 @@ class CrossRef(object):
         '''takes citation details or PubMedArticle object. does a doi lookup by 
             submitting citation.  results should be analyzed since there's not 
             always an exact match. Result scores under 2.0 are usually False matches.'''
-
+        self.pma = pma
         self.params =  { 'title': asciify(self.pma.title).replace(' ', '+'), 
-                         'volume': self.pma.volume,
+                         'volume': asciify(self.pma.volume).replace(' ', '+'),
                          'year': self.pma.year,
                          'author_lastname': asciify(self.pma.author1_last_fm.split(' ')[0]),
-                         'jtitle': asciify(self.pma.journal),
+                         'jtitle': asciify(self.pma.journal).replace(' ', '+'),
                          'start_page': self.pma.first_page,
                        }
 
@@ -127,7 +127,6 @@ if __name__=='__main__':
             if CR.slugs != {}:
                 results_table['cr_author'].append(CR.slugs['rft.au'])
             else:
-                from IPython import embed; embed()
                 results_table['cr_author'].append('')            
 
             results_table['pma_author'].append(pma.author1_last_fm)
