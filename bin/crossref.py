@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import os, sys, logging, shutil
 from urlparse import urlparse
 
@@ -22,18 +24,19 @@ fetch = PubMedFetcher()
 
 class CrossRef(object):
 
-    query_url = 'http://search.crossref.org/dois?q={title}&aulast={author_lastname}&volume={volume}&year={year}&sort=score'
+    query_url = 'http://search.crossref.org/dois?q={title}&jtitle={jtitle}&aulast={author_lastname}&volume={volume}&spage={start_page}&year={year}&sort=score'
 
-    def __init__(self, pma):
-        '''takes a PubMedArticle object. does a doi lookup by submitting citation.
-            results should be analyzed since there's not always an exact match,
-            and sometimes, confusingly, there are several "100%" matches.'''
-        self.pma = pma
+    def __init__(self, pma=None, **kwargs):
+        '''takes citation details or PubMedArticle object. does a doi lookup by 
+            submitting citation.  results should be analyzed since there's not 
+            always an exact match. Result scores under 2.0 are usually False matches.'''
+
         self.params =  { 'title': asciify(self.pma.title).replace(' ', '+'), 
                          'volume': self.pma.volume,
                          'year': self.pma.year,
                          'author_lastname': asciify(self.pma.author1_last_fm.split(' ')[0]),
                          'jtitle': asciify(self.pma.journal),
+                         'start_page': self.pma.first_page,
                        }
 
         # filled after query:
@@ -62,34 +65,33 @@ class CrossRef(object):
 
         self.results = results
 
-        top_result = None
+        top_results = []
         for result in results:
-            #TODO: handle case in which more than one result==100
-            #      (but usually, top result is correct.)
-            if result['normalizedScore'] == 100:
-                top_result = result
-                break
+            if result['score'] > 2:
+                top_results.append(result)
 
-        if not top_result:
-            print "%s: no result with score==100; printing top 3 results." % pmid
+        if top_results==[]:
             for result in results:
-                if result['fullCitation'].find(self.params.author_lastname) > -1:
-                    top_result = result
-                    break
+                if result['fullCitation'].find(self.params['author_lastname']) > -1:
+                    if result['fullCitation'].find(self.params['start_page']) > -1:
+                        top_results.append(result)
 
-        self.doi = top_result['doi']
-        self.year = top_result['year']
-        self.title = top_result['title']
-        self.score = top_result['score']
-        self.normalizedScore = top_result['normalizedScore']
-        self.fullCitation = top_result['fullCitation']
-        self.coins = top_result['coins']
-    
-        self._parse_coins(self.coins)
+        if top_results:
+            top_result = top_results[0]
+
+            self.doi = top_result['doi']
+            self.year = top_result['year']
+            self.title = top_result['title']
+            self.score = top_result['score']
+            self.normalizedScore = top_result['normalizedScore']
+            self.fullCitation = top_result['fullCitation']
+            self.coins = top_result['coins']
+            self._parse_coins(self.coins)
 
     def _parse_coins(self, coins):
         #         coins: "ctx_ver=Z39.88-2004&amp;rft_id=info%3Adoi%2Fhttp%3A%2F%2Fdx.doi.org%2F10.2307%2F40250596&amp;rfr_id=info%3Asid%2Fcrossref.org%3Asearch&amp;rft.atitle=Research+and+Relevant+Knowledge%3A+American+Research+Universities+since+World+War+II&amp;rft.jtitle=Academe&amp;rft.date=1994&amp;rft.volume=80&amp;rft.issue=1&amp;rft.spage=56&amp;rft.aufirst=Winton+U.&amp;rft.aulast=Solberg&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.au=Winton+U.+Solberg&amp;rft.au=+Roger+L.+Geiger",
         self.slugs = dict([item.split('=') for item in coins.split('&amp;')])
+        return self.slugs
 
 
 
@@ -97,7 +99,7 @@ if __name__=='__main__':
     try:
         filename = sys.argv[1]
     except IndexError:
-        print 'Supply filename of pmid list as the argument to this script.'
+        print('Supply filename of pmid list as the argument to this script.')
         sys.exit()
     
     pmids = open(filename, 'r').readlines()
@@ -110,20 +112,26 @@ if __name__=='__main__':
             try:
                 pma = fetch.article_by_pmid(pmid)
             except:
-                print "%s: Could not fetch" % pmid
+                print("%s: Could not fetch" % pmid)
             try:
                 CR = CrossRef(pma)
             except MetaPubError, e:
-                print pmid, e
+                print(pmid, e)
                 continue
                 
-            print pmid, ":", CR.doi, CR.score
             results_table['pma_title'].append(pma.title)
             results_table['cr_title'].append(CR.title)
             results_table['doi'].append(CR.doi)
             results_table['score'].append(CR.score)
-            results_table['cr_author'].append(CR.slugs['rft.au'])
+
+            if CR.slugs != {}:
+                results_table['cr_author'].append(CR.slugs['rft.au'])
+            else:
+                from IPython import embed; embed()
+                results_table['cr_author'].append('')            
+
             results_table['pma_author'].append(pma.author1_last_fm)
+            print(pmid, CR.doi, CR.score, sep='\t')
 
     headers = ['pmid', 'doi', 'pma_title', 'cr_title', 'pma_author', 'cr_author', 'score']
     tabulated = tabulate(results_table, headers, tablefmt="simple")
