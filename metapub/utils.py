@@ -8,8 +8,8 @@ from .config import PKGNAME
 from .exceptions import MetaPubError
 
 TMPDIR = '/tmp'
-EMAIL = 'naomi@nthmost.com'
-ID_CONVERSION_URI = 'http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool='+PKGNAME+'&email='+EMAIL+'&ids=%s'
+DEFAULT_EMAIL = 'naomi@nthmost.com'
+ID_CONVERSION_URI = 'http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool='+PKGNAME+'&email='+DEFAULT_EMAIL+'&ids=%s'
 
 def get_tmp_xml_path(someid):
     someid = someid.replace('/', '__')
@@ -23,9 +23,44 @@ def _id_conversion_api(input_id):
     return record
 
 def get_pmid_for_otherid(otherid):
-    # this returns "None" if there is no 'pmid' item.
+    '''use the PMC ID conversion API to attempt to convert either PMCID or DOI to a PMID.
+        returns PMID if successful, or None if there is no 'pmid' item in the return.
+
+        :param: otherid (string)
+        :rtype: string
+    '''
     record = _id_conversion_api(otherid)
     return record.get('pmid')
+
+def asciify(inp):
+    '''nuke all the unicode from orbit. it's the only way to be sure.'''
+    if inp:
+        return inp.encode('ascii', 'ignore')
+    else:
+        return ''
+
+def parameterize(inp, sep='+'):
+    '''make strings suitable for submission to GET-based query service'''
+    return asciify(inp).replace(' ', sep)
+
+def remove_html_markup(s):
+    '''remove html and xml tags from text. preserves HTML entities like &amp;'''
+    tag = False
+    quote = False
+    out = ""
+
+    for c in s:
+            if c == '<' and not quote:
+                tag = True
+            elif c == '>' and not quote:
+                tag = False
+            elif (c == '"' or c == "'") and tag:
+                quote = not quote
+            elif not tag:
+                out = out + c
+    return out
+
+
 
 # PMID: http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=my_tool&email=my_email@example.com&ids=23193287
 # PMCID: http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=my_tool&email=my_email@example.com&ids=PMC3531190

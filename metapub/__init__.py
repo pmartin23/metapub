@@ -5,5 +5,5 @@ from pubmedarticle import PubMedArticle
 from pubmedfetcher import PubMedFetcher
 from medgenfetcher import MedGenFetcher
 from medgenconcept import MedGenConcept
-
+from crossref import CrossRef
 

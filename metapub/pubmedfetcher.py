@@ -7,11 +7,9 @@ from eutils.exceptions import EutilsBadRequestError
 import requests
 
 from .pubmedarticle import PubMedArticle
-from .utils import get_pmid_for_otherid
+from .utils import get_pmid_for_otherid, DEFAULT_EMAIL
 from .exceptions import MetaPubError
 from .base import Borg
-
-DEFAULT_EMAIL='metapub@nthmost.com'
 
 class PubMedFetcher(Borg):
     '''PubMedFetcher (a Borg singleton object)
