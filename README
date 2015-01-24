@@ -1,6 +1,10 @@
 Metapub is a Python library that provides python objects fetched via eutils 
 that represent papers and concepts found within the NLM.
 
+These objects abstract some interactions with pubmed, and intends to 
+encompass as many types of database lookups and summaries as can be 
+provided via Eutils / Entrez.
+
 PubMedArticle / PubMedFetcher
 
 Basic usage::
@@ -23,17 +27,52 @@ Basic usage::
   print concept.modes_of_inheritance
 
 
-These objects abstract some interactions with pubmed, and intends to 
-encompass as many types of database lookups and summaries as can be 
-provided via Eutils / Entrez.
+CrossRef
+
+The CrossRef object provides an object layer into search.crossref.org's API.
+See http://search.crossref.org
+
+CrossRef excels at resolving DOIs into article citation details. 
+
+CrossRef can also be used to resolve a DOI /from/ article citation details, with
+a bit of finagling.  The "get_top_result" function was built to do some light
+interpretation of the json-based results of a CrossRef lookup.
+
+Result scores under 2.0 are usually False matches.
+Result scores over 3.0 are always (?) True.  
+Between 2.0 and 3.0 is a grey area: be wary and check results against any known info you may have.
+
+Current testing (as of 1/23/2015) indicates that a cleverly-formed CrossRef 
+query can return results 99% correct about 90% of the time.  
+
+The more `params` submitted with the query, the more accurate the results may be. 
+
+
+Basic usage::
+
+  CR = CrossRef()       # starts the query cache engine
+  results = CR(search_string, params)
+  top_result = CR.get_top_result(results)
+
+Example starting from a known pubmed ID::
+
+  pma = PubMedFetcher().article_by_pmid(known_pmid)
+  results = CR.query_from_PubMedArticle(pma)
+  top_result = CR.get_top_result(results, CR.last_params, use_best_guess=True)
+
+NOTE: if you don't supply "CR.last_params", you can't use the "use_best_guess"
+operator. In cases where all results have scores under 2, no results will 
+be returned unless use_best_guess=True.  That's often desired behavior, 
+since results with scores under 2 are usually pretty bad.
+
 
 Metapub relies on the very neat eutils package created by Reece
 Hart, which you can check out here:
 
-http://bitbucket.org/uta/eutils
+http://bitbucket.org/biocommons/eutils
 
 This library is in its very early stages and there's a lot that may
-change, and quite a bit planned for implementation in 2014-2015.
+change, and quite a bit planned for implementation in 2015.
 
 Feel free to use the library with confidence that each released version 
 is well tested -- and in a couple of cases, some of its code is already
