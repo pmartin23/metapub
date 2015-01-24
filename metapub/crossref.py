@@ -54,7 +54,7 @@ class CrossRef(Borg):
                 be returned unless use_best_guess=True.  That's often desired behavior, 
                 since results with scores under 2 are usually pretty bad.
         '''
-        self.query_base_url = 'http://search.crossref.org/dois?q=%s'
+        self.query_base_url = 'http://search.crossref.org/dois?q=%s&'
         self.default_args = { 'sort': 'score' }
         # contains last parameters submitted to a query.
         self.last_params = {}
