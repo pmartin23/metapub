@@ -49,6 +49,10 @@ def parameterize(inp, sep='+'):
     '''make strings suitable for submission to GET-based query service'''
     return asciify(inp).replace(' ', sep)
 
+def deparameterize(inp, sep='+'):
+    '''undo parameterization in string. replace separators (sep) with spaces.'''
+    return inp.replace(sep, ' ')
+
 def remove_html_markup(s):
     '''remove html and xml tags from text. preserves HTML entities like &amp;'''
     tag = False

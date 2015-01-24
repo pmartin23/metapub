@@ -7,7 +7,7 @@ from eutils.exceptions import EutilsBadRequestError
 import requests
 
 from .pubmedarticle import PubMedArticle
-from .utils import get_pmid_for_otherid, DEFAULT_EMAIL, pick_from_kwargs
+from .utils import get_pmid_for_otherid, DEFAULT_EMAIL, pick_from_kwargs, parameterize
 from .exceptions import MetaPubError
 from .base import Borg
 
@@ -79,7 +79,7 @@ class PubMedFetcher(Borg):
     def pmids_for_citation(self, **kwargs):
         '''returns list of pmids for given citation. requires at least 3/5 of these keyword arguments:
             jtitle or journal (journal title)
-            year
+            year or date
             volume
             spage or first_page (starting page / first page)
             aulast (first author's last name) or author1_first_lastfm (as produced by PubMedArticle class)
@@ -94,14 +94,17 @@ class PubMedFetcher(Borg):
         author_name = _reduce_author_string(pick_from_kwargs(kwargs, 
                         options=['aulast', 'author1_last_fm', 'author', 'authors'], default=''))
         first_page = pick_from_kwargs(kwargs, options=['spage', 'first_page'], default='')
+        year = pick_from_kwargs(kwargs, options=['year', 'date'], default='')
+        volume = pick_from_kwargs(kwargs, options=['volume'], default='')
 
-        inp_dict = { 'journal_title': journal_title.replace(' ', '+'),
-                     'year': str(kwargs.get('year', '')), 
-                     'volume': str(kwargs.get('volume', '')),
+        inp_dict = { 'journal_title': parameterize(journal_title, '+'), 
+                     'year': str(year),
+                     'volume': str(volume),
                      'first_page': str(first_page),
-                     'author_name': author_name,
+                     'author_name': parameterize(author_name, '+'),
                    }
 
+        print inp_dict
         req = base_uri.format(**inp_dict)
         content = requests.get(req).text
         pmids = []

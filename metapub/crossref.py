@@ -16,7 +16,7 @@ from tabulate import tabulate
 from .pubmedfetcher import PubMedFetcher 
 from .exceptions import MetaPubError
 
-from .utils import asciify, parameterize, remove_html_markup
+from .utils import asciify, parameterize, remove_html_markup, deparameterize
 from .base import Borg
 
 DEFAULT_CACHE_PATH = os.path.join(os.path.expanduser('~'),'.cache','crossref-cache.db')
@@ -60,8 +60,18 @@ class CrossRef(Borg):
         self.last_params = {}
 
     def _parse_coins(self, coins):
-        self.slugs = dict([(remove_html_markup(item).split('=')) for item in coins.split('&amp;')])
-        return self.slugs
+        # there are multiple 'au' items. pull them out first.
+        slugs = {}
+        aus = 0
+
+        for k,v in [(remove_html_markup(item).split('=')) for item in coins.split('&amp;')]:
+            if k=='rft.au':
+                k = k + str(aus)
+                aus += 1
+            slugs[k.replace('rft.', '')] = deparameterize(v, '+')
+
+        #slugs = dict([(remove_html_markup(item).split('=')) for item in coins.split('&amp;')])
+        return slugs
 
     def query_from_PubMedArticle(self, pma):
         '''Takes a PubMedArticle object and submits as many citation details 
