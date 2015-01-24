@@ -104,7 +104,6 @@ class PubMedFetcher(Borg):
                      'author_name': parameterize(author_name, '+'),
                    }
 
-        print inp_dict
         req = base_uri.format(**inp_dict)
         content = requests.get(req).text
         pmids = []
