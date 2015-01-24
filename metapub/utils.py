@@ -11,6 +11,12 @@ TMPDIR = '/tmp'
 DEFAULT_EMAIL = 'naomi@nthmost.com'
 ID_CONVERSION_URI = 'http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool='+PKGNAME+'&email='+DEFAULT_EMAIL+'&ids=%s'
 
+def pick_from_kwargs(args, options, default=None):
+    for opt in options:
+        if args.get(opt, None):
+            return args[opt]
+    return default
+
 def get_tmp_xml_path(someid):
     someid = someid.replace('/', '__')
     return os.path.join(TMPDIR, '%s.xml' % someid)

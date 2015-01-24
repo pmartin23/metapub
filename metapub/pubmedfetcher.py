@@ -7,7 +7,7 @@ from eutils.exceptions import EutilsBadRequestError
 import requests
 
 from .pubmedarticle import PubMedArticle
-from .utils import get_pmid_for_otherid, DEFAULT_EMAIL
+from .utils import get_pmid_for_otherid, DEFAULT_EMAIL, pick_from_kwargs
 from .exceptions import MetaPubError
 from .base import Borg
 
@@ -78,21 +78,28 @@ class PubMedFetcher(Borg):
 
     def pmids_for_citation(self, **kwargs):
         '''returns list of pmids for given citation. requires at least 3/5 of these keyword arguments:
-            journal_title
+            jtitle or journal (journal title)
             year
             volume
-            first_page
-            author_name (works best with only Author1's last name supplied)
-        '''
+            spage or first_page (starting page / first page)
+            aulast (first author's last name) or author1_first_lastfm (as produced by PubMedArticle class)
 
+        (Note that these arguments were made to match the tokens that arise from CrossRef's result['slugs'].)
+        '''
         # output format in return:
         # journal_title|year|volume|first_page|author_name|your_key|
         base_uri = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/ecitmatch.cgi?db=pubmed&retmode=xml&bdata={journal_title}|{year}|{volume}|{first_page}|{author_name}|metapub|'
-        inp_dict = { 'journal_title': kwargs.get('journal_title', '').replace(' ', '+'),
+
+        journal_title = pick_from_kwargs(kwargs, options=['jtitle', 'journal', 'journal_title'], default='')
+        author_name = _reduce_author_string(pick_from_kwargs(kwargs, 
+                        options=['aulast', 'author1_last_fm', 'author', 'authors'], default=''))
+        first_page = pick_from_kwargs(kwargs, options=['spage', 'first_page'], default='')
+
+        inp_dict = { 'journal_title': journal_title.replace(' ', '+'),
                      'year': str(kwargs.get('year', '')), 
                      'volume': str(kwargs.get('volume', '')),
-                     'first_page': str(kwargs.get('first_page', '')),
-                     'author_name': _reduce_author_string(kwargs.get('author_name', '')).replace(' ', '+'),
+                     'first_page': str(first_page),
+                     'author_name': author_name,
                    }
 
         req = base_uri.format(**inp_dict)
