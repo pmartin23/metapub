@@ -15,6 +15,27 @@ Basic usage::
   print article.journal, article.year, article.volume, article.issue
   print article.authors
 
+PubMedFetcher also includes the following special methods.
+
+`article_by_doi`: (attempt to) fetch an article by looking up the DOI first.
+
+`article_by_pmcid`: fetch an article by looking up the PMCID first.
+
+`pmids_from_citation`: produces a list of possible PMIDs for the submitted
+    citation, where the citation is submitted as a collection of keyword
+    arguments.  At least 3 of the 5, preferably 4 or 5 for best results,
+    must be included::
+
+        aulast or author_last_fm1
+        year
+        volume
+        first_page or spage
+        journal or jtitle
+
+    (*Note* this function is still very "alpha". Citation lookups prefer
+    Medline XML style journal strings, so use those when possible.)
+
+
 MedGenConcept / MedGenFetcher
 
 Basic usage::
