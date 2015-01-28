@@ -18,3 +18,4 @@
 1/22/2015, 0.1.2, moved Borg class into base.py. Added 'email' arg to MedGenFetcher and PubMedFetcher to pass to eutils.QueryService.
 1/23/2015, 0.2.1, CrossRef class joins the party. added a few new utilities to utils. 
 1/24/2015, 0.2.2, Improvements to pmid_for_citation, allowing transfer of CrossRef slugs directly into function as kwargs.
+1/27/2015, 0.2.3, Bugfixes in string processing in CrossRef. CR result['slugs']['authors'] list instead of ['au1'], ['au2'], etc.

@@ -60,28 +60,30 @@ class CrossRef(Borg):
         self.last_params = {}
 
     def _parse_coins(self, coins):
-        # there are multiple 'au' items. pull them out first.
+        # there are multiple 'au' items. pull them out, add them to the list of authors,
+        # then tack them in as a list after all the others.
+        
         slugs = {}
-        aus = 0
+        authors = []
 
-        for k,v in [(remove_html_markup(item).split('=')) for item in coins.split('&amp;')]:
+        for k,v in [(remove_html_markup(item).split('=', 1)) for item in coins.split('&amp;')]:
             if k=='rft.au':
-                k = k + str(aus)
-                aus += 1
-            slugs[k.replace('rft.', '')] = deparameterize(v, '+')
-
-        #slugs = dict([(remove_html_markup(item).split('=')) for item in coins.split('&amp;')])
+                authors.append(v)
+            else:
+                slugs[k.replace('rft.', '')] = deparameterize(v, '+')
+        slugs['authors'] = authors
         return slugs
 
     def query_from_PubMedArticle(self, pma):
         '''Takes a PubMedArticle object and submits as many citation details 
             as possible to get well-polarized results.
         '''
+        aulast = None if pma.author1_last_fm is None else pma.author1_last_fm.split(' ')[0]
         params = { 
                      'volume': parameterize(pma.volume),
                      'issue': parameterize(pma.issue),
                      'year': parameterize(pma.year),
-                     'aulast': parameterize(pma.author1_last_fm.split(' ')[0]),
+                     'aulast': parameterize(aulast),
                      'jtitle': parameterize(pma.journal).replace('.', '').replace('J+', ''),
                      'start_page': parameterize(pma.first_page),
                  }
