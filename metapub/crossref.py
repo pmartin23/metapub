@@ -65,13 +65,15 @@ class CrossRef(Borg):
         
         slugs = {}
         authors = []
-
-        for k,v in [(remove_html_markup(item).split('=', 1)) for item in coins.split('&amp;')]:
+        items = coins.split('&amp;')
+        slugs = {}
+        for item in items:
+            item = remove_html_markup(item)
+            k,v = item.split('=', 1)
             if k=='rft.au':
-                authors.append(v)
+                authors.append(deparameterize(v))
             else:
                 slugs[k.replace('rft.', '')] = deparameterize(v, '+')
-        slugs['authors'] = authors
         return slugs
 
     def query_from_PubMedArticle(self, pma):
@@ -100,6 +102,7 @@ class CrossRef(Borg):
     def _get_enhanced_results(self, results):
         enhanced_results = []
         for result in results:
+            result['doi'] = result['doi'].replace('http://dx.doi.org/', '')
             result['coins'] = urllib.unquote(result['coins'])
             result['slugs'] = self._parse_coins(result['coins'])
             enhanced_results.append(result)

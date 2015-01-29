@@ -19,3 +19,4 @@
 1/23/2015, 0.2.1, CrossRef class joins the party. added a few new utilities to utils. 
 1/24/2015, 0.2.2, Improvements to pmid_for_citation, allowing transfer of CrossRef slugs directly into function as kwargs.
 1/27/2015, 0.2.3, Bugfixes in string processing in CrossRef. CR result['slugs']['authors'] list instead of ['au1'], ['au2'], etc.
+1/28/2015, 0.2.4, Force crossref result['doi'] to return just the DOI (not a doi.org url as sometimes shows up).
