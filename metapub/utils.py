@@ -1,15 +1,10 @@
 from __future__ import absolute_import
 
 import os
-from urllib import urlretrieve
 from lxml import etree
 
-from .config import PKGNAME
+from .config import TMPDIR
 from .exceptions import MetaPubError
-
-TMPDIR = '/tmp'
-DEFAULT_EMAIL = 'naomi@nthmost.com'
-ID_CONVERSION_URI = 'http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool='+PKGNAME+'&email='+DEFAULT_EMAIL+'&ids=%s'
 
 def pick_from_kwargs(args, options, default=None):
     for opt in options:
@@ -20,23 +15,6 @@ def pick_from_kwargs(args, options, default=None):
 def get_tmp_xml_path(someid):
     someid = someid.replace('/', '__')
     return os.path.join(TMPDIR, '%s.xml' % someid)
-
-def _id_conversion_api(input_id):
-    xmlfile = urlretrieve(ID_CONVERSION_URI % input_id, get_tmp_xml_path(input_id))
-    root = etree.parse(xmlfile[0])
-    root.find('record')
-    record = root.find('record')
-    return record
-
-def get_pmid_for_otherid(otherid):
-    '''use the PMC ID conversion API to attempt to convert either PMCID or DOI to a PMID.
-        returns PMID if successful, or None if there is no 'pmid' item in the return.
-
-        :param: otherid (string)
-        :rtype: string
-    '''
-    record = _id_conversion_api(otherid)
-    return record.get('pmid')
 
 def asciify(inp):
     '''nuke all the unicode from orbit. it's the only way to be sure.'''

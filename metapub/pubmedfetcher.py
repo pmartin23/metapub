@@ -7,9 +7,10 @@ from eutils.exceptions import EutilsBadRequestError
 import requests
 
 from .pubmedarticle import PubMedArticle
-from .utils import get_pmid_for_otherid, DEFAULT_EMAIL, pick_from_kwargs, parameterize
+from .convert import get_pmid_for_otherid, pick_from_kwargs, parameterize
 from .exceptions import MetaPubError
 from .base import Borg
+from .config import DEFAULT_EMAIL
 
 class PubMedFetcher(Borg):
     '''PubMedFetcher (a Borg singleton object)

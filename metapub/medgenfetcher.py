@@ -10,28 +10,31 @@ from .base import Borg
 from .utils import DEFAULT_EMAIL
 
 class MedGenFetcher(Borg):
-    '''PubMedFetcher (a Borg singleton object)
+    '''MedGenFetcher (a Borg singleton object)
 
-    An interaction layer for querying via specified method to return PubMedArticle objects.
+    An interaction layer for querying to return MedGenConcept objects.
     
     Currently available methods: eutils
 
     Basic Usage:
 
-        fetch = PubMedFetcher()
+        fetch = MedGenFetcher()
     
     To specify a service method (more coming soon):
 
-        fetch = PubMedFetcher('eutils')
+        fetch = MedGenFetcher('eutils')
 
-    To return an article by querying the service with a known PMID:
+    To return a MedGenConcept from a known UID:
 
-        paper = fetch.article_by_pmid('123456')
+        concept = fetch.concept_by_uid(known_UID)
 
-    Similar methods exist for returning papers by DOI and PM Central id:
+    To return a list of UIDs relevant to a given term known in medgen:
 
-        paper = fetch.article_by_doi('10.1038/ng.379')
-        paper = fetch.article_by_pmcid('PMC3458974')
+        uids = fetch.uids_by_term(some_term)
+
+    To get a medgen UID given a known Concept ID (cui):
+
+        uid = fetch.uid_for_cui(known_cui)
     '''
 
     def __init__(self, method='eutils', email=DEFAULT_EMAIL):
