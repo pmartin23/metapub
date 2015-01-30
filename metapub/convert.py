@@ -37,6 +37,11 @@ def pmid2doi(pmid, use_best_guess=False):
     return PubMedArticle2doi(pma, use_best_guess)
 
 def doi2pmid(doi, use_best_guess=False):
+    '''uses CrossRef and PubMed eutils to lookup a PMID given a known doi.
+        Warning: does NO validation (use in combo with metapub.text_mining).
+
+        If a PMID can be found, return it. Otherwise return None.
+    '''
     # for PMA, skip the validation; some pubmed XML has weird partial strings for DOI.
     # We should allow people to search using these oddball strings.
     _start_engines()
@@ -46,10 +51,6 @@ def doi2pmid(doi, use_best_guess=False):
         return pma.pmid
     except:
         pass
-
-    # for crossref, make sure it's a real DOI
-    if re_doi.findall(doi)==[]:
-        print('WARNING: %s doesn\'t look like a valid DOI; submitting anyway.' % doi)
 
     results = crossref.query(doi)
     if results:
@@ -77,5 +78,9 @@ def get_pmid_for_otherid(otherid):
 
 def get_pmcid_for_otherid(otherid):
     record = _pmc_id_conversion_api(otherid)
-    return record.get('PMC')
+    return record.get('pmcid')
+
+def get_doi_for_otherid(otherid):
+    record = _pmc_id_conversion_api(otherid)
+    return record.get('doi')
 
