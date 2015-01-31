@@ -3,6 +3,7 @@
 from __future__ import print_function, absolute_import
 
 import os, sys, shutil
+import re
 import hashlib
 import logging
 import json
@@ -25,6 +26,9 @@ class CrossRef(Borg):
     _logger = logging.getLogger('metapub.crossref')      #.setLevel(logging.INFO)
     _logger.setLevel(logging.INFO)
     _cache = SQLiteCache(DEFAULT_CACHE_PATH)
+
+    re_rfts = re.compile('rft\.(.*?)&amp;')
+    re_rfrs = re.compile('rfr_id=.*?&amp;')
 
     def __init__(self, **kwargs):
         '''takes citation details or PubMedArticle object. does a doi lookup by 
@@ -67,15 +71,16 @@ class CrossRef(Borg):
         
         slugs = {}
         authors = []
-        items = coins.split('&amp;')
+        coins = remove_html_markup(coins)
+        rfts = self.re_rfts.findall(coins)
+        rfr_ids = self.re_rfrs.findall(coins)
         slugs = {}
-        for item in items:
-            item = remove_html_markup(item)
+        for item in rfts + rfr_ids:
             k,v = item.split('=', 1)
-            if k=='rft.au':
+            if k=='au':
                 authors.append(deparameterize(v))
             else:
-                slugs[k.replace('rft.', '')] = deparameterize(v, '+')
+                slugs[item] = deparameterize(v, '+')
         return slugs
 
     def query_from_PubMedArticle(self, pma):

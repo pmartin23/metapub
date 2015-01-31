@@ -20,3 +20,5 @@
 1/24/2015, 0.2.2, Improvements to pmid_for_citation, allowing transfer of CrossRef slugs directly into function as kwargs.
 1/27/2015, 0.2.3, Bugfixes in string processing in CrossRef. CR result['slugs']['authors'] list instead of ['au1'], ['au2'], etc.
 1/28/2015, 0.2.4, Force crossref result['doi'] to return just the DOI (not a doi.org url as sometimes shows up).
+1/30/2015, 0.2.5, New code in metapub.text_mining and metapub.convert (names may change). Moved PMC stuff to metapub.pubmedcentral.
+1/30/2015, 0.3.0, Major improvements to CrossRef and PubMedFetcher reliability. Consolidation of configuration stuff in .config 
