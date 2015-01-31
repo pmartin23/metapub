@@ -62,8 +62,12 @@ class PubMedFetcher(Borg):
             result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
         except EutilsBadRequestError:
             raise MetaPubError('Invalid ID "%s" (rejected by Eutils); please check the number and try again.' % pmid)
+
+        if result==None:
+            return None
         if result.find('ERROR') > -1:
-            raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle (no such PMID)' % pmid)
+            raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle' % pmid)
+
         return PubMedArticle(result)
 
     def _eutils_article_by_pmcid(self, pmcid):

@@ -5,6 +5,8 @@ from lxml import etree
 
 from .exceptions import MetaPubError
 
+PUNCS_WE_DONT_LIKE = "[],.()<>'/?"
+
 def pick_from_kwargs(args, options, default=None):
     for opt in options:
         if args.get(opt, None):
@@ -19,8 +21,9 @@ def asciify(inp):
         return ''
 
 def parameterize(inp, sep='+'):
-    '''make strings suitable for submission to GET-based query service'''
-    return asciify(inp).replace(' ', sep)
+    '''make strings suitable for submission to GET-based query service. strips
+        out these characters: %s''' % PUNCS_WE_DONT_LIKE
+    return asciify(inp).replace(' ', sep).translate(None, PUNCS_WE_DONT_LIKE)
 
 def deparameterize(inp, sep='+'):
     '''undo parameterization in string. replace separators (sep) with spaces.'''

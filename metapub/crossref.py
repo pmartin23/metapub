@@ -88,7 +88,7 @@ class CrossRef(Borg):
                      'issue': parameterize(pma.issue),
                      'year': parameterize(pma.year),
                      'aulast': parameterize(aulast),
-                     'jtitle': parameterize(pma.journal).replace('.', '').replace('J+', ''),
+                     'jtitle': parameterize(pma.journal).translate(None, '.[]()<>,').replace('J+', ''),
                      'start_page': parameterize(pma.first_page),
                  }
         search = parameterize(pma.title)
