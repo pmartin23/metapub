@@ -52,7 +52,7 @@ def doi2pmid(doi, use_best_guess=False):
     results = crossref.query(doi)
     if results:
         top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess)
-        return pm_fetch.pmids_for_citation(**top_result)
+        return pm_fetch.pmids_for_citation(**top_result['slugs'])
     else:
         return None
 
