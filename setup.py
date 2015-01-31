@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'metapub',
-    version = '0.3.0',
+    version = '0.3.1',
     description = 'Pubmed / NCBI / eutils interaction library, handling the metadata of pubmed papers.',
     url = 'https://bitbucket.org/nthmost/metapub',
     author = 'Naomi Most',
@@ -13,7 +13,6 @@ setup(
     maintainer_email = 'naomi@nthmost.com',
     license = 'Apache 2.0',
     packages = find_packages(),
-    setup_request = [ 'hgtools', 'pytz' ],
     install_requires = [
         'setuptools',
         'lxml',
