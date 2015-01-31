@@ -7,7 +7,7 @@ from lxml import etree
 from .exceptions import MetaPubError
 from .medgenconcept import MedGenConcept
 from .base import Borg
-from .utils import DEFAULT_EMAIL
+from .config import DEFAULT_EMAIL
 
 class MedGenFetcher(Borg):
     '''MedGenFetcher (a Borg singleton object)
