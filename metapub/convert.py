@@ -47,7 +47,7 @@ def doi2pmid(doi, use_best_guess=False):
     _start_engines()
     doi = doi.strip()
     try:
-        pma = fetch.article_by_doi(doi):
+        pma = fetch.article_by_doi(doi)
         return pma.pmid
     except:
         pass
@@ -66,7 +66,7 @@ def _pmc_id_conversion_api(input_id):
     record = root.find('record')
     return record
 
-def get_pmid_for_otherid(otherid):
+def PMC_get_pmid_for_otherid(otherid):
     '''use the PMC ID conversion API to attempt to convert either PMCID or DOI to a PMID.
         returns PMID if successful, or None if there is no 'pmid' item in the return.
 
@@ -76,11 +76,11 @@ def get_pmid_for_otherid(otherid):
     record = _pmc_id_conversion_api(otherid)
     return record.get('pmid')
 
-def get_pmcid_for_otherid(otherid):
+def PMC_get_pmcid_for_otherid(otherid):
     record = _pmc_id_conversion_api(otherid)
     return record.get('pmcid')
 
-def get_doi_for_otherid(otherid):
+def PMC_get_doi_for_otherid(otherid):
     record = _pmc_id_conversion_api(otherid)
     return record.get('doi')
 

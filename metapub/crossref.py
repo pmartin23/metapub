@@ -56,8 +56,10 @@ class CrossRef(Borg):
         '''
         self.query_base_url = 'http://search.crossref.org/dois?q=%s&'
         self.default_args = { 'sort': 'score' }
-        # contains last parameters submitted to a query.
+        # contains last search and parameters submitted to a query.
+        self.last_search = ''
         self.last_params = {}
+        self.last_query = ''
 
     def _parse_coins(self, coins):
         # there are multiple 'au' items. pull them out, add them to the list of authors,
@@ -148,8 +150,11 @@ class CrossRef(Borg):
         WARNING: This function will not check that you have submitted appropriate params.
                  If you get an error or no results, please check your params and try again.
         '''
-        self.last_params = params
         q = self._assemble_query(search, params)
+
+        self.last_search = search
+        self.last_params = params
+        self.last_query = q
 
         res_text = None
         if not skip_cache:
