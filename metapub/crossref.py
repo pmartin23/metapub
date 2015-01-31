@@ -80,7 +80,7 @@ class CrossRef(Borg):
             if k=='au':
                 authors.append(deparameterize(v))
             else:
-                slugs[item] = deparameterize(v, '+')
+                slugs[k] = deparameterize(v, '+')
         return slugs
 
     def query_from_PubMedArticle(self, pma):
@@ -124,7 +124,7 @@ class CrossRef(Borg):
         q += '&'.join(['%s=%s' % (k,v) for (k,v) in defining_args.items()])
         return q
 
-    def query(self, search, params, skip_cache=False):
+    def query(self, search, params=None, skip_cache=False):
         '''
         Takes a base search string (required) and any number of the following
         available params (optional) as a dictionary. Returns a list of 
@@ -138,7 +138,7 @@ class CrossRef(Borg):
         of looking in cache for previous identical queries.
 
         :param: search (string)
-        :param: params (dict)
+        :param: params (dict) (optional) (default: empty dict)
         :param: skip_cache (bool) (optional) (default: False)
 
         Available params for submission to search.crossref.org:
@@ -155,6 +155,9 @@ class CrossRef(Borg):
         WARNING: This function will not check that you have submitted appropriate params.
                  If you get an error or no results, please check your params and try again.
         '''
+        if params==None:
+            params = {}
+
         q = self._assemble_query(search, params)
 
         self.last_search = search
