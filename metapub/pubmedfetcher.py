@@ -7,7 +7,8 @@ from eutils.exceptions import EutilsBadRequestError
 import requests
 
 from .pubmedarticle import PubMedArticle
-from .convert import get_pmid_for_otherid, pick_from_kwargs, parameterize
+from .pubmedcentral import get_pmid_for_otherid
+from .utils import pick_from_kwargs, parameterize
 from .exceptions import MetaPubError
 from .base import Borg
 from .config import DEFAULT_EMAIL
@@ -66,13 +67,13 @@ class PubMedFetcher(Borg):
         return PubMedArticle(result)
 
     def _eutils_article_by_pmcid(self, pmcid):
-        pmid = get_pmid_for_otherid(pmcid)
+        pmid = PMC_get_pmid_for_otherid(pmcid)
         if pmid is None:
             raise MetaPubError('No PMID available for PubMedCentral id %s' % pmcid)
         return self._eutils_article_by_pmid(pmid)
     
     def _eutils_article_by_doi(self, doi):
-        pmid = get_pmid_for_otherid(doi)
+        pmid = PMC_get_pmid_for_otherid(doi)
         if pmid is None:
             raise MetaPubError('No PMID available for doi %s' % doi)
         return self._eutils_article_by_pmid(pmid)

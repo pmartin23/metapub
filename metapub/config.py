@@ -1,16 +1,15 @@
 from __future__ import absolute_import
 
+import os
 import logging
 
 PKGNAME='metapub'
 
+# where to place XML (temporarily) when downloaded.
 TMPDIR = '/tmp'
 
 # email address submitted to eutils with requests (as required by their api).
 DEFAULT_EMAIL=os.getenv('EUTILS_EMAIL', 'naomi.most@invitae.com')
-
-PMC_ID_CONVERSION_URI = 'http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool='+PKGNAME+'&email='+DEFAULT_EMAIL+'&ids=%s'
-
 
 #### keep eutils yammering down to a reasonable level.
 logging.getLogger("requests").setLevel(logging.WARNING)
