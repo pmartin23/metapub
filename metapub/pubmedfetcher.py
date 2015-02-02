@@ -57,7 +57,7 @@ class PubMedFetcher(Borg):
         else:
             raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql or filesystem cache.')
 
-    def eutils_article_by_pmid(self, pmid):
+    def _eutils_article_by_pmid(self, pmid):
         try:
             result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
         except EutilsBadRequestError:
