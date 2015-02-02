@@ -10,7 +10,7 @@ encompass as many types of database lookups and summaries as can be
 provided via Eutils / Entrez.
 
 PubMedArticle / PubMedFetcher
-=============================
+-----------------------------
 
 Basic usage::
 
@@ -43,7 +43,7 @@ PubMedFetcher also includes the following special methods.
 
 
 metapub.pubmedcentral.* 
-=======================
+-----------------------
 
 The PubMedCentral functions are a loose collection of conversion 
 methods for academic publishing IDs, allowing conversion (where possible)
@@ -65,7 +65,7 @@ to acquire the desired ID type.
 
 
 MedGenConcept / MedGenFetcher
-=============================
+-----------------------------
 
 Basic usage::
 
@@ -78,6 +78,7 @@ Basic usage::
 
 
 CrossRef
+--------
 
 The CrossRef object provides an object layer into search.crossref.org's API.
 See http://search.crossref.org
@@ -115,6 +116,9 @@ operator. In cases where all results have scores under 2, no results will
 be returned unless use_best_guess=True.  That's often desired behavior, 
 since results with scores under 2 are usually pretty bad.
 
+
+About, and a Disclaimer
+-----------------------
 
 Metapub relies on the very neat eutils package created by Reece
 Hart, which you can check out here:
