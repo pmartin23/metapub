@@ -13,6 +13,7 @@ from metapub.exceptions import XMLSyntaxError, MetaPubError
 from metapub.text_mining import find_doi_in_string
 from metapub.config import get_data_log
 from metapub.pubmedcentral import get_pmcid_for_otherid
+from metapub.utils import asciify
 
 # configurables (edit as you like):
 RESULTS_DIR = 'sandbox/results/'
@@ -63,7 +64,7 @@ def record_error(pmid, source, e):
 
 def record_entry(**kwargs):
     #{'doi': 'NA', 'score': 0, 'cr_results': [], 'connection_errors': 0, 'pma': None, 'cr_top_result': None, 'pmid': 1234567}
-    fmt = '{pmid},{doi},{score}'
+    fmt = '{pmid},{doi},{score}'   #,{crossref_query},{crossref_coins}'
     data_log.info(fmt.format(**kwargs))
 
 
@@ -108,7 +109,11 @@ class PMIDMapping(object):
             self.score = -1
 
         # 3) record our efforts.
-        record_entry(**self.__dict__)
+        outd = self.__dict__
+        outd['crossref_query'] = asciify(crossref.last_query)
+        outd['crossref_coins'] = None if not self.cr_top_result else self.cr_top_result['coins']
+
+        record_entry(**outd)
 
     def _verify_doi(self, doi):
         return find_doi_in_string(doi)

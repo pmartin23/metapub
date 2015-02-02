@@ -1,3 +1,7 @@
+=======
+Metapub
+=======
+
 Metapub is a Python library that provides python objects fetched via eutils 
 that represent papers and concepts found within the NLM.
 
@@ -6,6 +10,7 @@ encompass as many types of database lookups and summaries as can be
 provided via Eutils / Entrez.
 
 PubMedArticle / PubMedFetcher
+=============================
 
 Basic usage::
 
@@ -14,6 +19,7 @@ Basic usage::
   print article.title
   print article.journal, article.year, article.volume, article.issue
   print article.authors
+
 
 PubMedFetcher also includes the following special methods.
 
@@ -36,7 +42,30 @@ PubMedFetcher also includes the following special methods.
     Medline XML style journal strings, so use those when possible.)
 
 
+metapub.pubmedcentral.* 
+=======================
+
+The PubMedCentral functions are a loose collection of conversion 
+methods for academic publishing IDs, allowing conversion (where possible)
+between the following ID types::
+
+    doi (Digital object identifier)
+    pmid (PubMed ID)
+    pmcid (Pubmed Central ID (including versioned document ID)
+
+The following methods are supplied, returning a string (if found) or None::
+
+    get_pmid_for_otherid(string)
+    get_doi_for_otherid(string)
+    get_pmcid_for_otherid(string)
+
+As implied by the function names, you can supply any valid ID type ("otherid")
+to acquire the desired ID type.
+
+
+
 MedGenConcept / MedGenFetcher
+=============================
 
 Basic usage::
 
