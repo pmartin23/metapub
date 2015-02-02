@@ -29,7 +29,7 @@ def get_doi(pmid):
         return pma.doi
 
     results = CR.query_from_PubMedArticle(pma)
-    top_result = CR.get_top_result(results)     #, CR.last_params, use_best_guess=True)
+    top_result = CR.get_top_result(results, min_score=2.5)     #, CR.last_params, use_best_guess=True)
     #if DEBUG:
     #    print(results)
     if top_result is None:
@@ -38,7 +38,7 @@ def get_doi(pmid):
         return "N/A"
 
     if DEBUG:
-        print("CrossRef found it.")
+        print("CrossRef found it with score=%f" % top_result['score'])
     return top_result['doi']
 
 

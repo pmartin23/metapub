@@ -24,3 +24,5 @@
 1/30/2015, 0.3.0, Major improvements to CrossRef and PubMedFetcher reliability. Consolidation of configuration stuff in .config 
 1/30/2015, 0.3.1, Critical bugfix to CrossRef. Finished metapub.convert.doi2pmid theoretically speaking (not thoroughly tested).
 2/1/2015, 0.3.2, Added absolute_import to all files for Python3 compatibility. Critical bugfixes in metapub.convert and metapub.text_mining.
+2/2/2014, 0.3.2.1, Crossref: `min_score` param added to get_top_result and all metapub.convert functions. default=2.0; set higher (like 3.0) for situations where you need high-confidence results.
+2/2/2014, 0.3.2.2, Better regular expression for DOIs (removes prohibition on angle-brackets).

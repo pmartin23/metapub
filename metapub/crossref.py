@@ -109,6 +109,7 @@ class CrossRef(Borg):
     def _get_enhanced_results(self, results):
         enhanced_results = []
         for result in results:
+            result['score'] = float(result['score'])
             result['doi'] = result['doi'].replace('http://dx.doi.org/', '')
             result['coins'] = urllib.unquote(result['coins'])
             result['slugs'] = self._parse_coins(result['coins'])
@@ -186,12 +187,12 @@ class CrossRef(Borg):
         return []
 
 
-    def get_top_result(self, results, params={}, use_best_guess=False):
+    def get_top_result(self, results, params={}, use_best_guess=False, min_score=2.0):
         '''Returns most likely match from result candidates. If all candidates fail
             very basic tests of matchiness (e.g. is this the author name?), it returns None.'''
         top_results = []
         for result in results:
-            if result['score'] > 2:
+            if result['score'] > min_score:
                 top_results.append(result)
 
         if top_results:

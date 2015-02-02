@@ -18,22 +18,22 @@ def _start_engines():
         crossref = CrossRef()
         pm_fetch = PubMedFetcher()
 
-def PubMedArticle2doi(pma, use_best_guess=False):
+def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
     _start_engines()
     results = crossref.query_from_PubMedArticle(pma)
-    top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess)
+    top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
     if top_result:
         return top_result['doi']
     else:
         return None
 
-def pmid2doi(pmid, use_best_guess=False):
+def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
     # let MetaPubError pass back to the caller if pmid is not for realz..
     _start_engines()
     pma = fetch.article_by_pmid(pmid)
-    return PubMedArticle2doi(pma, use_best_guess)
+    return PubMedArticle2doi(pma, use_best_guess, min_score=2.0)
 
-def doi2pmid(doi, use_best_guess=False):
+def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     '''uses CrossRef and PubMed eutils to lookup a PMID given a known doi.
         Warning: does NO validation (use in combo with metapub.text_mining).
 
@@ -51,7 +51,7 @@ def doi2pmid(doi, use_best_guess=False):
 
     results = crossref.query(doi)
     if results:
-        top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess)
+        top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
         return pm_fetch.pmids_for_citation(**top_result['slugs'])
     else:
         return None
