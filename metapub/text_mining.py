@@ -8,6 +8,6 @@ def findall_dois_in_text(body):
 def find_doi_in_string(body):
     try:
         return re_doi.findall(body)[0]
-    except KeyError:
+    except IndexError:
         return None
 

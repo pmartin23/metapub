@@ -23,3 +23,4 @@
 1/30/2015, 0.2.5, New code in metapub.text_mining and metapub.convert (names may change). Moved PMC stuff to metapub.pubmedcentral.
 1/30/2015, 0.3.0, Major improvements to CrossRef and PubMedFetcher reliability. Consolidation of configuration stuff in .config 
 1/30/2015, 0.3.1, Critical bugfix to CrossRef. Finished metapub.convert.doi2pmid theoretically speaking (not thoroughly tested).
+2/1/2015, 0.3.2, Added absolute_import to all files for Python3 compatibility. Critical bugfixes in metapub.convert and metapub.text_mining.

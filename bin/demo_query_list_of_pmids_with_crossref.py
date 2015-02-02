@@ -50,8 +50,8 @@ if __name__=='__main__':
             results_table['score'].append(top_result['score'])
 
             if top_result['slugs'] != {}:
-                results_table['cr_aulast'].append(top_result['slugs']['rft.aulast'])
-                results_table['cr_journal'].append(top_result['slugs']['rft.jtitle'])
+                results_table['cr_aulast'].append(top_result['slugs']['aulast'])
+                results_table['cr_journal'].append(top_result['slugs']['jtitle'])
             else:
                 results_table['cr_aulast'].append('')            
                 results_table['cr_journal'].append('')

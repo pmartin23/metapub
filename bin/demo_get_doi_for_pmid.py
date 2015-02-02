@@ -7,6 +7,7 @@ import logging
 
 from metapub import PubMedFetcher, CrossRef 
 from metapub.exceptions import MetaPubError
+from metapub.text_mining import find_doi_in_string
 
 DEBUG = True
 
@@ -48,7 +49,11 @@ if __name__=='__main__':
         print('Supply a PubMed ID as the argument to this script.')
         sys.exit()
 
-    print("DOI: %s" % get_doi(pmid))
+    doi = get_doi(pmid)
+    print("DOI: %s" % doi)
+    print("")
 
+    result = find_doi_in_string(doi)
+    print(result)
     
 
