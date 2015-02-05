@@ -17,7 +17,7 @@ class MetaPubObject(object):
         if root:
             return dom.find(root)
         else:
-            return dom.getchildren()[0]    
+            return dom
 
     def _get(self, tag):
         n = self.content.find(tag)

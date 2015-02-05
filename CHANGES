@@ -28,3 +28,5 @@
 2/2/2014, 0.3.2.2, Better regular expression for DOIs (removes prohibition on angle-brackets).
 2/2/2014, 0.3.2.3, Added ; and : to PUNCS_WE_DONT_LIKE.
 2/2/2014, 0.3.2.4, Added InvalidPMID exception (raised within PubMedFetcher), so now you can specifically catch invalid PMIDs.
+2/5/2014, 0.3.3, PubmedBookArticle support added (i.e. pubmed books like GeneReviews). added PubMedArticle.book_* attributes.
+

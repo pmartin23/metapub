@@ -64,7 +64,7 @@ def record_error(pmid, source, e):
 
 def record_entry(**kwargs):
     #{'doi': 'NA', 'score': 0, 'cr_results': [], 'connection_errors': 0, 'pma': None, 'cr_top_result': None, 'pmid': 1234567}
-    fmt = '{pmid},{doi},{score}'   #,{crossref_query},{crossref_coins}'
+    fmt = '{pmid},{doi},{score},{pubmed_type}'   #,{crossref_query},{crossref_coins}'
     data_log.info(fmt.format(**kwargs))
 
 
@@ -91,6 +91,7 @@ class PMIDMapping(object):
         # set sensible defaults intended for display in records.
         self.pmid = pmid
         self.pma = None
+        self.pm_type = None
         self.cr_top_result = None
         self.doi = 'NA'
         #self.pmcid = 'NA'       # not doing PMC just yet.
@@ -102,6 +103,7 @@ class PMIDMapping(object):
         if self.pma:
             # 2a) try to get doi first in PubMed, then in PMC, then in CrossRef.
             self._get_doi()     # fills self.doi, self.cr_top_result, self.score
+            self.pm_type = self.pma.pubmed_type
 
             # 2b) try to get pmcid first in PubMed, then in PMC.
             # self._get_pmcid()
@@ -112,6 +114,7 @@ class PMIDMapping(object):
         outd = self.__dict__
         outd['crossref_query'] = asciify(crossref.last_query)
         outd['crossref_coins'] = None if not self.cr_top_result else self.cr_top_result['coins']
+        outd['pubmed_type'] = self.pm_type
 
         record_entry(**outd)
 

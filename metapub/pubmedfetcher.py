@@ -71,8 +71,8 @@ class PubMedFetcher(Borg):
         try:
             return PubMedArticle(result)
         except AttributeError:
-            # in this case, eutils let us fetch a good-looking pmid, but the result from NCBI was empty.
-            raise InvalidPMID('Pubmed ID "%s" not found. (NCBI: Wrong UID %s)' % (pmid, pmid))
+            # in this case, eutils let us fetch a good-looking pmid, but it did not parse as an article.
+            raise InvalidPMID('Pubmed ID "%s" not found.' % pmid)
 
     def _eutils_article_by_pmcid(self, pmcid):
         pmid = PMC_get_pmid_for_otherid(pmcid)
@@ -114,7 +114,6 @@ class PubMedFetcher(Borg):
                      'author_name': parameterize(author_name, '+'),
                    }
 
-        print(inp_dict)
         req = base_uri.format(**inp_dict)
         content = requests.get(req).text
         pmids = []
