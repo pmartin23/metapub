@@ -105,6 +105,7 @@ class PubMedArticle(MetaPubObject):
         outd = self.__dict__
         outd.pop('content')
         outd.pop('xmlstr')
+        outd.pop('_root')
         return self.__dict__
 
     def _construct_datetime(self, d):
