@@ -98,7 +98,7 @@ class PubMedArticle(MetaPubObject):
         # the shared oddballs, must be done last.
         self.abstract = self._get_abstract() if pmt=='article' else self._get_book_abstract()
         self.journal = self.book_title if pmt=='book' else self._get_journal()
-        self.year = self._get_book_year if pmt=='book' else self._get_year()
+        self.year = self._get_book_year() if pmt=='book' else self._get_year()
 
 
     def to_dict(self):
