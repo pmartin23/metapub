@@ -14,3 +14,8 @@ def find_doi_in_string(body):
     except IndexError:
         return None
 
+#### NOT TESTED and probably not working #####
+def get_pmc_fulltext_filename_for_PubMedArticle(pma):
+    fmt = '{journal}/{journal}_{year}_{month}_{day}_{voliss}_{pages}'
+    return fmt.format(**pma.to_dict())
+
