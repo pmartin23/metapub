@@ -162,7 +162,8 @@ class PubMedArticle(MetaPubObject):
         return sections
 
     def _get_book_abstract(self):
-        return '\n'.join(self.book_abstracts)
+        abstract_strs = ['%s: %s' % (k,v) for k,v in self.book_abstracts.items()]
+        return '\n'.join(abstract_strs)
 
     def _get_book_copyright(self):
         return self._get('BookDocument/Abstract/CopyrightInformation')

@@ -30,4 +30,4 @@
 2/2/2014, 0.3.2.4, Added InvalidPMID exception (raised within PubMedFetcher), so now you can specifically catch invalid PMIDs.
 2/5/2014, 0.3.3, PubmedBookArticle support added (i.e. pubmed books like GeneReviews). added PubMedArticle.book_* attributes.
 2/5/2014, 0.3.3.2, Code cleanup and a bugfix for the display of a pubmed book's year.
-
+2/5/2014, 0.3.3.3, Improved output of PubMedArticle.abstract for 'book' type objects.
