@@ -24,9 +24,12 @@ class PubMedFetcher(Borg):
 
         fetch = PubMedFetcher()
     
-    To specify a service method (more coming soon):
+    To specify a service method:
 
         fetch = PubMedFetcher('eutils')
+        fetch = PubMedFetcher('mysql')
+
+    (Information about how to set up the 'mysql' service method is in the README.)
 
     To return an article by querying the service with a known PMID:
 
@@ -48,14 +51,16 @@ class PubMedFetcher(Borg):
         Borg.__init__(self)
         self.method = method
 
-        if method=='eutils':
+        if method=='mysql':
+            from .db import SQLData
+            self._db = SQLData(**MYSQL_CONNECTION_DETAILS)
+            self.article_by_pmid = self._mysql_article_by_pmid
+        else:
             import eutils.client as ec
             self.qs = ec.QueryService(tool='metapub', email=email)
             self.article_by_pmid = self._eutils_article_by_pmid
             self.article_by_pmcid = self._eutils_article_by_pmcid
             self.article_by_doi = self._eutils_article_by_doi
-        else:
-            raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql or filesystem cache.')
 
     def _eutils_article_by_pmid(self, pmid):
         try:

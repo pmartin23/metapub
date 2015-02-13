@@ -35,3 +35,12 @@ def get_data_log(filepath, name=PKGNAME+'-data'):
     datalog.addHandler(fh)
     return datalog
 
+def get_console_log(name=PKGNAME+'-console'):
+    consolelog = logging.getLogger(name)
+    consolelog.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    ch = logging.StreamHandler()
+    ch.setFormatter(formatter)
+    consolelog.addHandler(ch)
+    return consolelog
+
