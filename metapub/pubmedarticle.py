@@ -205,6 +205,9 @@ class PubMedArticle(MetaPubObject):
         if abstracts == []:
             return self._get(self._root+'/Article/Abstract/AbstractText')
 
+        if len(abstracts)==1:
+            return abstracts[0].text
+
         # this is a type of PMA with several AbstractText listings (like a Book)
         abd = {}
         for ab in abstracts:
