@@ -201,7 +201,15 @@ class PubMedArticle(MetaPubObject):
         return self._get(self._root+'/PMID')
 
     def _get_abstract(self):
-        return self._get(self._root+'/Article/Abstract/AbstractText')
+        abstracts = self.content.findall(self._root + '/Article/Abstract/AbstractText')
+        if abstracts == []:
+            return self._get(self._root+'/Article/Abstract/AbstractText')
+
+        # this is a type of PMA with several AbstractText listings (like a Book)
+        abd = {}
+        for ab in abstracts:
+            abd[ab.get('Label')] = ab.text
+        return '\n'.join(['%s: %s' % (k,v) for k,v in abd.items()])
 
     def _get_authors(self):
         # N.B. Citations may have 0 authors. e.g., pmid:7550356
