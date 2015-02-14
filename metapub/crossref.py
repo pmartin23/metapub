@@ -22,6 +22,19 @@ from .base import Borg
 
 DEFAULT_CACHE_PATH = os.path.join(os.path.expanduser('~'),'.cache','crossref-cache.db')
 
+
+# crossref return looks like:
+"""{
+        doi: "http://dx.doi.org/10.2307/40250596",
+        score: 2.0651011,
+        normalizedScore: 74,
+        title: "Research and Relevant Knowledge: American Research Universities since World War II",
+        fullCitation: "Winton U. Solberg, Roger L. Geiger, 1994, 'Research and Relevant Knowledge: American Research Universities since World War II', <i>Academe</i>, vol. 80, no. 1, p. 56",
+        coins: "ctx_ver=Z39.88-2004&amp;rft_id=info%3Adoi%2Fhttp%3A%2F%2Fdx.doi.org%2F10.2307%2F40250596&amp;rfr_id=info%3Asid%2Fcrossref.org%3Asearch&amp;rft.atitle=Research+and+Relevant+Knowledge%3A+American+Research+Universities+since+World+War+II&amp;rft.jtitle=Academe&amp;rft.date=1994&amp;rft.volume=80&amp;rft.issue=1&amp;rft.spage=56&amp;rft.aufirst=Winton+U.&amp;rft.aulast=Solberg&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.au=Winton+U.+Solberg&amp;rft.au=+Roger+L.+Geiger",
+        year: "1994"
+        },"""
+
+
 class CrossRef(Borg):
     _logger = logging.getLogger('metapub.crossref')      #.setLevel(logging.INFO)
     _logger.setLevel(logging.INFO)
@@ -255,15 +268,4 @@ class CrossRef(Borg):
         #        self._logger.debug('sleeping {sleep_time:.3f}'.format(sleep_time=sleep_time))
         #        time.sleep(sleep_time)
 
-
-# crossref return looks like:
-"""{
-        doi: "http://dx.doi.org/10.2307/40250596",
-        score: 2.0651011,
-        normalizedScore: 74,
-        title: "Research and Relevant Knowledge: American Research Universities since World War II",
-        fullCitation: "Winton U. Solberg, Roger L. Geiger, 1994, 'Research and Relevant Knowledge: American Research Universities since World War II', <i>Academe</i>, vol. 80, no. 1, p. 56",
-        coins: "ctx_ver=Z39.88-2004&amp;rft_id=info%3Adoi%2Fhttp%3A%2F%2Fdx.doi.org%2F10.2307%2F40250596&amp;rfr_id=info%3Asid%2Fcrossref.org%3Asearch&amp;rft.atitle=Research+and+Relevant+Knowledge%3A+American+Research+Universities+since+World+War+II&amp;rft.jtitle=Academe&amp;rft.date=1994&amp;rft.volume=80&amp;rft.issue=1&amp;rft.spage=56&amp;rft.aufirst=Winton+U.&amp;rft.aulast=Solberg&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.au=Winton+U.+Solberg&amp;rft.au=+Roger+L.+Geiger",
-        year: "1994"
-        },"""
 
