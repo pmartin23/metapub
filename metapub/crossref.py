@@ -121,8 +121,8 @@ class CrossRef(Borg):
         if params != {}:
             for k,v in params.items():
                 defining_args[k] = parameterize(v)
-        q = self.query_base_url % search 
-        q += '&'.join(['%s=%s' % (k,v) for (k,v) in defining_args.items()])
+        q = self.query_base_url % urllib.quote_plus(search) 
+        q += '&'.join(['%s=%s' % (k,urllib.quote_plus(v)) for (k,v) in defining_args.items()])
         return q
 
     def query(self, search, params=None, skip_cache=False):
