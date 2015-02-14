@@ -75,13 +75,13 @@ class PubMedFetcher(Borg):
             raise InvalidPMID('Pubmed ID "%s" not found.' % pmid)
 
     def _eutils_article_by_pmcid(self, pmcid):
-        pmid = PMC_get_pmid_for_otherid(pmcid)
+        pmid = get_pmid_for_otherid(pmcid)
         if pmid is None:
             raise MetaPubError('No PMID available for PubMedCentral id %s' % pmcid)
         return self._eutils_article_by_pmid(pmid)
     
     def _eutils_article_by_doi(self, doi):
-        pmid = PMC_get_pmid_for_otherid(doi)
+        pmid = get_pmid_for_otherid(doi)
         if pmid is None:
             raise MetaPubError('No PMID available for doi %s' % doi)
         return self._eutils_article_by_pmid(pmid)

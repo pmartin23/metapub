@@ -32,3 +32,4 @@
 2/5/2014, 0.3.3.2, Code cleanup and a bugfix for the display of a pubmed book's year.
 2/5/2014, 0.3.3.3, Improved output of PubMedArticle.abstract for 'book' type objects.
 2/13/2014, 0.3.3.4, Handle cases where PubMedArticle contains multiple abstracts (similar to books). example pmid: 18612690
+2/13/2014, 0.3.3.5, Merged in CrossRef query improvements by Naomi Fox. Bugfix in PubMedFetcher (wrong function name, oops).
