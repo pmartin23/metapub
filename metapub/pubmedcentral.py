@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import os
+from lxml import etree
 from urllib import urlretrieve
 
 from .config import PKGNAME, DEFAULT_EMAIL, TMPDIR
