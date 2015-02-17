@@ -1,7 +1,5 @@
 import sys
 
-from tabulate import tabulate
-
 from metapub import MedGenFetcher
 
 # example of CUID: C0000039

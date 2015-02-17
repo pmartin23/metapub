@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import os, sys, shutil
 import logging, time
-from tabulate import tabulate
 
 from requests.exceptions import ConnectionError
 
