@@ -18,7 +18,7 @@ text_with_one_doi = open('tests/data/text_with_one_doi.txt', 'r').read()
 text_with_no_dois = open('tests/data/text_with_no_dois.txt', 'r').read()
 
 
-class TestRunStatus(unittest.TestCase):
+class TestFindDOIs(unittest.TestCase):
 
     def setUp(self):
         pass
