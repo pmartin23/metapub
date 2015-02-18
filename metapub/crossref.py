@@ -15,7 +15,7 @@ from eutils.sqlitecache import SQLiteCache
 from tabulate import tabulate
 
 from .pubmedfetcher import PubMedFetcher 
-from .exceptions import MetaPubError
+from .exceptions import *
 
 from .utils import asciify, parameterize, remove_html_markup, deparameterize
 from .base import Borg
@@ -117,7 +117,7 @@ class CrossRef(Borg):
         if response.status_code==200:
             return response.text
         else:
-            raise Exception('search.crossref.org returned HTTP %s (query was %s)' % (response.status_code, q))
+            raise CrossRefConnectionError('search.crossref.org returned HTTP %s (query was %s)' % (response.status_code, q))
 
     def _get_enhanced_results(self, results):
         enhanced_results = []
@@ -195,7 +195,7 @@ class CrossRef(Borg):
             try:
                 results = json.loads(res_text)
             except ValueError:
-                raise Exception('invalid JSON response for %s (%s)' % (q, res_text))
+                raise CrossRefConnectionError('invalid JSON response for %s (%s)' % (q, res_text))
             return self._get_enhanced_results(results)
         return []
 

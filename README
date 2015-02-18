@@ -116,6 +116,14 @@ operator. In cases where all results have scores under 2, no results will
 be returned unless use_best_guess=True.  That's often desired behavior, 
 since results with scores under 2 are usually pretty bad.
 
+More Information
+----------------
+
+Digital Identifiers of Scientific Literature: what they are, when they're 
+used, and what they look like.
+
+http://www.biosciencewriters.com/Digital-identifiers-of-scientific-literature-PMID-PMCID-NIHMS-DOI-and-how-to-use-them.aspx
+
 
 About, and a Disclaimer
 -----------------------

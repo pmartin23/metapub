@@ -2,10 +2,11 @@ from __future__ import absolute_import
 
 import os
 from lxml import etree
+import unicodedata
 
 from .exceptions import MetaPubError
 
-PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:"
+PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\""
 
 def pick_from_kwargs(args, options, default=None):
     for opt in options:
@@ -16,7 +17,10 @@ def pick_from_kwargs(args, options, default=None):
 def asciify(inp):
     '''nuke all the unicode from orbit. it's the only way to be sure.'''
     if inp:
-        return inp.encode('ascii', 'ignore')
+        try:
+            return inp.encode('ascii', 'ignore')
+        except UnicodeDecodeError:
+            return unicodedata.normalize('NFKD', inp.decode('utf-8')).encode('ascii', 'ignore')
     else:
         return ''
 
