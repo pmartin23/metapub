@@ -23,6 +23,9 @@ no_authors_params = { 'jtitle':'Journal of Neural Transmission',
                     'first_page':1077, 
                     } 
 
+#PNAS|2008|||An|metapub|AMBIGUOUS (5 citations)
+AMBIGUOUS_params = { 'jtitle': 'PNAS', 'year': 2008, 'aulast': 'An' }
+
 class TestPubmedCitationMatch(unittest.TestCase):
 
     def setUp(self):
@@ -46,4 +49,9 @@ class TestPubmedCitationMatch(unittest.TestCase):
     def test_citation_match_not_found_invalid_journal(self):
         result = fetch.pmids_for_citation(**NOT_FOUND_INVALID_JOURNAL_params)
         assert result[0] == u'NOT_FOUND;INVALID_JOURNAL'
+
+    def test_citation_match_ambiguous(self):
+        result = fetch.pmids_for_citation(**AMBIGUOUS_params)
+        assert result[0] == u'AMBIGUOUS (5 citations)'
+
 
