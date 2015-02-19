@@ -20,3 +20,12 @@ stuff = fetch.pmids_for_query(**params)
 print params
 print stuff
 
+params = { 'MH':'breast neoplasm', 
+                    'pdat':2014, 
+         } 
+
+
+stuff = fetch.pmids_for_query(**params)
+
+print params
+print stuff

@@ -1,8 +1,9 @@
 import unittest
 
 from metapub import PubMedFetcher
+from metapub.pubmedcentral import *
 
-class TestPubmedSearch(unittest.TestCase):
+class TestPubmedFetcher(unittest.TestCase):
 
     def setUp(self):
         pass

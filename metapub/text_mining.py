@@ -10,6 +10,7 @@ import re
 #         10.1002/ajmg.b.30585).
 
 re_doi = re.compile(r'(10[.][0-9]{2,}(?:[.][0-9]+)*/(?:(?!["&\'])\S)+)')
+re_doi_ws = re.compile(r'(10[.][0-9]{2,}(?:[.][0-9]+)*\s+/\s+(?:(?!["&\'])\S)+)')
 
 def _doi_pass_2(doi):
     if doi.endswith('.') or doi.endswith(','):
@@ -20,17 +21,26 @@ def _doi_pass_2(doi):
         else:
             return _doi_pass_2(doi[:-1])
     else:
-        return doi
+        return doi.replace(' ', '')
 
-def findall_dois_in_text(inp):
-    '''returns all seen DOIs in input string.'''
-    dois = re_doi.findall(inp)
+def findall_dois_in_text(inp, whitespace=False):
+    '''returns all seen DOIs in input string.
+
+       if `whitespace` arg set to True, look for DOIs like the following:
+             10.1002 / pd.354   
+        ...but return with whitespace stripped:
+             10.1002/pd.354
+    '''
+    if whitespace:
+        dois = re_doi_ws.findall(inp)
+    else:
+        dois = re_doi.findall(inp)
     return [_doi_pass_2(doi) for doi in dois]
 
-def find_doi_in_string(inp):
+def find_doi_in_string(inp, whitespace=False):
     '''returns the first seen DOI in the input string.'''
     try:
-        doi = re_doi.findall(inp)[0]
+        doi = findall_dois_in_text(inp, whitespace)[0]
     except IndexError:
         return None
     return _doi_pass_2(doi)

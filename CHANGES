@@ -35,3 +35,5 @@
 2/13/2014, 0.3.3.5, Merged in CrossRef query improvements by Naomi Fox. Bugfix in PubMedFetcher (wrong function name, oops).
 2/17/2014, 0.3.4, Merged in pubmedcentral.py missing import statements by Naomi Fox. [critical bugfix]
 2/17/2014, 0.3.4.1, added CrossRefConnectionError. Made that and InvalidPMID into subclasses of MetaPubError.
+2/18/2014, 0.3.4.2, added PubMedFetcher.pmids_for_query w/ pubmed advanced query support -- untested and only returns resultant XML right now.
+2/19/2014, 0.3.4.3, expanded text_mining doi matching to allow optional whitespace inclusion around the '/' (it happens!)

@@ -16,6 +16,7 @@ almost_dois = ['10.10.1.0/26', '10.1234/gad.15.4).' ]
 text_with_many_dois = open('tests/data/text_with_many_dois.txt', 'r').read()
 text_with_one_doi = open('tests/data/text_with_one_doi.txt', 'r').read()
 text_with_no_dois = open('tests/data/text_with_no_dois.txt', 'r').read()
+text_with_one_whitespace_doi = open('tests/data/text_with_one_whitespace_doi.txt', 'r').read()
 
 
 class TestFindDOIs(unittest.TestCase):
@@ -25,6 +26,13 @@ class TestFindDOIs(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def test_find_whitespace_doi(self):
+        result = find_doi_in_string(text_with_one_whitespace_doi, whitespace=True)
+        if result:
+            assert result == '10.1002/pd.354'
+        else:
+            assert False
 
     def test_find_no_doi_in_text(self):
         result = find_doi_in_string(text_with_no_dois)

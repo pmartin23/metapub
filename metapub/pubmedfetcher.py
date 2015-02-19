@@ -95,11 +95,11 @@ class PubMedFetcher(Borg):
         q['PMC'] = kpick(kwargs, options=['pmc', 'pmcid'])
         q['TA'] = kpick(kwargs, options=['TA', 'jtitle', 'journal']) 
         q['DP'] = kpick(kwargs, options=['DP', 'year', 'pdat'])
-        q['1AU'] = kpick(kwargs, options=['1AU', 'aulast', 'author1_lastfm'])
+        q['1AU'] = kpick(kwargs, options=['1AU', 'aulast', 'author1_lastfm', 'author1_last_fm'])
         q['OT'] = kwargs.get('OT', None)
         q['PT'] = kpick(kwargs, options=['PT', 'pubmed_type'])
         q['MH'] = kpick(kwargs, options=['MH', 'mesh', 'MeSH Terms'])
-        #q['FAU'] = kpick(kwargs, options['author1_lastfm'])
+        q['FAU'] = kpick(kwargs, options=['FAU', 'first_author', 'author1'])
         q['IP'] = kpick(kwargs, options=['IP', 'issue'])
         q['TI'] = kpick(kwargs, options=['TI', 'title', 'atitle', 'article_title'])
         q['TW'] = kpick(kwargs, options=['TW', 'text'])
@@ -109,14 +109,20 @@ class PubMedFetcher(Borg):
         q['book'] = kwargs.get('book', None)
         q['ISBN'] = kwargs.get('ISBN', None)
         q['LASTAU'] = kwargs.get('LASTAU', None)
-        q['MHDA'] = kwargs.get('MHDA', None)
+
+        #MeSH Date [MHDA]
+        #MeSH Major Topic [MAJR]
+        #MeSH Subheadings [SH]
+        #MeSH Terms [MH]        
+        #q['MHDA'] = kwargs.get('MHDA', None)
+
         q['PMID'] = kpick(kwargs, options=['pmid', 'uid', 'pubmed_id'])
         
         if query != '':
             query = query + ' '
         for feature in q.keys():
             if q[feature] != None:
-                query +='%s[%s] ' % (q[feature], q)
+                query +='%s[%s] ' % (q[feature], feature)
         
         # option to query pubmed central only:
         # pubmed pmc[sb]
