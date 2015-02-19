@@ -8,7 +8,7 @@ from .exceptions import MetaPubError
 
 PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\""
 
-def pick_from_kwargs(args, options, default=None):
+def kpick(args, options, default=None):
     for opt in options:
         if args.get(opt, None):
             return args[opt]

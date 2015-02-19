@@ -8,7 +8,7 @@ import requests
 
 from .pubmedarticle import PubMedArticle
 from .pubmedcentral import get_pmid_for_otherid
-from .utils import pick_from_kwargs, parameterize
+from .utils import kpick, parameterize
 from .exceptions import *
 from .base import Borg
 from .config import DEFAULT_EMAIL
@@ -54,6 +54,7 @@ class PubMedFetcher(Borg):
             self.article_by_pmid = self._eutils_article_by_pmid
             self.article_by_pmcid = self._eutils_article_by_pmcid
             self.article_by_doi = self._eutils_article_by_doi
+            self.pmids_for_query = self._eutils_pmids_for_query
         else:
             raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql or filesystem cache.')
 
@@ -86,6 +87,46 @@ class PubMedFetcher(Borg):
             raise MetaPubError('No PMID available for doi %s' % doi)
         return self._eutils_article_by_pmid(pmid)
 
+    def _eutils_pmids_for_query(self, query='', **kwargs):
+        '''returns list of pmids for given freeform query string plus 
+            keyword arguments.'''
+        q = {}
+        q['AID'] = kpick(kwargs, options=['AID', 'doi']) 
+        q['PMC'] = kpick(kwargs, options=['pmc', 'pmcid'])
+        q['TA'] = kpick(kwargs, options=['TA', 'jtitle', 'journal']) 
+        q['DP'] = kpick(kwargs, options=['DP', 'year', 'pdat'])
+        q['1AU'] = kpick(kwargs, options=['1AU', 'aulast', 'author1_lastfm'])
+        q['OT'] = kwargs.get('OT', None)
+        q['PT'] = kpick(kwargs, options=['PT', 'pubmed_type'])
+        q['MH'] = kpick(kwargs, options=['MH', 'mesh', 'MeSH Terms'])
+        #q['FAU'] = kpick(kwargs, options['author1_lastfm'])
+        q['IP'] = kpick(kwargs, options=['IP', 'issue'])
+        q['TI'] = kpick(kwargs, options=['TI', 'title', 'atitle', 'article_title'])
+        q['TW'] = kpick(kwargs, options=['TW', 'text'])
+        q['LA'] = kpick(kwargs, options=['LA', 'language'])
+        q['VI'] = kpick(kwargs, options=['VI', 'volume', 'vol'])
+        q['PUBN'] = kpick(kwargs, options=['PUBN', 'publisher'])
+        q['book'] = kwargs.get('book', None)
+        q['ISBN'] = kwargs.get('ISBN', None)
+        q['LASTAU'] = kwargs.get('LASTAU', None)
+        q['MHDA'] = kwargs.get('MHDA', None)
+        q['PMID'] = kpick(kwargs, options=['pmid', 'uid', 'pubmed_id'])
+        
+        if query != '':
+            query = query + ' '
+        for feature in q.keys():
+            if q[feature] != None:
+                query +='%s[%s] ' % (q[feature], q)
+        
+        # option to query pubmed central only:
+        # pubmed pmc[sb]
+        if kwargs.get('pmc_only', False):
+            query += 'pubmed pmc[sb]'
+
+        results = self.qs.esearch({'db': 'pubmed', 'term': query})
+        return results
+
+
     def pmids_for_citation(self, **kwargs):
         '''returns list of pmids for given citation. requires at least 3/5 of these keyword arguments:
             jtitle or journal (journal title)
@@ -100,12 +141,12 @@ class PubMedFetcher(Borg):
         # journal_title|year|volume|first_page|author_name|your_key|
         base_uri = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/ecitmatch.cgi?db=pubmed&retmode=xml&bdata={journal_title}|{year}|{volume}|{first_page}|{author_name}|metapub|'
 
-        journal_title = pick_from_kwargs(kwargs, options=['jtitle', 'journal', 'journal_title'], default='')
-        author_name = _reduce_author_string(pick_from_kwargs(kwargs, 
+        journal_title = kpick(kwargs, options=['jtitle', 'journal', 'journal_title'], default='')
+        author_name = _reduce_author_string(kpick(kwargs, 
                         options=['aulast', 'author1_last_fm', 'author', 'authors'], default=''))
-        first_page = pick_from_kwargs(kwargs, options=['spage', 'first_page'], default='')
-        year = pick_from_kwargs(kwargs, options=['year', 'date'], default='')
-        volume = pick_from_kwargs(kwargs, options=['volume'], default='')
+        first_page = kpick(kwargs, options=['spage', 'first_page'], default='')
+        year = kpick(kwargs, options=['year', 'date', 'pdat'], default='')
+        volume = kpick(kwargs, options=['volume'], default='')
 
         inp_dict = { 'journal_title': parameterize(journal_title, '+'), 
                      'year': str(year),
@@ -134,4 +175,61 @@ def _reduce_author_string(author_string):
     author1 = authors[0]
     # presume last name is at the end of the string
     return author1.split(' ')[-1]
+
+
+""" 
+Search Field Descriptions and Tags
+
+from http://www.ncbi.nlm.nih.gov/books/NBK3827/
+
+Affiliation [AD]
+Article Identifier [AID]
+All Fields [ALL]
+Author [AU]
+Author Identifier [AUID]
+Book [book]
+Comment Corrections
+Corporate Author [CN]
+Create Date [CRDT]
+Completion Date [DCOM]
+EC/RN Number [RN]
+Editor [ED]
+Entrez Date [EDAT]
+Filter [FILTER]
+First Author Name [1AU]
+Full Author Name [FAU]
+Full Investigator Name [FIR]
+Grant Number [GR]   Investigator [IR]
+ISBN [ISBN]
+Issue [IP]
+Journal [TA]
+Language [LA]
+Last Author [LASTAU]
+Location ID [LID]
+MeSH Date [MHDA]
+MeSH Major Topic [MAJR]
+MeSH Subheadings [SH]
+MeSH Terms [MH]
+Modification Date [LR]
+NLM Unique ID [JID]
+Other Term [OT]
+Owner
+Pagination [PG]
+Personal Name as Subject [PS]   Pharmacological Action [PA]
+Place of Publication [PL]
+PMID [PMID]
+Publisher [PUBN]
+Publication Date [DP]
+Publication Type [PT]
+Secondary Source ID [SI]
+Subset [SB]
+Supplementary Concept[NM]
+Text Words [TW]
+Title [TI]
+Title/Abstract [TIAB]
+Transliterated Title [TT]
+UID [PMID]
+Version
+Volume [VI]
+"""
 
