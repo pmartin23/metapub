@@ -37,3 +37,4 @@
 2/17/2014, 0.3.4.1, added CrossRefConnectionError. Made that and InvalidPMID into subclasses of MetaPubError.
 2/18/2014, 0.3.4.2, added PubMedFetcher.pmids_for_query w/ pubmed advanced query support -- untested and only returns resultant XML right now.
 2/19/2014, 0.3.4.3, expanded text_mining doi matching to allow optional whitespace inclusion around the '/' (it happens!)
+2/19/2014, 0.3.4.4, setup.py sources version from metapub/__version__.py
