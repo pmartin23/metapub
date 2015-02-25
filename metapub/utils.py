@@ -4,8 +4,6 @@ import os
 from lxml import etree
 import unicodedata
 
-from .exceptions import MetaPubError
-
 PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\""
 
 def kpick(args, options, default=None):
