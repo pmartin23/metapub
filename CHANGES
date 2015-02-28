@@ -39,3 +39,4 @@
 2/19/2014, 0.3.4.3, expanded text_mining doi matching to allow optional whitespace inclusion around the '/' (it happens!)
 2/19/2014, 0.3.4.4, setup.py sources version from metapub/__version__.py
 2/23/2014, 0.3.4.5, setup.py dup's version in metapub/__version__.py (too many packaging hassles).
+2/23/2014, 0.3.4.6, added text_mining.pick_pmid
