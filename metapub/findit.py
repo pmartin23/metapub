@@ -1,3 +1,6 @@
+from .convert import PubMedArticle2doi
+from .exceptions import MetaPubError
+
 """
 When fulfilling orders for articles listed in pubmed, follow these heuristics:
 (assuming a valid PubMedArticle object as "pma")
@@ -56,6 +59,9 @@ simple_formats = {
 
 # vip = Volume-Issue-Page format -- URLs that have the same format
 # except for the host name
+
+# http://www.bloodjournal.org/content/117/5/1622.full.pdf
+
 vip_format = 'http://{host}/content/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
 vip_journals = {
     'Blood': { 'host': 'bloodjournal.hematologylibrary.org' },
@@ -91,30 +97,38 @@ nature_journals = {
     }
 
 
-PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{pmid}/pdf'
+PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 
-def find_it(pma):
+def find_it(pma, crossref_doi=True):
     if pma.pmc:
-        return PMC_PDF_URL.format(pma)
+        return PMC_PDF_URL.format(a=pma)
         
     elif pma.journal in simple_formats.keys():
-        return simple_formats[self.journal].format(a=pma)
+        if pma.doi is None and crossref_doi:
+            if crossref_doi:
+                pma.doi = PubMedArticle2doi(pma)
+            else:
+                raise MetaPubError('No DOI in the PubMedArticle XML for %s; cannot construct URI.' % pma.pmid)
+        return simple_formats[pma.journal].format(a=pma)
 
-    elif self.journal in vip_journals.keys():
-        return vip_format.format(host=vip_journals[self.journal]['host'], a=pma)
+    elif pma.journal in vip_journals.keys():
+        return vip_format.format(host=vip_journals[pma.journal]['host'], a=pma)
 
-    elif self.journal in nature_journals.keys():
-        return nature_format.format(a=pma, ja=nature_journals[self.journal]['ja'])
+    elif pma.journal in nature_journals.keys():
+        return nature_format.format(a=pma, ja=nature_journals[pma.journal]['ja'])
 
-    elif self.journal in cell_journals.keys() and pma.pii:
-        return cell_format.format(a=pma, ja=cell_journals[self.journal]['ja'],
+    elif pma.journal in cell_journals.keys() and pma.pii:
+        return cell_format.format(a=pma, ja=cell_journals[pma.journal]['ja'],
                 pii=pma.pii.translate(None,'-()') ) 
     
-    elif self.journal in 'Lancet':
+    elif pma.journal in 'Lancet' and pma.pii:
         return 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(
-            piit = self.pii.replace(None,'-()'))
+            piit = pma.pii.replace(None,'-()'))
 
     else:
         return None
 
+
+
+FindIt = find_it
 
