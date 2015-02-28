@@ -102,9 +102,9 @@ class CrossRef(Borg):
         '''
         aulast = None if pma.author1_last_fm is None else pma.author1_last_fm.split(' ')[0]
         params = { 
-                     'volume': parameterize(pma.volume),
-                     'issue': parameterize(pma.issue),
-                     'year': parameterize(pma.year),
+                     'volume': parameterize('%s' % pma.volume),
+                     'issue': parameterize('%s' % pma.issue),
+                     'year': parameterize('%s' % pma.year),
                      'aulast': parameterize(aulast),
                      'jtitle': parameterize(pma.journal).translate(None, '.[]()<>,').replace('J+', ''),
                      'start_page': parameterize(pma.first_page),

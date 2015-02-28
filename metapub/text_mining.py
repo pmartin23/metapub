@@ -12,6 +12,20 @@ import re
 re_doi = re.compile(r'(10[.][0-9]{2,}(?:[.][0-9]+)*/(?:(?!["&\'])\S)+)')
 re_doi_ws = re.compile(r'(10[.][0-9]{2,}(?:[.][0-9]+)*\s+/\s+(?:(?!["&\'])\S)+)')
 
+re_pmid = re.compile('\d+')
+def pick_pmid(text):
+    '''return longest numerical string from text (string) as the pmid.
+        if text is empty or there are no pmids, return None.'''
+    pmids = re_pmid.findall(text)
+    if pmids:
+        longest = ''
+        for num in pmids:
+            if len(num) > len(longest):
+                longest = num
+        return longest
+    else:
+        return None
+
 def _doi_pass_2(doi):
     if doi.endswith('.') or doi.endswith(','):
         return _doi_pass_2(doi[:-1])

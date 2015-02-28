@@ -8,8 +8,9 @@ from urllib import unquote
 
 from metapub import PubMedFetcher, CrossRef 
 from metapub.exceptions import MetaPubError
+from metapub.utils import asciify
 
-from tabulate import tabulate
+#from tabulate import tabulate
 
 ####
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -17,6 +18,11 @@ logging.getLogger("eutils").setLevel(logging.INFO)
 ####
 
 fetch = PubMedFetcher()
+
+def print_table(res_table, headers):
+    print('\t'.join(headers))
+    for x in range(0, len(res_table['score'])):
+        print('\t'.join(['{}'.format(res_table[h][x]) for h in headers]))
 
 if __name__=='__main__':
     try:
@@ -27,8 +33,7 @@ if __name__=='__main__':
     
     pmids = open(filename, 'r').readlines()
 
-    results_table = { 'pmid': [], 'doi': [], 'score': [], 'pma_aulast': [], 'cr_aulast': [], 'pma_journal': [], 'cr_journal': [] } 
-    #results_table = { 'pmid': [], 'pma_title': [], 'cr_title': [], 'doi': [], 'score': [], 'pma_author': [], 'cr_author': []} 
+    results_table = { 'pmid': [], 'pma_title': [], 'cr_title': [], 'doi': [], 'score': [], 'pma_aulast': [], 'cr_aulast': [], 'pma_journal': [], 'cr_journal': [] } 
 
     CR = CrossRef()
 
@@ -39,32 +44,50 @@ if __name__=='__main__':
             try:
                 pma = fetch.article_by_pmid(pmid)
             except:
-                print("%s: Could not fetch" % pmid)
+                pma = None
+                #print("%s: Could not fetch" % pmid)
+        if pma:
             results = CR.query_from_PubMedArticle(pma)
             top_result = CR.get_top_result(results, CR.last_params, use_best_guess=True)
                 
-            #results_table['pma_title'].append(pma.title)
-            results_table['pma_journal'].append(pma.journal)
-            #results_table['cr_title'].append(top_result['title'])
+            results_table['pma_title'].append(asciify(pma.title))
+            results_table['pma_journal'].append(asciify(pma.journal))
+            results_table['cr_title'].append(asciify(top_result['title']))
             results_table['doi'].append(top_result['doi'])
             results_table['score'].append(top_result['score'])
 
             if top_result['slugs'] != {}:
-                results_table['cr_aulast'].append(top_result['slugs']['aulast'])
-                results_table['cr_journal'].append(top_result['slugs']['jtitle'])
+                try:
+                    results_table['cr_aulast'].append(asciify(top_result['slugs']['aulast']))
+                except:
+                    results_table['cr_aulast'].append('NA')
+                    
+                results_table['cr_journal'].append(asciify(top_result['slugs']['jtitle']))
             else:
                 results_table['cr_aulast'].append('')            
                 results_table['cr_journal'].append('')
 
-            print(unquote(top_result['coins'])) #.decode('utf8'))
+            #print(unquote(top_result['coins'])) #.decode('utf8'))
 
-            results_table['pma_aulast'].append(pma.author1_last_fm)
-            print(pmid, top_result['doi'], top_result['score'], sep='\t')
+            results_table['pma_aulast'].append(asciify(pma.author1_last_fm))
+        else:
+            results = None
+            top_result = None
+            results_table['pma_aulast'].append('NA')
+            results_table['pma_journal'].append('NA')
+            results_table['pma_title'].append('NA')
+            results_table['doi'].append('NA')
+            results_table['score'].append('NA')
+            results_table['cr_journal'].append('NA')
+            results_table['cr_aulast'].append('NA')
+            results_table['cr_title'].append('NA')
 
-    headers = ['pmid', 'doi', 'pma_title', 'cr_title', 'pma_author', 'cr_author', 'score']
-    tabulated = tabulate(results_table, results_table.keys(), tablefmt="simple")
-    print(tabulated)
-        
+        #print(pmid, top_result['doi'], top_result['score'], sep='\t')
+
+    headers = ['score', 'pmid', 'doi', 'pma_aulast', 'cr_aulast', 'pma_journal', 'cr_journal', 'pma_title', 'cr_title']
+
+    print_table(results_table, headers)
+
 
 # crossref return looks like:
 """{
