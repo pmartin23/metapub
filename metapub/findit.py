@@ -1,3 +1,8 @@
+from __future__ import absolute_import
+
+import requests
+
+from .pubmedfetcher import PubMedFetcher
 from .convert import PubMedArticle2doi
 from .exceptions import MetaPubError
 
@@ -36,7 +41,7 @@ format_templates = {
 
 # simple formats are used for URLs that can be deduced from data
 # in the pubmed record
-simple_formats = {
+simple_formats_doi = {
     'Am. J. Med. Genet. A': format_templates['wiley'],
     'Am. J. Med. Genet.': format_templates['wiley'],
     'Ann. Neurol.': format_templates['wiley'],
@@ -52,10 +57,12 @@ simple_formats = {
     'PLoS Med.': format_templates['plos'],
     'PLoS ONE.': format_templates['plos'],
     'PLoS Pathog.': format_templates['plos'],
-
-    'JAMA': 'http://jama.ama-assn.org/content/{a.pii}.full.pdf',
     'N. Engl. J. Med.':  'http://www.nejm.org/doi/pdf/{a.doi}',
     }
+
+simple_formats_pii = {
+    'JAMA': 'http://jama.ama-assn.org/content/{a.pii}.full.pdf',
+    } 
 
 # vip = Volume-Issue-Page format -- URLs that have the same format
 # except for the host name
@@ -99,36 +106,97 @@ nature_journals = {
 
 PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 
-def find_it(pma, crossref_doi=True):
+def find_from_pma(pma, crossref_doi=True):
+    reason = None
+    uri = None
+
     if pma.pmc:
-        return PMC_PDF_URL.format(a=pma)
+        uri = PMC_PDF_URL.format(a=pma)
         
-    elif pma.journal in simple_formats.keys():
-        if pma.doi is None and crossref_doi:
+    elif pma.journal in simple_formats_doi.keys():
+        if pma.doi == None:
             if crossref_doi:
                 pma.doi = PubMedArticle2doi(pma)
+                if pma.doi is None:
+                    reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.' 
             else:
-                raise MetaPubError('No DOI in the PubMedArticle XML for %s; cannot construct URI.' % pma.pmid)
-        return simple_formats[pma.journal].format(a=pma)
+                reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.' 
+        
+        if pma.doi != None:
+            uri = simple_formats_doi[pma.journal].format(a=pma)
+
+    elif pma.journal in simple_formats_pii.keys() and pma.pii != None:
+        uri = simple_formats_pii[pma.journal].format(a=pma)
 
     elif pma.journal in vip_journals.keys():
-        return vip_format.format(host=vip_journals[pma.journal]['host'], a=pma)
+        uri = vip_format.format(host=vip_journals[pma.journal]['host'], a=pma)
 
     elif pma.journal in nature_journals.keys():
-        return nature_format.format(a=pma, ja=nature_journals[pma.journal]['ja'])
+        uri = nature_format.format(a=pma, ja=nature_journals[pma.journal]['ja'])
 
     elif pma.journal in cell_journals.keys() and pma.pii:
-        return cell_format.format(a=pma, ja=cell_journals[pma.journal]['ja'],
-                pii=pma.pii.translate(None,'-()') ) 
+        uri = cell_format.format( a=pma, ja=cell_journals[pma.journal]['ja'],
+                pii=pma.pii.translate(None,'-()') )
     
     elif pma.journal in 'Lancet' and pma.pii:
-        return 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(
-            piit = pma.pii.replace(None,'-()'))
+        uri = 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(piit = pma.pii.replace(None,'-()'))
 
-    else:
-        return None
+    return (uri, reason)
 
 
+class FindIt(object):
 
-FindIt = find_it
+    @classmethod
+    def by_pmid(cls, pmid, **kwargs):
+        kwargs['pmid'] = pmid
+        return cls(**kwargs)
+
+    @classmethod
+    def by_doi(cls, doi, **kwargs):
+        return cls(doi=doi, 
+    
+    def __init__(self, *args, **kwargs):    
+        self.pmid = kwargs.get('pmid', None)
+        self.doi = kwargs.get('doi', None)
+        self.uri = kwargs.get('uri', None)
+        self.reason = None
+
+        self.pma = None
+        self.cr_top_result = None
+
+        if self.pmid:
+            self.pma = fetch.article_by_pmid(pmid)
+            self.uri, self.reason = find_from_pma(self.pma)
+
+        elif self.doi:
+            results = CR.query(self.doi)
+            self.cr_top_result = CR.get_top_result(results)
+            if self.cr_top_result is not None:
+
+
+    def download(self, filename):
+        # verify=False means it ignores bad SSL certs
+        response = requests.get(uri, stream=True, timeout=CURL_TIMEOUT, verify=False)
+
+        if not response.ok:
+            return 'error'
+
+        if response.status_code == 200:
+            if response.headers.get('content-type')=='application/pdf':
+                with open(filename, 'wb') as handle:
+                    for block in response.iter_content(1024):
+                        if not block:
+                            break
+                        handle.write(block)
+            return response.headers.get('content-type')
+        else:
+            return response.status_code
+
+
+    def verify(self, pdf2txt=False):
+        '''verify that download was indeed a PDF. If pdf2txt is True, convert PDF to text for further validation.
+
+            returns confidence score from 1 to 10 (10 being highest confidence that PDF is in fact the 
+            desired article.)'''
+
 
