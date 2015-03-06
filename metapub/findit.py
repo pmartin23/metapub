@@ -106,6 +106,34 @@ def find_article_from_doi(doi):
     return find_article_from_pma(pma)
     
 
+
+# TODO: support this madness (http://www.ncbi.nlm.nih.gov/books/NBK3828/):
+
+"""
+How do I submit tags for Volume and Issue Supplements?
+
+Use the following guidelines for Supplements:
+
+Supplement 1 for Volume 6:
+
+ <Volume>6 Suppl 1</Volume>
+<Issue></Issue> 
+Issue 4, Supplement 2 for Volume 7:
+
+<Volume>7</Volume>
+<Issue>4 Suppl 2</Issue> 
+Issue 4 Pt 1 for Volume 7:
+
+<Volume>7</Volume>
+<Issue>4 Pt 1</Issue> 
+Issue Part 3 for Volume 7 (it has Volume 7 Part 3 on the cover):
+
+<Volume>7</Volume>
+<Issue>Pt 3</Issue>
+"""
+
+
+
 def find_article_from_pma(pma, crossref_doi=True):
     reason = None
     url = None

@@ -33,5 +33,7 @@ if article.pii:
 if article.doi:
     print 'doi: '+article.doi
 
+print 'volume: '+article.volume
+print 'issue: '+article.issue
 #print article.xmlstr
 
