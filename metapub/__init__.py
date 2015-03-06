@@ -9,5 +9,5 @@ from .medgenfetcher import MedGenFetcher
 from .medgenconcept import MedGenConcept
 from .crossref import CrossRef
 
-__version__ = '0.3.4.8'
+__version__ = '0.3.4.9'
 

@@ -150,7 +150,7 @@ class PubMedArticle(MetaPubObject):
         return [ _au_to_last_fm(au) for au in self.content.findall('BookDocument/Book/AuthorList/Author') ]
 
     def _get_book_abstracts(self):
-        abd = {}
+        abd = OrderedDict()
         for item in self.content.findall('BookDocument/Abstract/AbstractText'):
             abd[item.get('Label')] = item.text
         return abd
@@ -213,7 +213,7 @@ class PubMedArticle(MetaPubObject):
             return abstracts[0].text
 
         # this is a type of PMA with several AbstractText listings (like a Book)
-        abd = {}
+        abd = OrderedDict()
         for ab in abstracts:
             abd[ab.get('Label')] = ab.text
         return '\n'.join(['%s: %s' % (k,v) for k,v in abd.items()])
