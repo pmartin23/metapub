@@ -13,6 +13,8 @@ re_doi = re.compile(r'(10[.][0-9]{2,}(?:[.][0-9]+)*/(?:(?!["&\'])\S)+)')
 re_doi_ws = re.compile(r'(10[.][0-9]{2,}(?:[.][0-9]+)*\s+/\s+(?:(?!["&\'])\S)+)')
 
 re_pmid = re.compile('\d+')
+re_numbers = re_pmid    # for now, until there's a better idea about parsing PMIDs...
+
 def pick_pmid(text):
     '''return longest numerical string from text (string) as the pmid.
         if text is empty or there are no pmids, return None.'''
