@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import requests
 
 from .pubmedfetcher import PubMedFetcher
-from .convert import PubMedArticle2doi
+from .convert import PubMedArticle2doi, doi2pmid
 from .exceptions import MetaPubError
 
 """
@@ -106,7 +106,15 @@ nature_journals = {
 
 PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 
-def find_from_pma(pma, crossref_doi=True):
+def find_article_from_doi(doi):
+    #1) lookup on CrossRef
+    #2) pull a PubMedArticle based on CrossRef results
+    #3) run it through find_article_from_pma
+    pma = fetch.article_by_pmid(doi2pmid(doi))
+    return find_article_from_pma(pma)
+    
+
+def find_article_from_pma(doi=None, pma=None, crossref_doi=True):
     reason = None
     uri = None
 
@@ -147,13 +155,14 @@ def find_from_pma(pma, crossref_doi=True):
 class FindIt(object):
 
     @classmethod
-    def by_pmid(cls, pmid, **kwargs):
+    def by_pmid(cls, pmid, *args, **kwargs):
         kwargs['pmid'] = pmid
-        return cls(**kwargs)
+        return cls(args, kwargs)
 
     @classmethod
-    def by_doi(cls, doi, **kwargs):
-        return cls(doi=doi, 
+    def by_doi(cls, doi, *args, **kwargs):
+        kwargs['doi'] = doi
+        return cls(args, kwargs)
     
     def __init__(self, *args, **kwargs):    
         self.pmid = kwargs.get('pmid', None)
@@ -166,12 +175,13 @@ class FindIt(object):
 
         if self.pmid:
             self.pma = fetch.article_by_pmid(pmid)
-            self.uri, self.reason = find_from_pma(self.pma)
+            self.uri, self.reason = find_it(pma=self.pma)
 
         elif self.doi:
             results = CR.query(self.doi)
             self.cr_top_result = CR.get_top_result(results)
             if self.cr_top_result is not None:
+                self.uri, self.reason = find_it(doi=doi)
 
 
     def download(self, filename):

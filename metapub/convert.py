@@ -52,7 +52,15 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     results = crossref.query(doi)
     if results:
         top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
-        return pm_fetch.pmids_for_citation(**top_result['slugs'])
+        pmids = pm_fetch.pmids_for_citation(**top_result['slugs'])
+        if len(pmids) == 1:
+            if pmids[0] == 'NOT_FOUND':
+                return None
+            return str(pmids[0])
+        elif len(pmids) == 0:
+            return None
+        else:
+            return 'AMBIGUOUS'
     else:
         return None
 
