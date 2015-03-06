@@ -41,3 +41,4 @@
 2/23/2015, 0.3.4.5, setup.py dup's version in metapub/__version__.py (too many packaging hassles).
 2/23/2015, 0.3.4.6, added text_mining.pick_pmid
 3/5/2015, 0.3.4.7, PubMedFetcher.article_by_pmcid prepends "PMC" when input is raw integer. (Fix for Issue #4)
+3/5/2015, 0.3.4.8, accept integers for numerical id inputs (pmcid and pmid). PubMedArticle.url attribute added.
