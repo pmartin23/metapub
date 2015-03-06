@@ -24,19 +24,20 @@
 1/30/2015, 0.3.0, Major improvements to CrossRef and PubMedFetcher reliability. Consolidation of configuration stuff in .config 
 1/30/2015, 0.3.1, Critical bugfix to CrossRef. Finished metapub.convert.doi2pmid theoretically speaking (not thoroughly tested).
 2/1/2015, 0.3.2, Added absolute_import to all files for Python3 compatibility. Critical bugfixes in metapub.convert and metapub.text_mining.
-2/2/2014, 0.3.2.1, Crossref: `min_score` param added to get_top_result and all metapub.convert functions. default=2.0; set higher (like 3.0) for situations where you need high-confidence results.
-2/2/2014, 0.3.2.2, Better regular expression for DOIs (removes prohibition on angle-brackets).
-2/2/2014, 0.3.2.3, Added ; and : to PUNCS_WE_DONT_LIKE.
-2/2/2014, 0.3.2.4, Added InvalidPMID exception (raised within PubMedFetcher), so now you can specifically catch invalid PMIDs.
-2/5/2014, 0.3.3, PubmedBookArticle support added (i.e. pubmed books like GeneReviews). added PubMedArticle.book_* attributes.
-2/5/2014, 0.3.3.2, Code cleanup and a bugfix for the display of a pubmed book's year.
-2/5/2014, 0.3.3.3, Improved output of PubMedArticle.abstract for 'book' type objects.
-2/13/2014, 0.3.3.4, Handle cases where PubMedArticle contains multiple abstracts (similar to books). example pmid: 18612690
-2/13/2014, 0.3.3.5, Merged in CrossRef query improvements by Naomi Fox. Bugfix in PubMedFetcher (wrong function name, oops).
-2/17/2014, 0.3.4, Merged in pubmedcentral.py missing import statements by Naomi Fox. [critical bugfix]
-2/17/2014, 0.3.4.1, added CrossRefConnectionError. Made that and InvalidPMID into subclasses of MetaPubError.
-2/18/2014, 0.3.4.2, added PubMedFetcher.pmids_for_query w/ pubmed advanced query support -- untested and only returns resultant XML right now.
-2/19/2014, 0.3.4.3, expanded text_mining doi matching to allow optional whitespace inclusion around the '/' (it happens!)
-2/19/2014, 0.3.4.4, setup.py sources version from metapub/__version__.py
-2/23/2014, 0.3.4.5, setup.py dup's version in metapub/__version__.py (too many packaging hassles).
-2/23/2014, 0.3.4.6, added text_mining.pick_pmid
+2/2/2015, 0.3.2.1, Crossref: `min_score` param added to get_top_result and all metapub.convert functions. default=2.0; set higher (like 3.0) for situations where you need high-confidence results.
+2/2/2015, 0.3.2.2, Better regular expression for DOIs (removes prohibition on angle-brackets).
+2/2/2015, 0.3.2.3, Added ; and : to PUNCS_WE_DONT_LIKE.
+2/2/2015, 0.3.2.4, Added InvalidPMID exception (raised within PubMedFetcher), so now you can specifically catch invalid PMIDs.
+2/5/2015, 0.3.3, PubmedBookArticle support added (i.e. pubmed books like GeneReviews). added PubMedArticle.book_* attributes.
+2/5/2015, 0.3.3.2, Code cleanup and a bugfix for the display of a pubmed book's year.
+2/5/2015, 0.3.3.3, Improved output of PubMedArticle.abstract for 'book' type objects.
+2/13/2015, 0.3.3.4, Handle cases where PubMedArticle contains multiple abstracts (similar to books). example pmid: 18612690
+2/13/2015, 0.3.3.5, Merged in CrossRef query improvements by Naomi Fox. Bugfix in PubMedFetcher (wrong function name, oops).
+2/17/2015, 0.3.4, Merged in pubmedcentral.py missing import statements by Naomi Fox. [critical bugfix]
+2/17/2015, 0.3.4.1, added CrossRefConnectionError. Made that and InvalidPMID into subclasses of MetaPubError.
+2/18/2015, 0.3.4.2, added PubMedFetcher.pmids_for_query w/ pubmed advanced query support -- untested and only returns resultant XML right now.
+2/19/2015, 0.3.4.3, expanded text_mining doi matching to allow optional whitespace inclusion around the '/' (it happens!)
+2/19/2015, 0.3.4.4, setup.py sources version from metapub/__version__.py
+2/23/2015, 0.3.4.5, setup.py dup's version in metapub/__version__.py (too many packaging hassles).
+2/23/2015, 0.3.4.6, added text_mining.pick_pmid
+3/5/2015, 0.3.4.7, PubMedFetcher.article_by_pmcid prepends "PMC" when input is raw integer. (Fix for Issue #4)
