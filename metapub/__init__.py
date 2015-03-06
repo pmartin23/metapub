@@ -8,6 +8,7 @@ from .pubmedfetcher import PubMedFetcher
 from .medgenfetcher import MedGenFetcher
 from .medgenconcept import MedGenConcept
 from .crossref import CrossRef
+from .findit import FindIt
 
-__version__ = '0.3.4.10'
+__version__ = '0.3.5'
 
