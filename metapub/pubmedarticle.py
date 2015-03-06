@@ -61,6 +61,7 @@ class PubMedArticle(MetaPubObject):
         
         # shared between book and article types:
         self.pmid = self._get_pmid()
+        self.url  = self._get_url()
         self.authors = self._get_authors() if pmt=='article' else self._get_book_authors()
         self.title = self._get_title() if pmt=='article' else self._get_book_articletitle()
         self.authors_str = self._get_authors_str()
@@ -199,6 +200,9 @@ class PubMedArticle(MetaPubObject):
 
     def _get_pmid(self):
         return self._get(self._root+'/PMID')
+
+    def _get_url(self):
+        return 'http://ncbi.nlm.nih.gov/pubmed/'+str(self.pmid)
 
     def _get_abstract(self):
         abstracts = self.content.findall(self._root + '/Article/Abstract/AbstractText')
