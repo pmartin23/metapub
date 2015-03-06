@@ -6,6 +6,8 @@ from .pubmedfetcher import PubMedFetcher
 from .convert import PubMedArticle2doi, doi2pmid
 from .exceptions import MetaPubError
 
+fetch = PubMedFetcher()
+
 oa_journals = (
     # open access journals (always free, everywhere, the way it should be)
 
@@ -123,27 +125,52 @@ def find_article_from_pma(pma, crossref_doi=True):
         if pma.doi != None:
             url = simple_formats_doi[pma.journal].format(a=pma)
 
-    elif pma.journal in simple_formats_pii.keys() and pma.pii != None:
-        url = simple_formats_pii[pma.journal].format(a=pma)
+    elif pma.journal in simple_formats_pii.keys():
+        if pma.pii:
+            url = simple_formats_pii[pma.journal].format(a=pma)
+        else:
+            reason = 'pii missing from PubMedArticle XML'
 
     elif pma.journal in vip_journals.keys():
         # TODO: catch weird stuff like these results from PMID 10071047:
         #   http://brain.oxfordjournals.org/content/122 ( Pt 2)/None/183.full.pdf
         # (working URL = http://brain.oxfordjournals.org/content/brain/122/2/183.full.pdf )
-        url = vip_format.format(host=vip_journals[pma.journal]['host'], a=pma)
+        if pma.volume != None and pma.issue is None:
+            # try to get a number out of the parts that came after the first number.
+            volparts = pma.volume.replace('(', ' ').replace(')', ' ').split()
+            if volparts > 1:
+                pma.volume = volparts[0]
+            for item in volparts[1:]:
+                try:
+                    int(item)
+                    pma.issue = item
+                except:
+                    pass
+        
+        if pma.issue and pma.volume:
+            url = vip_format.format(host=vip_journals[pma.journal]['host'], a=pma)
+        else:
+            reason = 'volume and/or issue data missing from PubMedArticle XML'
+
 
     elif pma.journal in nature_journals.keys():
-        url = nature_format.format(a=pma, ja=nature_journals[pma.journal]['ja'])
+        if pma.pii:
+            url = nature_format.format(a=pma, ja=nature_journals[pma.journal]['ja'])
+        else:
+            reason = 'pii missing from PubMedArticle XML'
 
-    elif pma.journal in cell_journals.keys() and pma.pii:
-        url = cell_format.format( a=pma, ja=cell_journals[pma.journal]['ja'],
-                pii=pma.pii.translate(None,'-()') )
+    elif pma.journal in cell_journals.keys():
+        if pma.pii:
+            url = cell_format.format( a=pma, ja=cell_journals[pma.journal]['ja'],
+                    pii=pma.pii.translate(None,'-()') )
+        else:
+            reason = 'pii missing from PubMedArticle XML'
     
     elif pma.journal in 'Lancet' and pma.pii is not None:
         url = 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(piit = pma.pii.translate(None,'-()'))
 
     else:
-        reason = 'Journal lacks URI format (please consider contributing to metapub!)'
+        reason = 'No URL format for Journal %s' % pma.journal
 
     return (url, reason)
 
@@ -168,8 +195,6 @@ class FindIt(object):
 
         self.pma = None
         #self.cr_top_result = None
-
-        fetch = PubMedFetcher()
 
         if self.pmid:
             self.pma = fetch.article_by_pmid(self.pmid)
