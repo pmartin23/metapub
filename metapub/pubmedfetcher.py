@@ -9,6 +9,7 @@ import requests
 from .pubmedarticle import PubMedArticle
 from .pubmedcentral import get_pmid_for_otherid
 from .utils import kpick, parameterize
+from .text_mining import re_pmid
 from .exceptions import *
 from .base import Borg
 from .config import DEFAULT_EMAIL
@@ -76,6 +77,11 @@ class PubMedFetcher(Borg):
             raise InvalidPMID('Pubmed ID "%s" not found.' % pmid)
 
     def _eutils_article_by_pmcid(self, pmcid):
+        # if user submitted a bare number, prepend "PMC" to make sure it is submitted correctly 
+        # the conversion API at pubmedcentral.
+        if re_pmid.findall(pmcid)[0] == pmcid:
+            pmcid = 'PMC'+pmcid
+
         pmid = get_pmid_for_otherid(pmcid)
         if pmid is None:
             raise MetaPubError('No PMID available for PubMedCentral id %s' % pmcid)
