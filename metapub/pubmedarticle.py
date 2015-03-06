@@ -4,6 +4,7 @@ from __future__ import absolute_import, print_function
 
 import logging
 from datetime import datetime
+from collections import OrderedDict
 
 from .base import MetaPubObject
 from .exceptions import MetaPubError

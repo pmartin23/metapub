@@ -4,8 +4,8 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'metapub',
-    version = '0.3.4.9',
-    description = 'Pubmed / NCBI / eutils interaction library, handling the metadata of pubmed papers.',
+    version = '0.3.4.10',
+    description = 'Pubmed / NCBI / medgen / eutils interaction library, handling all things meta about pub.',
     url = 'https://bitbucket.org/nthmost/metapub',
     author = 'Naomi Most',
     maintainer = 'Naomi Most',
