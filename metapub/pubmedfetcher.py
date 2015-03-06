@@ -60,6 +60,7 @@ class PubMedFetcher(Borg):
             raise NotImplementedError('coming soon: fetch from local pubmed via medgen-mysql or filesystem cache.')
 
     def _eutils_article_by_pmid(self, pmid):
+        pmid = str(pmid)
         try:
             result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
         except EutilsBadRequestError:
@@ -79,6 +80,7 @@ class PubMedFetcher(Borg):
     def _eutils_article_by_pmcid(self, pmcid):
         # if user submitted a bare number, prepend "PMC" to make sure it is submitted correctly 
         # the conversion API at pubmedcentral.
+        pmcid = str(pmcid)
         if re_pmid.findall(pmcid)[0] == pmcid:
             pmcid = 'PMC'+pmcid
 
