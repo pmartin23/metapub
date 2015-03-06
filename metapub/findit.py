@@ -6,17 +6,6 @@ from .pubmedfetcher import PubMedFetcher
 from .convert import PubMedArticle2doi, doi2pmid
 from .exceptions import MetaPubError
 
-"""
-When fulfilling orders for articles listed in pubmed, follow these heuristics:
-(assuming a valid PubMedArticle object as "pma")
-1) if pma.pmc, return PMC url to pdf
-2) if pma.journal in oa_journals, return journal_pdf_url
-3) if pma.journal in subs_journals, return journal_pdf_url
-3.1) Fail: if pma.pii is missing
-3.2) Fail: if journal_pdf_url send back HTML text (e.g. an order page) instead of a PDF.
-last) order from reprintsdesk
-"""
-
 oa_journals = (
     # open access journals (always free, everywhere, the way it should be)
 
@@ -36,7 +25,7 @@ oa_journals = (
 
 format_templates = {
     'wiley': 'http://onlinelibrary.wiley.com/doi/{a.doi}/pdf',
-    'plos': 'http://www.plosbiology.org/article/fetchObjectAttachment.action?uri=info:doi/{a.doi}&representation=PDF',
+    'plos': 'http://www.plosbiology.org/article/fetchObjectAttachment.action?url=info:doi/{a.doi}&representation=PDF',
     }
 
 # simple formats are used for URLs that can be deduced from data
@@ -85,7 +74,8 @@ vip_journals = {
     }
 
 # cell journals
-cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
+#cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
+cell_format = 'http://www.cell.com{ja}/pdf/{pii}.pdf'
 cell_journals = {
     'Am. J. Hum. Genet.': { 'ja': '/AJHG' },
     'Cell': { 'ja': '' },
@@ -114,12 +104,12 @@ def find_article_from_doi(doi):
     return find_article_from_pma(pma)
     
 
-def find_article_from_pma(doi=None, pma=None, crossref_doi=True):
+def find_article_from_pma(pma, crossref_doi=True):
     reason = None
-    uri = None
+    url = None
 
     if pma.pmc:
-        uri = PMC_PDF_URL.format(a=pma)
+        url = PMC_PDF_URL.format(a=pma)
         
     elif pma.journal in simple_formats_doi.keys():
         if pma.doi == None:
@@ -131,25 +121,31 @@ def find_article_from_pma(doi=None, pma=None, crossref_doi=True):
                 reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.' 
         
         if pma.doi != None:
-            uri = simple_formats_doi[pma.journal].format(a=pma)
+            url = simple_formats_doi[pma.journal].format(a=pma)
 
     elif pma.journal in simple_formats_pii.keys() and pma.pii != None:
-        uri = simple_formats_pii[pma.journal].format(a=pma)
+        url = simple_formats_pii[pma.journal].format(a=pma)
 
     elif pma.journal in vip_journals.keys():
-        uri = vip_format.format(host=vip_journals[pma.journal]['host'], a=pma)
+        # TODO: catch weird stuff like these results from PMID 10071047:
+        #   http://brain.oxfordjournals.org/content/122 ( Pt 2)/None/183.full.pdf
+        # (working URL = http://brain.oxfordjournals.org/content/brain/122/2/183.full.pdf )
+        url = vip_format.format(host=vip_journals[pma.journal]['host'], a=pma)
 
     elif pma.journal in nature_journals.keys():
-        uri = nature_format.format(a=pma, ja=nature_journals[pma.journal]['ja'])
+        url = nature_format.format(a=pma, ja=nature_journals[pma.journal]['ja'])
 
     elif pma.journal in cell_journals.keys() and pma.pii:
-        uri = cell_format.format( a=pma, ja=cell_journals[pma.journal]['ja'],
+        url = cell_format.format( a=pma, ja=cell_journals[pma.journal]['ja'],
                 pii=pma.pii.translate(None,'-()') )
     
-    elif pma.journal in 'Lancet' and pma.pii:
-        uri = 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(piit = pma.pii.replace(None,'-()'))
+    elif pma.journal in 'Lancet' and pma.pii is not None:
+        url = 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(piit = pma.pii.translate(None,'-()'))
 
-    return (uri, reason)
+    else:
+        reason = 'Journal lacks URI format (please consider contributing to metapub!)'
+
+    return (url, reason)
 
 
 class FindIt(object):
@@ -167,26 +163,25 @@ class FindIt(object):
     def __init__(self, *args, **kwargs):    
         self.pmid = kwargs.get('pmid', None)
         self.doi = kwargs.get('doi', None)
-        self.uri = kwargs.get('uri', None)
+        self.url = kwargs.get('url', None)
         self.reason = None
 
         self.pma = None
-        self.cr_top_result = None
+        #self.cr_top_result = None
+
+        fetch = PubMedFetcher()
 
         if self.pmid:
-            self.pma = fetch.article_by_pmid(pmid)
-            self.uri, self.reason = find_it(pma=self.pma)
+            self.pma = fetch.article_by_pmid(self.pmid)
+            self.url, self.reason = find_article_from_pma(self.pma)
 
         elif self.doi:
-            results = CR.query(self.doi)
-            self.cr_top_result = CR.get_top_result(results)
-            if self.cr_top_result is not None:
-                self.uri, self.reason = find_it(doi=doi)
+            self.url, self.reason = find_article_from_doi(self.doi)
 
 
     def download(self, filename):
         # verify=False means it ignores bad SSL certs
-        response = requests.get(uri, stream=True, timeout=CURL_TIMEOUT, verify=False)
+        response = requests.get(url, stream=True, timeout=CURL_TIMEOUT, verify=False)
 
         if not response.ok:
             return 'error'
