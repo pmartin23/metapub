@@ -35,5 +35,6 @@ if article.doi:
 
 print 'volume: '+article.volume
 print 'issue: '+article.issue
+print 'PMCID: '+article.pmc
 #print article.xmlstr
 

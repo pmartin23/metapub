@@ -9,6 +9,32 @@ from .text_mining import re_numbers
 
 fetch = PubMedFetcher()
 
+DX_DOI_URL = 'http://dx.doi.org/%s'
+def the_doi_2step(doi):
+    response = requests.get(DX_DOI_URL % doi)
+    if response.status_code == 200:
+        return response.url
+    else:
+        return None
+
+# TODO
+# doiserbia (Library of Serbia) articles can be grabbed by doing the_doi_2step,
+# then ...?
+doiserbia_journals = ['Genetika']
+
+unlinkable = ['Ann Surg Oncol',
+              'Brain Pathol',
+              'Cancer',
+              'Cytogenet Genome Res',       # Karger
+              'Eur J Cancer',
+              'Genet Test Mol Biomarkers',
+            ]
+
+# 22126563: http://www.apocpcontrol.org/paper_file/issue_abs/Volume12_No7/1771-1776%20c%206.9%20Lei%20Zhong.pdf
+weird_formats = {
+    'Asian Pac J Cancer Prev': 'http://www.apocpcontrol.org/paper_file/issue_abs/Volume{a.volume}_No{a.issue}/{a.pages}%20c%206.9%20{pma.author1_last_fm}.pdf'
+    }
+
 oa_journals = (
     # open access journals (always free, everywhere, the way it should be)
 
@@ -26,44 +52,75 @@ oa_journals = (
     'BMC genetics',
     )
 
+"""
+9538891: no URL because No URL format for Journal Invest. Ophthalmol. Vis. Sci.
+9539130: no URL because No URL format for Journal Neuron
+9700188: no URL because No URL format for Journal Hum. Mol. Genet.
+9700193: no URL because No URL format for Journal Hum. Mol. Genet.
+"""
+
+
 format_templates = {
     'wiley': 'http://onlinelibrary.wiley.com/doi/{a.doi}/pdf',
     'plos': 'http://www.plosbiology.org/article/fetchObjectAttachment.action?url=info:doi/{a.doi}&representation=PDF',
     'informa': 'http://informahealthcare.com/doi/abs/{a.doi}', 
     'ats': 'http://www.atsjournals.org/doi/pdf/{a.doi}', 
+    'acs': 'http://pubs.acs.org/doi/pdf/{a.doi}',
+    'liebert': 'http://online.liebertpub.com/doi/pdf/{a.doi}'
     }
 
 # simple formats are used for URLs that can be deduced from data
 # in the pubmed record
 simple_formats_doi = {
-    'Am. J. Med. Genet. A': format_templates['wiley'],
-    'Am. J. Med. Genet.': format_templates['wiley'],
-    'Ann. Neurol.': format_templates['wiley'],
-    'Clin. Genet.': format_templates['wiley'],
+    'Am J Med Genet A': format_templates['wiley'],
+    'Am J Med Genet': format_templates['wiley'],
+    'Ann Neurol': format_templates['wiley'],
+    'BJU Int': format_templates['wiley'],
+    'Br J Haematol': format_templates['wiley'],
+    'Clin Genet': format_templates['wiley'],
     'Genes Chromosomes Cancer': format_templates['wiley'],
-    'Genet. Epidemiol.': format_templates['wiley'],
-    'Hum. Mutat.': format_templates['wiley'],
-    'Int. J. Cancer': format_templates['wiley'],
+    'Genet Epidemiol': format_templates['wiley'],
+    'Hum Mutat': format_templates['wiley'],
+    'Int J Cancer': format_templates['wiley'],
     'Proteins': format_templates['wiley'],
-    'J. Thromb. Haemost.': format_templates['wiley'],
-    'Am J Med Genet B Neuropsychiatr Genet.': format_templates['wiley'],
+    'J Thromb Haemost': format_templates['wiley'],
+    'Am J Med Genet B Neuropsychiatr Genet': format_templates['wiley'],
+    'Muscle Nerve': format_templates['wiley'],
+    'Clin Endocrinol (Oxf)': format_templates['wiley'],
+    'Eur J Haematol': format_templates['wiley'],
+    'Breast J': format_templates['wiley'],
+    'Eur J Clin Invest': format_templates['wiley'],
 
+    'Acta Oncol': format_templates['informa'],
     'Hemoglobin': format_templates['informa'],
 
-    'Am. J. Respir. Cell Mol. Biol.': format_templates['ats'],
+    'Am J Respir Cell Mol Biol': format_templates['ats'],
 
-    'PLoS Biol.': format_templates['plos'],
-    'PLoS Comput. Biol.': format_templates['plos'],
-    'PLoS Genet.': format_templates['plos'],
-    'PLoS Med.': format_templates['plos'],
-    'PLoS ONE.': format_templates['plos'],
-    'PLoS Pathog.': format_templates['plos'],
-    'N. Engl. J. Med.':  'http://www.nejm.org/doi/pdf/{a.doi}',
+    'Anal Chem': format_templates['acs'],
+
+    'Thyroid': format_templates['liebert'],
+
+    'PLoS Biol': format_templates['plos'],
+    'PLoS Comput Biol': format_templates['plos'],
+    'PLoS Genet': format_templates['plos'],
+    'PLoS Med': format_templates['plos'],
+    'PLoS ONE': format_templates['plos'],
+    'PLoS Pathog': format_templates['plos'],
+    'N Engl J Med':  'http://www.nejm.org/doi/pdf/{a.doi}',
     }
+
+# not sure whether to group sciencedirect journals like this.
+sciencedirect_format = 'http://www.sciencedirect.com/science/article/pii/{piit}'
+sciencedirect_journals = [ 'Am J Cardiol', 
+                           'Biochem Biophys Res Commun' ,
+                           'Mol Genet Metab',
+                            ]
+# http://www.ajconline.org/article/S0002-9149(07)00515-2/pdf
 
 simple_formats_pii = {
     'JAMA': 'http://jama.ama-assn.org/content/{a.pii}.full.pdf',
     'Gastroenterology': 'http://www.gastrojournal.org/article/{a.pii}/pdf',
+    'J Mol Diagn': 'http://jmd.amjpathol.org/article/{a.pii}/pdf',
     } 
 
 # vip = Volume-Issue-Page format -- URLs that have the same format
@@ -96,6 +153,7 @@ vip_journals = {
         'Haematologica' : {'host' : 'haematologica.org'},
         'Hum Mol Genet': { 'host': 'hmg.oxfordjournals.org' },
         'Int J Oncol' : {'host' : 'spandidos-publications.com/ijo/'},
+        'Invest Ophthalmol Vis Sci': { 'host': 'www.iovs.org' },
         'IOVS' : {'host' : 'iovs.org'},
         'J Am Soc Nephrol' : {'host' : 'jasn.asnjournals.org'},
         'J Biol Chem': { 'host': 'www.jbc.org' },
@@ -116,17 +174,15 @@ vip_journals = {
         'Oncol Rep' : {'host' : 'spandidos-publications.com/or/'},
         'Orphanet J Rare Dis' : {'host' : 'ojrd.com'},
         'Proc Natl Acad Sci USA': { 'host': 'pnas.org'},
-        'Science': { 'host': 'sciencemag.org' }
+        'Science': { 'host': 'sciencemag.org' },
         }
-
-
 
 
 # cell journals
 #cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
 cell_format = 'http://www.cell.com{ja}/pdf/{pii}.pdf'
 cell_journals = {
-    'Am. J. Hum. Genet.': { 'ja': '/AJHG' },
+    'Am J Hum Genet': { 'ja': '/AJHG' },
     'Cell': { 'ja': '' },
     }
 
@@ -134,22 +190,24 @@ cell_journals = {
 nature_format = 'http://www.nature.com/{ja}/journal/v{a.volume}/n{a.issue}/pdf/{a.pii}.pdf'
 nature_journals = {
     'Nature': { 'ja': 'nature' },
-    'Nat. Genet.': { 'ja': 'ng' },
-    'Nat. Neurosci.': { 'ja': 'neuro' },
-    'Nat. Methods': { 'ja': 'nmeth' },
-    'Nat. Rev. Genet.': { 'ja': 'nrg' },
-    'Nature reviews. Immunology': { 'ja': 'nri' },
-    'Eur. J. Hum. Genet.': { 'ja': 'ejhg' },
-    'J. Hum. Genet.': { 'ja': 'jhg' },
+    'Nat Genet': { 'ja': 'ng' },
+    'Nat Neurosci': { 'ja': 'neuro' },
+    'Nat Methods': { 'ja': 'nmeth' },
+    'Nat Rev. Genet': { 'ja': 'nrg' },
+    'Nature reviews Immunology': { 'ja': 'nri' },
+    'Eur J Hum Genet': { 'ja': 'ejhg' },
+    'J Hum Genet': { 'ja': 'jhg' },
     }
+
+# Genet Med should work in nature_journals, but its urls are weird. 
+# e.g. http://www.nature.com/gim/journal/v8/n11/pdf/gim2006115a.pdf
+doi2step_journals = [ 'Genet Med' ]
 
 # TODO
 #
 # 15611820: no URL because No URL format for Journal Arq Bras Endocrinol Metabol
 # 15611833: no URL because No URL format for Journal Arq Bras Endocrinol Metabol
 # 15611902: no URL because No URL format for Journal Laryngorhinootologie
-# 15613099: no URL because No URL format for Journal Eur. J. Haematol.
-# 17486372: no URL because No URL format for Journal Pediatr. Nephrol.
 # 17486493: no URL because No URL format for Journal Hemoglobin
 # 17516458: no URL because No URL format for Journal Mov. Disord.
 # 17516465: no URL because No URL format for Journal Mov. Disord.
@@ -173,15 +231,28 @@ nature_journals = {
 17415575: no URL because No URL format for Journal Arch. Dermatol. Res.
 17415800: no URL because No URL format for Journal Mov. Disord.
 17416296: no URL because No URL format for Journal Arch. Med. Res.
+17143180: no URL because No URL format for Journal J Hypertens
+17143182: no URL because No URL format for Journal J Hypertens
+17143282: no URL because No URL format for Journal Nat Genet
+17143285: no URL because No URL format for Journal Nat Genet
+17143317: no URL because No URL format for Journal Nat Clin Pract Endocrinol Metab
+17143551: no URL because No URL format for Journal Int J Mol Med
+17145028: no URL because No URL format for Journal Med Clin (Barc)
+17145065: no URL because No URL format for Journal Mutat Res
+16944272: no URL because No URL format for Journal Fam Cancer
+10726756: no URL because No URL format for Journal Electrophoresis
 """
 
 # Journals with really annoying paywalls guarding their precious secrets.
 schattauer_journals = [
-    'Thromb Haemost.',
+    'Thromb Haemost',
     ]
 
 springer_journals = [
-    'Physiol Genomics.',
+    'Physiol Genomics',
+    'Breast Cancer Res Treat',
+    'Pediatr Nephrol',
+    'Fam Cancer',
     ]
 
 
@@ -222,15 +293,19 @@ Issue Part 3 for Volume 7 (it has Volume 7 Part 3 on the cover):
 """
 
 
-
-def find_article_from_pma(pma, crossref_doi=True):
+def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
     reason = None
     url = None
 
+    jrnl = pma.journal.translate(None, '.')
+
     if pma.pmc:
         url = PMC_PDF_URL.format(a=pma)
+
+    elif jrnl in unlinkable:
+        reason = 'unlinkable'
         
-    elif pma.journal in simple_formats_doi.keys():
+    elif jrnl in simple_formats_doi.keys():
         if pma.doi == None:
             if crossref_doi:
                 pma.doi = PubMedArticle2doi(pma)
@@ -240,15 +315,29 @@ def find_article_from_pma(pma, crossref_doi=True):
                 reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.' 
         
         if pma.doi != None:
-            url = simple_formats_doi[pma.journal].format(a=pma)
+            url = simple_formats_doi[jrnl].format(a=pma)
 
-    elif pma.journal in simple_formats_pii.keys():
+    elif jrnl in simple_formats_pii.keys():
         if pma.pii:
-            url = simple_formats_pii[pma.journal].format(a=pma)
+            url = simple_formats_pii[jrnl].format(a=pma)
         else:
             reason = 'pii missing from PubMedArticle XML'
 
-    elif pma.journal in vip_journals.keys():
+    elif jrnl in doi2step_journals:
+        if pma.doi == None:
+            if crossref_doi:
+                pma.doi = PubMedArticle2doi(pma)
+                if pma.doi == None:
+                    reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.'
+            else:
+                reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.'
+
+        if pma.doi:
+            baseurl = the_doi_2step(pma.doi)
+            if baseurl: 
+                url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
+
+    elif jrnl in vip_journals.keys():
         # TODO: catch weird stuff like these results from PMID 10071047:
         #   http://brain.oxfordjournals.org/content/122 ( Pt 2)/None/183.full.pdf
         # (working URL = http://brain.oxfordjournals.org/content/brain/122/2/183.full.pdf )
@@ -262,33 +351,42 @@ def find_article_from_pma(pma, crossref_doi=True):
             else:
                 reason = 'issue data missing (volume: %s, issue: %s)' % (pma.volume, pma.issue)
 
-        
         if pma.issue and pma.volume:
             if pma.issue.find('Pt') > -1:
                 pma.issue = re_numbers.findall(pma.issue)[0]
-            url = vip_format.format(host=vip_journals[pma.journal]['host'], a=pma)
+            url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
         else:
             reason = 'volume and maybe also issue data missing'
 
 
-    elif pma.journal in nature_journals.keys():
+    elif jrnl in nature_journals.keys():
         if pma.pii:
-            url = nature_format.format(a=pma, ja=nature_journals[pma.journal]['ja'])
+            url = nature_format.format(a=pma, ja=nature_journals[jrnl]['ja'])
         else:
             reason = 'pii missing from PubMedArticle XML'
 
-    elif pma.journal in cell_journals.keys():
+    elif jrnl in cell_journals.keys():
         if pma.pii:
-            url = cell_format.format( a=pma, ja=cell_journals[pma.journal]['ja'],
+            url = cell_format.format( a=pma, ja=cell_journals[jrnl]['ja'],
                     pii=pma.pii.translate(None,'-()') )
         else:
             reason = 'pii missing from PubMedArticle XML'
     
-    elif pma.journal in 'Lancet' and pma.pii is not None:
-        url = 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(piit = pma.pii.translate(None,'-()'))
+    elif jrnl in 'Lancet' and pma.pii is not None:
+        #url = 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(piit = pma.pii.translate(None,'-()'))
+        url = 'http://www.thelancet.com/pdfs/journals/lancet/PII{a.pii}.pdf'.format(a = pma)
+
+    elif jrnl in sciencedirect_journals or jrnl in springer_journals:
+        if paywalls == False:
+            reason = 'not trying to download from ScienceDirect or Springer'
+        else:
+            if pma.pii:
+                url = sciencedirect_format.format(piit = pma.pii.translate(None,'-()'))
+            else:
+                reason = 'missing pii in PubMedXML'
 
     else:
-        reason = 'No URL format for Journal %s' % pma.journal
+        reason = 'No URL format for Journal %s' % jrnl
 
     return (url, reason)
 
@@ -310,16 +408,17 @@ class FindIt(object):
         self.doi = kwargs.get('doi', None)
         self.url = kwargs.get('url', None)
         self.reason = None
+        self.paywalls = kwargs.get('paywalls', False)
 
         self.pma = None
         #self.cr_top_result = None
 
         if self.pmid:
             self.pma = fetch.article_by_pmid(self.pmid)
-            self.url, self.reason = find_article_from_pma(self.pma)
+            self.url, self.reason = find_article_from_pma(self.pma, paywalls=self.paywalls)
 
         elif self.doi:
-            self.url, self.reason = find_article_from_doi(self.doi)
+            self.url, self.reason = find_article_from_doi(self.doi, paywalls=self.paywalls)
 
 
     def download(self, filename):
@@ -339,12 +438,5 @@ class FindIt(object):
             return response.headers.get('content-type')
         else:
             return response.status_code
-
-
-    def verify(self, pdf2txt=False):
-        '''verify that download was indeed a PDF. If pdf2txt is True, convert PDF to text for further validation.
-
-            returns confidence score from 1 to 10 (10 being highest confidence that PDF is in fact the 
-            desired article.)'''
 
 
