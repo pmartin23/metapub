@@ -18,6 +18,36 @@ def the_doi_2step(doi):
         return None
 
 # TODO
+# not sure whether to group sciencedirect journals like this.
+sciencedirect_format = 'http://www.sciencedirect.com/science/article/pii/{piit}'
+sciencedirect_journals = [ 'Am J Cardiol', 
+                           'Biochem Biophys Res Commun' ,
+                           'Mol Genet Metab',
+                           'J Neurol Sci',
+                           'Genomics',
+                           'Hum Genet',
+                           'Neuromuscul Disord',
+                           'Mutat Res',
+                           'J Mol Biol',
+                           'FEBS Lett',
+                            ]
+def get_sciencedirect_pdf(pma):
+    '''we're looking for a url that looks like this:
+
+    http://www.sciencedirect.com/science/article/pii/S0022283601953379/pdfft?md5=07db9e1b612f64ea74872842e34316a5&pid=1-s2.0-S0022283601953379-main.pdf'''
+    starturl = sciencedirect_format.format(pma.pii)
+    response = requests.get(starturl)
+    """<a id="pdfLink" rel="nofollow" href="http://www.sciencedirect.com/science/article/pii/S0022283601953379/pdfft?md5=07db9e1b612f64ea74872842e34316a5&amp;pid=1-s2.0-S0022283601953379-main.pdf" querystr="?_origin=article&amp;_zone=toolbar" target="newPdfWin" pdfurl="http://www.sciencedirect.com/science/article/pii/S0022283601953379/pdfft?md5=07db9e1b612f64ea74872842e34316a5&amp;pid=1-s2.0-S0022283601953379-main.pdf" class="S_C_pdfLink big pdf ext_sdlink cLink" style="cursor:pointer" title="Download PDF">Download PDF
+    <span id="pdfExplanation" class="offscreen">Opens in a new window.  Article suggestions will be shown in a dialog on return to ScienceDirect.</span>
+    </a>"""
+    text = response.text
+    if text.find('a id="pdfLink"') > -1:
+    #    return re.findall(
+    return None
+
+
+
+# TODO
 # doiserbia (Library of Serbia) articles can be grabbed by doing the_doi_2step,
 # then ...?
 doiserbia_journals = ['Genetika']
@@ -83,6 +113,7 @@ simple_formats_doi = {
     'Hum Mutat': format_templates['wiley'],
     'Int J Cancer': format_templates['wiley'],
     'Proteins': format_templates['wiley'],
+    'Mov Disord': format_templates['wiley'],
     'J Thromb Haemost': format_templates['wiley'],
     'Am J Med Genet B Neuropsychiatr Genet': format_templates['wiley'],
     'Muscle Nerve': format_templates['wiley'],
@@ -90,6 +121,10 @@ simple_formats_doi = {
     'Eur J Haematol': format_templates['wiley'],
     'Breast J': format_templates['wiley'],
     'Eur J Clin Invest': format_templates['wiley'],
+    'J Bone Miner Res': format_templates['wiley'],
+    'Vox Sang': format_templates['wiley'],
+    'Ann Hum Genet': format_templates['wiley'],
+    'Br J Dermatol': format_templates['wiley'],
 
     'Acta Oncol': format_templates['informa'],
     'Hemoglobin': format_templates['informa'],
@@ -109,18 +144,14 @@ simple_formats_doi = {
     'N Engl J Med':  'http://www.nejm.org/doi/pdf/{a.doi}',
     }
 
-# not sure whether to group sciencedirect journals like this.
-sciencedirect_format = 'http://www.sciencedirect.com/science/article/pii/{piit}'
-sciencedirect_journals = [ 'Am J Cardiol', 
-                           'Biochem Biophys Res Commun' ,
-                           'Mol Genet Metab',
-                            ]
 # http://www.ajconline.org/article/S0002-9149(07)00515-2/pdf
 
 simple_formats_pii = {
     'JAMA': 'http://jama.ama-assn.org/content/{a.pii}.full.pdf',
     'Gastroenterology': 'http://www.gastrojournal.org/article/{a.pii}/pdf',
     'J Mol Diagn': 'http://jmd.amjpathol.org/article/{a.pii}/pdf',
+    'Fertil Steril': 'http://www.fertstert.org/article/{a.pii}/pdf',
+    'J Neurol Sci': 'http://www.jns-journal.com/article/{a.pii}/pdf',
     } 
 
 # vip = Volume-Issue-Page format -- URLs that have the same format
@@ -164,6 +195,7 @@ vip_journals = {
         'J Immunol' : {'host' : 'jimmunol.org'},
         'J Neurosci' : {'host' : 'jneurosci.org'},
         'J Med Genet': { 'host': 'jmg.bmj.com' },
+        'J Lipid Res': { 'host': 'www.jlr.org' },
         'Mol Biol Cell' : {'host' : 'molbiolcell.org'},
         'Mol Cell Biol' : {'host': 'mcb.asm.org'},
         'Mol Canc Therapeut' : {'host' : 'mct.aacrjournals.org'},
@@ -177,6 +209,9 @@ vip_journals = {
         'Science': { 'host': 'sciencemag.org' },
         }
 
+jstage_format = 'https://www.jstage.jst.go.jp/article/biochemistry1922/125/4/125_4_803/_pdf'
+jstage_journals = ['J Biochem']
+
 
 # cell journals
 #cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
@@ -184,6 +219,7 @@ cell_format = 'http://www.cell.com{ja}/pdf/{pii}.pdf'
 cell_journals = {
     'Am J Hum Genet': { 'ja': '/AJHG' },
     'Cell': { 'ja': '' },
+    'Trends Mol Med': { 'ja': 'trends' }
     }
 
 # nature journals
@@ -197,20 +233,19 @@ nature_journals = {
     'Nature reviews Immunology': { 'ja': 'nri' },
     'Eur J Hum Genet': { 'ja': 'ejhg' },
     'J Hum Genet': { 'ja': 'jhg' },
+    'Nat Genet': { 'ja': 'ng' },
     }
 
-# Genet Med should work in nature_journals, but its urls are weird. 
+# the doi2step_journals should work in nature_journals, but the urls are weird. 
 # e.g. http://www.nature.com/gim/journal/v8/n11/pdf/gim2006115a.pdf
-doi2step_journals = [ 'Genet Med' ]
+#      http://www.nature.com/jid/journal/v113/n2/full/5603216a.html
+doi2step_journals = [ 'Genet Med', 'J Invest Dermatol' ]
 
 # TODO
 #
 # 15611820: no URL because No URL format for Journal Arq Bras Endocrinol Metabol
 # 15611833: no URL because No URL format for Journal Arq Bras Endocrinol Metabol
-# 15611902: no URL because No URL format for Journal Laryngorhinootologie
 # 17486493: no URL because No URL format for Journal Hemoglobin
-# 17516458: no URL because No URL format for Journal Mov. Disord.
-# 17516465: no URL because No URL format for Journal Mov. Disord.
 
 """
 17319787: no URL because No URL format for Journal Neoplasma
@@ -220,10 +255,17 @@ doi2step_journals = [ 'Genet Med' ]
 17321228: no URL because No URL format for Journal Bone
 17099210: no URL because No URL format for Journal Hum. Reprod.
 17100396: no URL because No URL format for Journal J Med Assoc Thai
+"""
+
+#TODO: more testing on Genet. Med
+"""
 17413420: no URL because No URL format for Journal Genet. Med.
 17413421: no URL because No URL format for Journal Genet. Med.
 17413422: no URL because No URL format for Journal Genet. Med.
 17413424: no URL because No URL format for Journal Genet. Med.
+"""
+
+"""
 17413447: no URL because No URL format for Journal Psychiatr. Genet.
 17414143: no URL because No URL format for Journal J. Pediatr. Gastroenterol. Nutr.
 17415510: no URL because No URL format for Journal J. Neurol.
@@ -233,8 +275,6 @@ doi2step_journals = [ 'Genet Med' ]
 17416296: no URL because No URL format for Journal Arch. Med. Res.
 17143180: no URL because No URL format for Journal J Hypertens
 17143182: no URL because No URL format for Journal J Hypertens
-17143282: no URL because No URL format for Journal Nat Genet
-17143285: no URL because No URL format for Journal Nat Genet
 17143317: no URL because No URL format for Journal Nat Clin Pract Endocrinol Metab
 17143551: no URL because No URL format for Journal Int J Mol Med
 17145028: no URL because No URL format for Journal Med Clin (Barc)
@@ -253,6 +293,7 @@ springer_journals = [
     'Breast Cancer Res Treat',
     'Pediatr Nephrol',
     'Fam Cancer',
+    'Ophthalmologe',
     ]
 
 
