@@ -19,5 +19,6 @@ setup(
         'requests',
         'eutils',
         'tabulate',
+        'cssselect',
         ],
     )

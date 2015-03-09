@@ -19,38 +19,46 @@ def the_doi_2step(doi):
     else:
         raise MetaPubError('dx.doi.org lookup failed for doi %s' % doi)
 
-# TODO
-# not sure whether to group sciencedirect journals like this.
 sciencedirect_format = 'http://www.sciencedirect.com/science/article/pii/{piit}'
-sciencedirect_journals = [ 'Am J Cardiol', 
+sciencedirect_journals = [
+                           'Arch Pediatr',
+                           'Blood Cells Mol Dis',
                            'Biochem Biophys Res Commun' ,
-                           'Mol Genet Metab',
-                           'J Neurol Sci',
-                           'Genomics',
-                           'Hum Genet',
-                           'Neuromuscul Disord',
-                           'Mutat Res',
-                           'J Mol Biol',
+                           'Biochem Pharmacol',
+                           'Clin Immunol',
                            'FEBS Lett',
+                           'Eur J Cancer',
+                           'Gene',
+                           'Genomics',
+                           'Hepatol Res',
+                           'Hum Genet',
+                           'J Am Coll Cardiol',
+                           'J Mol Biol',
+                           'J Neurol Sci',
+                           'Neuromuscul Disord',
+                           'Mol Cell Endocrinol',
+                           'Mol Genet Metab',
+                           'Mol Immunol',
+                           'Mutat Res',
                             ]
-def get_sciencedirect_pdf(pma):
-    '''we're looking for a url that looks like this:
 
+def get_sciencedirect_pdf_url(pma):
+    '''we're looking for a url that looks like this:
     http://www.sciencedirect.com/science/article/pii/S0022283601953379/pdfft?md5=07db9e1b612f64ea74872842e34316a5&pid=1-s2.0-S0022283601953379-main.pdf'''
-    starturl = sciencedirect_format.format(pma.pii)
-    response = requests.get(starturl)
-    """<a id="pdfLink" rel="nofollow" href="http://www.sciencedirect.com/science/article/pii/S0022283601953379/pdfft?md5=07db9e1b612f64ea74872842e34316a5&amp;pid=1-s2.0-S0022283601953379-main.pdf" querystr="?_origin=article&amp;_zone=toolbar" target="newPdfWin" pdfurl="http://www.sciencedirect.com/science/article/pii/S0022283601953379/pdfft?md5=07db9e1b612f64ea74872842e34316a5&amp;pid=1-s2.0-S0022283601953379-main.pdf" class="S_C_pdfLink big pdf ext_sdlink cLink" style="cursor:pointer" title="Download PDF">Download PDF
-    <span id="pdfExplanation" class="offscreen">Opens in a new window.  Article suggestions will be shown in a dialog on return to ScienceDirect.</span>
-    </a>"""
-    text = response.text
-    if text.find('a id="pdfLink"') > -1:
-        #TODO: deduce pdfLink url
-        return starturl
+    starturl = sciencedirect_format.format(piit = pma.pii.translate(None,'-()'))
+    r = requests.get(starturl)
+    tree = etree.fromstring(r.text, HTMLParser())
+    div = tree.cssselect('div.icon_pdf')[0]
+    url = div.cssselect('a')[0].get('href')
+    if url.find('.pdf') > -1:
+        return url
     else:
+        # give up, it's probably a "shopping cart" link.
         return None
 
 
 jama_journals = ['Arch Neurol',
+                 'Arch Ophthalmol',
                  'JAMA',
                  'JAMA Dermatol',
                  'JAMA Facial Plast Surg',
@@ -84,6 +92,7 @@ def the_jama_dance(doi):
 # then ...?
 doiserbia_journals = ['Genetika']
 
+
 unlinkable = ['Ann Surg Oncol',
               'Brain Pathol',
               'Cancer',
@@ -92,10 +101,14 @@ unlinkable = ['Ann Surg Oncol',
               'Genet Test Mol Biomarkers',
             ]
 
-# 22126563: http://www.apocpcontrol.org/paper_file/issue_abs/Volume12_No7/1771-1776%20c%206.9%20Lei%20Zhong.pdf
-weird_formats = {
-    'Asian Pac J Cancer Prev': 'http://www.apocpcontrol.org/paper_file/issue_abs/Volume{a.volume}_No{a.issue}/{a.pages}%20c%206.9%20{pma.author1_last_fm}.pdf'
-    }
+todo_journals = { 'Med Sci Monit': { 'example': 'http://www.medscimonit.com/download/index/idArt/869530' },
+                  'Asian Pac J Cancer Prev': { 'example': 'http://www.apocpcontrol.org/paper_file/issue_abs/Volume12_No7/1771-1776%20c%206.9%20Lei%20Zhong.pdf' },
+                  'Rev Esp Cardiol': { 'example': 'http://www.revespcardiol.org/en/linkresolver/articulo-resolver/13131646/' },
+                  'Ann Dermatol Venereol': { 'example': 'http://www.em-consulte.com/article/152959/alertePM' },
+                  'J Biochem': { 'example': 'https://www.jstage.jst.go.jp/article/biochemistry1922/125/4/125_4_803/_pdf'},
+                  'Mol Cells': { 'example': 'http://www.molcells.org/journal/view.html?year=2004&volume=18&number=2&spage=141 --> http://pdf.medrang.co.kr/KSMCB/2004/018/mac-18-2-141.pdf'},
+                  'Mol Vis': { 'example': 'http://www.molvis.org/molvis/v10/a45/ --> http://www.molvis.org/bin/pdf.cgi?Zheng,10,45'}, 
+                }
 
 oa_journals = (
     # open access journals (always free, everywhere, the way it should be)
@@ -114,18 +127,11 @@ oa_journals = (
     'BMC genetics',
     )
 
-"""
-9538891: no URL because No URL format for Journal Invest. Ophthalmol. Vis. Sci.
-9539130: no URL because No URL format for Journal Neuron
-9700188: no URL because No URL format for Journal Hum. Mol. Genet.
-9700193: no URL because No URL format for Journal Hum. Mol. Genet.
-"""
-
 
 format_templates = {
     'wiley': 'http://onlinelibrary.wiley.com/doi/{a.doi}/pdf',
     'plos': 'http://www.plosbiology.org/article/fetchObjectAttachment.action?url=info:doi/{a.doi}&representation=PDF',
-    'informa': 'http://informahealthcare.com/doi/abs/{a.doi}', 
+    'informa': 'http://informahealthcare.com/doi/pdf/{a.doi}', 
     'ats': 'http://www.atsjournals.org/doi/pdf/{a.doi}', 
     'acs': 'http://pubs.acs.org/doi/pdf/{a.doi}',
     'liebert': 'http://online.liebertpub.com/doi/pdf/{a.doi}',
@@ -135,38 +141,59 @@ format_templates = {
 # simple formats are used for URLs that can be deduced from data
 # in the pubmed record
 simple_formats_doi = {
-    'Am J Med Genet A': format_templates['wiley'],
-    'Am J Med Genet': format_templates['wiley'],
+    'Acta Neurol Scand': format_templates['wiley'],
+    'Ann Hum Genet': format_templates['wiley'],
     'Ann Neurol': format_templates['wiley'],
+    'Am J Hematol': format_templates['wiley'],
+    'Am J Med Genet': format_templates['wiley'],
+    'Am J Med Genet A': format_templates['wiley'],
+    'Am J Med Genet B Neuropsychiatr Genet': format_templates['wiley'],
+    'Arthritis Rheum': format_templates['wiley'],
+    'Australas J Dermatol': format_templates['wiley'],
     'BJU Int': format_templates['wiley'],
+    'Breast J': format_templates['wiley'],
+    'Br J Dermatol': format_templates['wiley'],
     'Br J Haematol': format_templates['wiley'],
+    'Clin Endocrinol (Oxf)': format_templates['wiley'],
     'Clin Genet': format_templates['wiley'],
+    'Clin Pharmacol Ther': format_templates['wiley'],
+    'Dev Med Child Neurol': format_templates['wiley'],
+    'Eur J Clin Invest': format_templates['wiley'],
+    'Eur J Haematol': format_templates['wiley'],
+    'Exp Dermatol': format_templates['wiley'],
     'Genes Chromosomes Cancer': format_templates['wiley'],
     'Genet Epidemiol': format_templates['wiley'],
     'Hum Mutat': format_templates['wiley'],
+    'Immunol Rev': format_templates['wiley'],
     'Int J Cancer': format_templates['wiley'],
-    'Proteins': format_templates['wiley'],
-    'Mov Disord': format_templates['wiley'],
-    'J Thromb Haemost': format_templates['wiley'],
-    'Am J Med Genet B Neuropsychiatr Genet': format_templates['wiley'],
-    'Muscle Nerve': format_templates['wiley'],
-    'Clin Endocrinol (Oxf)': format_templates['wiley'],
-    'Eur J Haematol': format_templates['wiley'],
-    'Breast J': format_templates['wiley'],
-    'Eur J Clin Invest': format_templates['wiley'],
     'J Bone Miner Res': format_templates['wiley'],
+    'J Dermatol': format_templates['wiley'],
+    'J Gastroenterol Hepatol': format_templates['wiley'],
+    'J Orthop Res': format_templates['wiley'],
+    'J Thromb Haemost': format_templates['wiley'],
+    'Mov Disord': format_templates['wiley'],
+    'Muscle Nerve': format_templates['wiley'],
+    'Pediatr Blood Cancer': format_templates['wiley'],
+    'Pediatr Int': format_templates['wiley'],
+    'Prenat Diagn': format_templates['wiley'],
+    'Proteins': format_templates['wiley'],
+    'Tissue Antigens': format_templates['wiley'],  #this one's not working...?
+    'Transfus Med': format_templates['wiley'],
+    'Transfusion': format_templates['wiley'],
     'Vox Sang': format_templates['wiley'],
-    'Ann Hum Genet': format_templates['wiley'],
-    'Br J Dermatol': format_templates['wiley'],
 
     'Acta Oncol': format_templates['informa'],
     'Hemoglobin': format_templates['informa'],
 
     'Am J Respir Cell Mol Biol': format_templates['ats'],
+    'Am J Respir Crit Care Med': format_templates['ats'],
 
     'Anal Chem': format_templates['acs'],
 
+    'Genet Test': format_templates['liebert'],
     'Thyroid': format_templates['liebert'],
+
+    'Mol Endocrinol': 'http://press.endocrine.org/doi/pdf/{a.doi}',
 
     'PLoS Biol': format_templates['plos'],
     'PLoS Comput Biol': format_templates['plos'],
@@ -180,11 +207,32 @@ simple_formats_doi = {
 # http://www.ajconline.org/article/S0002-9149(07)00515-2/pdf
 
 simple_formats_pii = {
+    'Am J Cardiol': 'http://www.ajconline.org/article/{a.pii}/pdf',
+    'Am J Ophthalmol': 'http://www.ajo.com/article/{a.pii}/pdf', #ScienceDirect
+    'Atherosclerosis': 'http://www.atherosclerosis-journal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Biol Psychiatry': 'http://www.biologicalpsychiatryjournal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Brain Dev': 'http://www.brainanddevelopment.com/article/{a.pii}/pdf', #ScienceDirect
+    'Cancer Lett': 'http://www.cancerletters.info/article/{a.pii}/pdf', #ScienceDirect
+    'Clin Neurol Neurosurg': 'http://www.clineu-journal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Diabetes Res Clin Pract': 'http://www.diabetesresearchclinicalpractice.com/article/{a.pii}/pdf', #ScienceDirect
+    'Epilepsy Res': 'http://www.epires-journal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Eur J Paediatr Neurol': 'http://www.ejpn-journal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Fertil Steril': 'http://www.fertstert.org/article/{a.pii}/pdf',    #ScienceDirect
     'Gastroenterology': 'http://www.gastrojournal.org/article/{a.pii}/pdf',
+    'Int J Pediatr Otorhinolaryngol': 'http://www.ijporlonline.com/article/{a.pii}/pdf', #ScienceDirect
+    'J Mol Cell Cardiol': 'http://www.jmmc-online.com/article/{a.pii}/pdf', #ScienceDirect
     'J Mol Diagn': 'http://jmd.amjpathol.org/article/{a.pii}/pdf',
-    'Fertil Steril': 'http://www.fertstert.org/article/{a.pii}/pdf',
-    'J Neurol Sci': 'http://www.jns-journal.com/article/{a.pii}/pdf',
+    'J Neurol Sci': 'http://www.jns-journal.com/article/{a.pii}/pdf',   
+    'J Pediatr': 'http://www.jpeds.com/article/{a.pii}/pdf',  #ScienceDirect
+    'J Pediatr Urol': 'http://www.jpurol.com/article/{a.pii}/pdf',  #ScienceDirect
+    'Ophthalmology': 'http://www.aaojournal.org/article/{a.pii}/pdf', #ScienceDirect
     'Orv Hetil': format_templates['akademii'],
+    'Metabolism': 'http://www.metabolismjournal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Metab Clin Exp': 'http://www.metabolismjournal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Mol Genet Metab': 'http://www.mgmjournal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Parkinsonism Relat Disord': 'http://www.prd-journal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Pediatr Neurol': 'http://www.pedneur.com/article/{a.pii}/pdf', #ScienceDirect
+    'Surg Neurol': 'http://www.worldneurosurgery.org/article/{a.pii}/pdf', #ScienceDirect
     } 
 
 # vip = Volume-Issue-Page format -- URLs that have the same format
@@ -195,19 +243,25 @@ simple_formats_pii = {
 vip_format = 'http://{host}/content/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
 
 vip_journals = {
+        'Ann Clin Biochem': { 'host': 'acb.sagepub.com' },
+        'Am J Hypertens': { 'host': 'ajh.oxfordjournals.org' },
         'Ann Oncol' : {'host' : 'annonc.oxfordjournals.org'},
         'Arterioscler Thromb Vasc Biol' : {'host' : 'atvb.ahajournals.org'},
         'Blood': { 'host': 'bloodjournal.org' }, #'bloodjournal.hematologylibrary.org' },
         'Brain': { 'host': 'brain.oxfordjournals.org' },
         'Breast Cancer Res' : { 'host': 'breast-cancer-research.com' },
         'Cancer Discov' : {'host': 'cancerdiscovery.aacrjournals.org'},
+        'Cancer Epidemiol Biomarkers Prev': { 'host': 'cebp.aacrjournals.org' },
         'Cancer Res': { 'host': 'cancerres.aacrjournals.org' },
+        'Carcinogenesis': { 'host': 'carcin.oxfordjournals.org' } ,
         'Cardiovasc Res' : {'host' : 'cardiovascres.oxfordjournals.org'},
         'Circulation': { 'host': 'circ.ahajournals.org' },
         'Circ Cardiovasc Genet' : {'host' : 'circgenetics.ahajournals.org'},
         'Circ Res' : {'host' : 'circres.ahajournals.org'},
         'Clin Cancer Res' : {'host' : 'clincancerres.aacrjournals.org'},
         'Clin Chem' : {'host' : 'clinchem.org'},
+        'Diabetes': {'host': 'diabetes.diabetesjournals.org'},
+        'Diabetes Care': { 'host': 'care.diabetesjournals.org' },
         'Eur Heart J' : {'host' : 'eurheartj.oxfordjournals.org'},
         'Eur J Endocrinol' : {'host' : 'eje-online.org'},
         'FASEB J' : {'host' : 'fasebj.org'},
@@ -216,6 +270,8 @@ vip_journals = {
         'Gut' : {'host' : 'gut.bmj.com'},
         'Haematologica' : {'host' : 'haematologica.org'},
         'Hum Mol Genet': { 'host': 'hmg.oxfordjournals.org' },
+        'Hum Reprod': { 'host': 'humrep.oxfordjournals.org' },
+        'Hypertension': { 'host': 'hyper.ahajournals.org' },
         'Int J Oncol' : {'host' : 'spandidos-publications.com/ijo/'},
         'Invest Ophthalmol Vis Sci': { 'host': 'www.iovs.org' },
         'IOVS' : {'host' : 'iovs.org'},
@@ -225,26 +281,30 @@ vip_journals = {
         'J Cell Sci' : {'host' : 'jcs.biologists.org'},
         'J Clin Endocrinol Metab': { 'host': 'jcem.endojournals.org' },
         'J Clin Oncol': { 'host': 'jco.ascopubs.org' },
+        'J Dent Res': { 'host': 'jdr.sagepub.com' },
         'J Immunol' : {'host' : 'jimmunol.org'},
+        'J Infect Dis': {'host': 'jid.oxfordjournals.org'},
+        'J Natl Cancer Inst': {'host': 'jnci.oxfordjournals.org'},
+        'J Neurol Neurosurg Psychiatry': {'host': 'jnnp.bmj.com'}, 
         'J Neurosci' : {'host' : 'jneurosci.org'},
         'J Med Genet': { 'host': 'jmg.bmj.com' },
+        'J Mol Endocrinol': { 'host': 'jme.endocrinology-journals.org' },
         'J Lipid Res': { 'host': 'www.jlr.org' },
         'Mol Biol Cell' : {'host' : 'molbiolcell.org'},
         'Mol Cell Biol' : {'host': 'mcb.asm.org'},
         'Mol Canc Therapeut' : {'host' : 'mct.aacrjournals.org'},
+        'Mol Hum Reprod': {'host': 'molehr.oxfordjournals.org'},
         'Mol Pharmacol': {'host' : 'molpharm.aspetjournals.org'},
         'Neurology' : {'host' : 'neurology.org'},
+        'Nephrol Dial Transplant': {'host': 'ndt.oxfordjournals.org'},
         'Nucleic Acids Res' : {'host' : 'nar.oxfordjournals.org'},
         'Oncol Lett' : {'host' : 'spandidos-publications.com/ol/'},
         'Oncol Rep' : {'host' : 'spandidos-publications.com/or/'},
         'Orphanet J Rare Dis' : {'host' : 'ojrd.com'},
+        'Pediatrics': {'host': 'pediatrics.aappublications.org'},
         'Proc Natl Acad Sci USA': { 'host': 'pnas.org'},
         'Science': { 'host': 'sciencemag.org' },
         }
-
-jstage_format = 'https://www.jstage.jst.go.jp/article/biochemistry1922/125/4/125_4_803/_pdf'
-jstage_journals = ['J Biochem']
-
 
 # cell journals
 #cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
@@ -252,21 +312,26 @@ cell_format = 'http://www.cell.com{ja}/pdf/{pii}.pdf'
 cell_journals = {
     'Am J Hum Genet': { 'ja': '/AJHG' },
     'Cell': { 'ja': '' },
-    'Trends Mol Med': { 'ja': 'trends' }
+    'Trends Mol Med': { 'ja': 'trends' },
+    'Cancer Cell': { 'ja': 'cancer-cell' },
+    'Neuron': {'ja': 'neuron' }
     }
 
 # nature journals
 nature_format = 'http://www.nature.com/{ja}/journal/v{a.volume}/n{a.issue}/pdf/{a.pii}.pdf'
 nature_journals = {
+    'Eur J Hum Genet': { 'ja': 'ejhg' },
+    'Eye (Lond)': { 'ja': 'eye' },
+    'J Hum Genet': { 'ja': 'jhg' },
+    'Kidney Int': { 'ja': 'ki' },
     'Nature': { 'ja': 'nature' },
     'Nat Genet': { 'ja': 'ng' },
     'Nat Neurosci': { 'ja': 'neuro' },
+    'Nat Med': { 'ja': 'nm' },
     'Nat Methods': { 'ja': 'nmeth' },
     'Nat Rev. Genet': { 'ja': 'nrg' },
     'Nature reviews Immunology': { 'ja': 'nri' },
-    'Eur J Hum Genet': { 'ja': 'ejhg' },
-    'J Hum Genet': { 'ja': 'jhg' },
-    'Nat Genet': { 'ja': 'ng' },
+    'Neuropsychopharmacology': { 'ja': 'npp' },
     }
 
 # the doi2step_journals should work in nature_journals, but the urls are weird. 
@@ -276,58 +341,83 @@ doi2step_journals = [ 'Genet Med', 'J Invest Dermatol' ]
 
 # TODO
 #
+#15533574: no URL because No URL format for Journal Int J Pediatr Otorhinolaryngol
+#15533621: no URL because No URL format for Journal Med Hypotheses
 # 15611820: no URL because No URL format for Journal Arq Bras Endocrinol Metabol
 # 15611833: no URL because No URL format for Journal Arq Bras Endocrinol Metabol
 # 17486493: no URL because No URL format for Journal Hemoglobin
+# 15231984: no URL because No URL format for Journal Pediatrics
+# 15234147: no URL because No URL format for Journal Ophthalmology
+# 15234312: no URL because No URL format for Journal Am J Ophthalmol
+# 15234419: no URL because No URL format for Journal J Am Coll Cardiol
+# 15234655: no URL because No URL format for Journal Am J Med
+#17319787: no URL because No URL format for Journal Neoplasma
+#17320181: no URL because No URL format for Journal Ophthalmology
+#17321228: no URL because No URL format for Journal Bone
+#17099210: no URL because No URL format for Journal Hum. Reprod.
+#17100396: no URL because No URL format for Journal J Med Assoc Thai
+#9538891: no URL because No URL format for Journal Invest. Ophthalmol. Vis. Sci.
+#9700188: no URL because No URL format for Journal Hum. Mol. Genet.
+#9700193: no URL because No URL format for Journal Hum. Mol. Genet.
+#17413447: no URL because No URL format for Journal Psychiatr. Genet.
+#17414143: no URL because No URL format for Journal J. Pediatr. Gastroenterol. Nutr.
+#17415510: no URL because No URL format for Journal J. Neurol.
+#17415538: no URL because No URL format for Journal HNO
+#17415575: no URL because No URL format for Journal Arch. Dermatol. Res.
+#17415800: no URL because No URL format for Journal Mov. Disord.
+#17416296: no URL because No URL format for Journal Arch. Med. Res.
+#17143180: no URL because No URL format for Journal J Hypertens
+#17143182: no URL because No URL format for Journal J Hypertens
+#17143317: no URL because No URL format for Journal Nat Clin Pract Endocrinol Metab
+#17143551: no URL because No URL format for Journal Int J Mol Med
+#17145028: no URL because No URL format for Journal Med Clin (Barc)
+#17145065: no URL because No URL format for Journal Mutat Res
+#10726756: no URL because No URL format for Journal Electrophoresis
+#15452385: no URL because No URL format for Journal Horm Res
+#15452722: no URL because No URL format for Journal Graefes Arch Clin Exp Ophthalmol
+#15453866: no URL because No URL format for Journal Acta Ophthalmol Scand
+#15519027: no URL because No URL format for Journal J Am Coll Cardiol
+#15519272: no URL because No URL format for Journal Hepatol Res
+        
 
-"""
-17319787: no URL because No URL format for Journal Neoplasma
-17319828: no URL because No URL format for Journal Transfusion
-17319831: no URL because No URL format for Journal Transfusion
-17320181: no URL because No URL format for Journal Ophthalmology
-17321228: no URL because No URL format for Journal Bone
-17099210: no URL because No URL format for Journal Hum. Reprod.
-17100396: no URL because No URL format for Journal J Med Assoc Thai
-"""
 
-#TODO: more testing on Genet. Med
-"""
-17413420: no URL because No URL format for Journal Genet. Med.
-17413421: no URL because No URL format for Journal Genet. Med.
-17413422: no URL because No URL format for Journal Genet. Med.
-17413424: no URL because No URL format for Journal Genet. Med.
-"""
-
-"""
-17413447: no URL because No URL format for Journal Psychiatr. Genet.
-17414143: no URL because No URL format for Journal J. Pediatr. Gastroenterol. Nutr.
-17415510: no URL because No URL format for Journal J. Neurol.
-17415538: no URL because No URL format for Journal HNO
-17415575: no URL because No URL format for Journal Arch. Dermatol. Res.
-17415800: no URL because No URL format for Journal Mov. Disord.
-17416296: no URL because No URL format for Journal Arch. Med. Res.
-17143180: no URL because No URL format for Journal J Hypertens
-17143182: no URL because No URL format for Journal J Hypertens
-17143317: no URL because No URL format for Journal Nat Clin Pract Endocrinol Metab
-17143551: no URL because No URL format for Journal Int J Mol Med
-17145028: no URL because No URL format for Journal Med Clin (Barc)
-17145065: no URL because No URL format for Journal Mutat Res
-16944272: no URL because No URL format for Journal Fam Cancer
-10726756: no URL because No URL format for Journal Electrophoresis
-"""
-
-# Journals with really annoying paywalls guarding their precious secrets.
+# Below: Journals with really annoying paywalls guarding their precious secrets.
 schattauer_journals = [
     'Thromb Haemost',
     ]
 
-springer_journals = [
-    'Physiol Genomics',
-    'Breast Cancer Res Treat',
-    'Pediatr Nephrol',
-    'Fam Cancer',
-    'Ophthalmologe',
+wolterskluwer_journals = [
+    'J Hypertens',
+    'J Glaucoma',
+    'Pharmacogenetics',
+    'Plast Reconstr Surg',
     ]
+
+karger_journals = [
+    'Cytogenet Genome Res'
+    ]
+
+springer_journals = [
+    'Acta Neuropathol',
+    'Breast Cancer Res Treat',
+    'Diabetologia',
+    'Eur J Pediatr',
+    'Fam Cancer',
+    'J Bone Miner Metab',
+    'J Endocrinol Invest',
+    'J Inherit Metab Dis',
+    'J Mol Med (Berl)',
+    'Neurogenetics',
+    'Ophthalmologe',
+    'Pediatr Nephrol',
+    'Physiol Genomics',
+    ]
+
+# thieme journals so far don't seem to have any open access content.
+# example of link to article page: https://www.thieme-connect.com/DOI/DOI?10.1055/s-0028-1085467
+thieme_journals = ['Neuropediatrics', 'Semin Vasc Med']
+
+paywall_journals = schattauer_journals + wolterskluwer_journals + springer_journals + thieme_journals + karger_journals
 
 
 PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
@@ -339,33 +429,6 @@ def find_article_from_doi(doi):
     pma = fetch.article_by_pmid(doi2pmid(doi))
     return find_article_from_pma(pma)
     
-
-
-# TODO: support this madness (http://www.ncbi.nlm.nih.gov/books/NBK3828/):
-
-"""
-How do I submit tags for Volume and Issue Supplements?
-
-Use the following guidelines for Supplements:
-
-Supplement 1 for Volume 6:
-
- <Volume>6 Suppl 1</Volume>
-<Issue></Issue> 
-Issue 4, Supplement 2 for Volume 7:
-
-<Volume>7</Volume>
-<Issue>4 Suppl 2</Issue> 
-Issue 4 Pt 1 for Volume 7:
-
-<Volume>7</Volume>
-<Issue>4 Pt 1</Issue> 
-Issue Part 3 for Volume 7 (it has Volume 7 Part 3 on the cover):
-
-<Volume>7</Volume>
-<Issue>Pt 3</Issue>
-"""
-
 
 def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
     reason = None
@@ -383,9 +446,6 @@ def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
     if pma.pmc:
         url = PMC_PDF_URL.format(a=pma)
 
-    elif jrnl in unlinkable:
-        reason = 'unlinkable'
-        
     elif jrnl in simple_formats_doi.keys():
         if pma.doi != None:
             url = simple_formats_doi[jrnl].format(a=pma)
@@ -440,28 +500,28 @@ def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
         if pma.pii:
             url = nature_format.format(a=pma, ja=nature_journals[jrnl]['ja'])
         else:
-            reason = 'pii missing from PubMedArticle XML'
+            reason = 'pii missing from PubMedArticle XML (%s in Nature format)' % jrnl
 
     elif jrnl in cell_journals.keys():
         if pma.pii:
             url = cell_format.format( a=pma, ja=cell_journals[jrnl]['ja'],
                     pii=pma.pii.translate(None,'-()') )
         else:
-            reason = 'pii missing from PubMedArticle XML'
+            reason = 'pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
     
     elif jrnl in 'Lancet' and pma.pii is not None:
         #url = 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(piit = pma.pii.translate(None,'-()'))
         url = 'http://www.thelancet.com/pdfs/journals/lancet/PII{a.pii}.pdf'.format(a = pma)
 
-    elif jrnl in sciencedirect_journals or jrnl in springer_journals:
-        if paywalls == False:
-            reason = 'not trying to download from ScienceDirect or Springer'
+    elif jrnl in sciencedirect_journals:
+        if pma.pii:
+            url = get_sciencedirect_pdf_url(pma)
         else:
-            if pma.pii:
-                url = sciencedirect_format.format(piit = pma.pii.translate(None,'-()'))
-            else:
-                reason = 'missing pii in PubMedXML'
+            reason = 'pii missing from PubMedArticle XML (%s in ScienceDirect format)' % jrnl
 
+    elif jrnl in paywall_journals:
+        if paywalls == False:
+            reason = '%s behind obnoxious paywall' % jrnl
     else:
         reason = 'No URL format for Journal %s' % jrnl
 
