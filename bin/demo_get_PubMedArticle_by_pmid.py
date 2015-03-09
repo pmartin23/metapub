@@ -28,13 +28,10 @@ print article.pmid, article.title
 #print 'pages: '+article.pages
 print 'authors: %s' % ','.join(article.authors)
 print 'abstract: %s' % article.abstract
-if article.pii:
-    print 'pii: '+article.pii
-if article.doi:
-    print 'doi: '+article.doi
-
+print 'pii: '+str(article.pii)
+print 'doi: '+str(article.doi)
+print 'pmc: '+str(article.pmc)
 print 'volume: '+article.volume
 print 'issue: '+article.issue
-print 'PMCID: '+article.pmc
 #print article.xmlstr
 

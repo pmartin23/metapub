@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
 import requests
+from lxml.html import HTMLParser
+from lxml import etree
 
 from .pubmedfetcher import PubMedFetcher
 from .convert import PubMedArticle2doi, doi2pmid
@@ -15,7 +17,7 @@ def the_doi_2step(doi):
     if response.status_code == 200:
         return response.url
     else:
-        return None
+        raise MetaPubError('dx.doi.org lookup failed for doi %s' % doi)
 
 # TODO
 # not sure whether to group sciencedirect journals like this.
@@ -42,10 +44,40 @@ def get_sciencedirect_pdf(pma):
     </a>"""
     text = response.text
     if text.find('a id="pdfLink"') > -1:
-    #    return re.findall(
-    return None
+        #TODO: deduce pdfLink url
+        return starturl
+    else:
+        return None
 
 
+jama_journals = ['Arch Neurol',
+                 'JAMA',
+                 'JAMA Dermatol',
+                 'JAMA Facial Plast Surg',
+                 'JAMA Intern Med',
+                 'JAMA Neurol',
+                 'JAMA Oncol',
+                 'JAMA Ophthalmol',
+                 'JAMA Otolaryngol Head Neck Surg',
+                 'JAMA Pediatr',
+                 'JAMA Psychiatry',
+                 'JAMA Surg', 
+                ]
+
+def the_jama_dance(doi):
+    url = the_doi_2step(doi)
+    r = requests.get(url)
+    if r.status_code != 200:
+        return 'error'
+
+    parser = HTMLParser()
+    tree = etree.fromstring(r.text, parser)
+    
+    # we're looking for a meta tag like this:
+    # <meta name="citation_pdf_url" content="http://archneur.jamanetwork.com/data/Journals/NEUR/13776/NOC40008.pdf" />
+    for item in tree.findall('head/meta'):
+        if item.get('name')=='citation_pdf_url':
+            return item.get('content')
 
 # TODO
 # doiserbia (Library of Serbia) articles can be grabbed by doing the_doi_2step,
@@ -96,7 +128,8 @@ format_templates = {
     'informa': 'http://informahealthcare.com/doi/abs/{a.doi}', 
     'ats': 'http://www.atsjournals.org/doi/pdf/{a.doi}', 
     'acs': 'http://pubs.acs.org/doi/pdf/{a.doi}',
-    'liebert': 'http://online.liebertpub.com/doi/pdf/{a.doi}'
+    'liebert': 'http://online.liebertpub.com/doi/pdf/{a.doi}',
+    'akademii': 'http://www.akademiai.com/content/{a.pii}/fulltext.pdf'
     }
 
 # simple formats are used for URLs that can be deduced from data
@@ -147,11 +180,11 @@ simple_formats_doi = {
 # http://www.ajconline.org/article/S0002-9149(07)00515-2/pdf
 
 simple_formats_pii = {
-    'JAMA': 'http://jama.ama-assn.org/content/{a.pii}.full.pdf',
     'Gastroenterology': 'http://www.gastrojournal.org/article/{a.pii}/pdf',
     'J Mol Diagn': 'http://jmd.amjpathol.org/article/{a.pii}/pdf',
     'Fertil Steril': 'http://www.fertstert.org/article/{a.pii}/pdf',
     'J Neurol Sci': 'http://www.jns-journal.com/article/{a.pii}/pdf',
+    'Orv Hetil': format_templates['akademii'],
     } 
 
 # vip = Volume-Issue-Page format -- URLs that have the same format
@@ -340,6 +373,13 @@ def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
 
     jrnl = pma.journal.translate(None, '.')
 
+    if pma.doi==None and crossref_doi:
+        pma.doi = PubMedArticle2doi(pma)
+        if pma.doi==None:
+            reason = 'DOI missing from PubMedArticle and CrossRef lookup failed.'
+        else:
+            reason = 'DOI missing from PubMedArticle.'
+ 
     if pma.pmc:
         url = PMC_PDF_URL.format(a=pma)
 
@@ -347,16 +387,9 @@ def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
         reason = 'unlinkable'
         
     elif jrnl in simple_formats_doi.keys():
-        if pma.doi == None:
-            if crossref_doi:
-                pma.doi = PubMedArticle2doi(pma)
-                if pma.doi is None:
-                    reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.' 
-            else:
-                reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.' 
-        
         if pma.doi != None:
             url = simple_formats_doi[jrnl].format(a=pma)
+            reason = ''
 
     elif jrnl in simple_formats_pii.keys():
         if pma.pii:
@@ -365,18 +398,21 @@ def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
             reason = 'pii missing from PubMedArticle XML'
 
     elif jrnl in doi2step_journals:
-        if pma.doi == None:
-            if crossref_doi:
-                pma.doi = PubMedArticle2doi(pma)
-                if pma.doi == None:
-                    reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.'
-            else:
-                reason = 'No DOI: missing from PubMedArticle and CrossRef lookup failed.'
-
         if pma.doi:
-            baseurl = the_doi_2step(pma.doi)
-            if baseurl: 
+            try:
+                baseurl = the_doi_2step(pma.doi)
                 url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
+                reason = ''
+            except MetaPubError, e:
+                reason = '%s' % e
+
+    elif jrnl in jama_journals:
+        if pma.doi:
+            try:
+                url = the_jama_dance(pma.doi)
+                reason = ''
+            except MetaPubError, e:
+                reason = '%s' % e
 
     elif jrnl in vip_journals.keys():
         # TODO: catch weird stuff like these results from PMID 10071047:
