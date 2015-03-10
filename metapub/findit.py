@@ -34,21 +34,26 @@ sciencedirect_journals = [
     'Blood Cells Mol Dis',
     'Biochem Biophys Res Commun' ,
     'Biochem Pharmacol',
+    'Biochim Biophys Acta',
+    'Clin Chim Acta',
     'Clin Immunol',
     'FEBS Lett',
     'Eur J Cancer',
     'Eur J Med Genet',
     'Gene',
     'Genomics',
+    'Gynecol Obstet Fertil',
     'Hepatol Res',
     'J Am Coll Cardiol',
     'J Mol Biol',
     'J Neurol Sci',
     'Mol Cell Endocrinol',
+    'Mol Cell Probes',
     'Mol Genet Metab',
     'Mol Immunol',
     'Mutat Res',
     'Neurosci Lett',
+    'Pediatr Pulmonol',
     ]
 
 sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
@@ -59,7 +64,7 @@ def get_sciencedirect_pdf_url(pma):
     try:
         r = requests.get(starturl)
     except requests.exceptions.TooManyRedirects:
-        return 'error: cannot reach pma.journal'
+        return 'error: cannot reach %s' % pma.journal
     tree = etree.fromstring(r.text, HTMLParser())
     div = tree.cssselect('div.icon_pdf')[0]
     url = div.cssselect('a')[0].get('href')
@@ -121,6 +126,8 @@ todo_journals = {
     'Arq Bras Endocrinol Metabol': { 'example': '15611820: http://www.scielo.br/pdf/abem/v48n1/19521.pdf' },
     'Neoplasma': { 'example': '17319787: http://www.elis.sk/download_file.php?product_id=1006&session_id=skl2f3grcd19ebnie17u15a571' },
     'Clinics (Sao Paulo)': { 'example': '17823699: http://www.scielo.br/scielo.php?script=sci_arttext&pid=S1807-59322007000400003' },
+    'Asian J Androl': {'example': '18097502: http://www.asiaandro.com/Abstract.asp?doi=10.1111/j.1745-7262.2008.00376.x' },
+    'Anesthesiology': {'example': '18212565: http://dx.doi.org/10.1097/01.anes.0000299431.81267.3e --> html w/ <a id="pdfLink" data-article-url="THE_URL">' },
     }
 
 # JSTAGE: mostly free (yay)
@@ -149,6 +156,7 @@ simple_formats_doi = {
     'Acta Oncol': format_templates['informa'],
     'Hemoglobin': format_templates['informa'],
     'Platelets': format_templates['informa'],
+    'Xenobiotica': format_templates['informa'],
 
     'Am J Respir Cell Mol Biol': format_templates['ats'],
     'Am J Respir Crit Care Med': format_templates['ats'],
@@ -157,6 +165,7 @@ simple_formats_doi = {
     'Biochemistry': format_templates['acs'],
 
     'Genet Test': format_templates['liebert'],
+    'Genet Test Mol Biomarkers': format_templates['liebert'],
     'Thyroid': format_templates['liebert'],
 
     'Mol Endocrinol': 'http://press.endocrine.org/doi/pdf/{a.doi}',
@@ -199,14 +208,17 @@ wiley_journals = [
     'Am J Med Genet B Neuropsychiatr Genet',
     'Arthritis Rheum',
     'Australas J Dermatol',
+    'Basic Clin Pharmacol Toxicol',
     'BJU Int',
     'Breast J',
     'Br J Dermatol',
     'Br J Haematol',
     'Cancer',
     'Clin Endocrinol (Oxf)',
+    'Clin Exp Dermatol',
     'Clin Genet',
     'Clin Pharmacol Ther',
+    'Diabet Med',
     'Dev Med Child Neurol',
     'Electrophoresis',
     'Environ Mol Mutagen',
@@ -216,16 +228,22 @@ wiley_journals = [
     'Exp Dermatol',
     'Genes Chromosomes Cancer',
     'Genet Epidemiol',
+    'Haemophilia',
     'Head Neck',
     'Hum Mutat',
     'Immunol Rev',
     'Int J Cancer',
+    'Int J Lab Hematol',
     'J Bone Miner Res',
     'J Dermatol',
+    'J Eur Acad Dermatol Venereol',
     'J Gastroenterol Hepatol',
+    'J Intern Med',
     'J Orthop Res',
     'J Thromb Haemost',
     'J Pathol',
+    'J Viral Hepat',
+    'Mol Carcinog',
     'Mov Disord',
     'Muscle Nerve',
     'Pediatr Blood Cancer',
@@ -255,10 +273,12 @@ def the_wiley_shuffle(pma):
 # http://www.ajconline.org/article/S0002-9149(07)00515-2/pdf
 
 simple_formats_pii = {
+    'Am Heart J': 'http://www.ahjonline.com/article/{a.pii}/pdf', #ScienceDirect
     'Am J Cardiol': 'http://www.ajconline.org/article/{a.pii}/pdf',
     'Am J Ophthalmol': 'http://www.ajo.com/article/{a.pii}/pdf', #ScienceDirect
     'Am J Med': 'http://www.amjmed.com/article/{a.pii}/pdf', #ScienceDirect
     'Atherosclerosis': 'http://www.atherosclerosis-journal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Arch Med Res': 'http://www.arcmedres.com/article/{a.pii}/pdf', #ScienceDirect
     'Biol Psychiatry': 'http://www.biologicalpsychiatryjournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Bone': 'http://www.thebonejournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Brain Dev': 'http://www.brainanddevelopment.com/article/{a.pii}/pdf', #ScienceDirect
@@ -282,6 +302,7 @@ simple_formats_pii = {
     'J Pediatr Urol': 'http://www.jpurol.com/article/{a.pii}/pdf',  #ScienceDirect
     'Ophthalmology': 'http://www.aaojournal.org/article/{a.pii}/pdf', #ScienceDirect
     'Orv Hetil': format_templates['akademii'],
+    'Med Hypotheses': 'http://www.medical-hypotheses.com/article/{a.pii}/pdf', #ScienceDirect
     'Metabolism': 'http://www.metabolismjournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Metab Clin Exp': 'http://www.metabolismjournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Mol Genet Metab': 'http://www.mgmjournal.com/article/{a.pii}/pdf', #ScienceDirect
@@ -319,6 +340,7 @@ vip_journals = {
         'Clin Chem' : {'host' : 'clinchem.org'},
         'Diabetes': {'host': 'diabetes.diabetesjournals.org'},
         'Diabetes Care': { 'host': 'care.diabetesjournals.org' },
+        'Endocr Relat Cancer': { 'host': 'erc.endocrinology-journals.org' },
         'Eur Heart J' : {'host' : 'eurheartj.oxfordjournals.org'},
         'Eur J Endocrinol' : {'host' : 'eje-online.org'},
         'FASEB J' : {'host' : 'fasebj.org'},
@@ -366,6 +388,7 @@ vip_journals = {
         'Proc Natl Acad Sci USA': { 'host': 'pnas.org'},
         'QJM': { 'host': 'qjmed.oxfordjournals.org'},
         'Science': { 'host': 'sciencemag.org' },
+        'Thorax': { 'host': 'thorax.bmj.com' },
         }
 
 # cell journals
@@ -400,6 +423,7 @@ nature_journals = {
     'Nature reviews Immunology': { 'ja': 'nri' },
     'Neuropsychopharmacology': { 'ja': 'npp' },
     'Oncogene': { 'ja': 'onc' },
+    'Pediatr Res': { 'ja': 'pr' },
     }
 
 def the_nature_show(pma):
@@ -418,27 +442,13 @@ def the_nature_show(pma):
 # the doi2step_journals should work in nature_journals, but the urls are weird. 
 # e.g. http://www.nature.com/gim/journal/v8/n11/pdf/gim2006115a.pdf
 #      http://www.nature.com/jid/journal/v113/n2/full/5603216a.html
-doi2step_journals = [ 'Genet Med', 'J Invest Dermatol' ]
+doi2step_journals = [ 'Genet Med', 'J Invest Dermatol', 'Nat Clin Pract Endocrinol Metab' ]
 
 # TODO
 #
-#21196708: no URL because No URL format for Journal Dermatology (Basel)
-#21196779: no URL because No URL format for Journal Nephron Physiol
-#21198350: no URL because No URL format for Journal Genet Test Mol Biomarkers
-#21198393: no URL because No URL format for Journal Genet Test Mol Biomarkers
-#21198395: no URL because No URL format for Journal Genet Test Mol Biomarkers
-#21198797: no URL because No URL format for Journal Clin Exp Dermatol
 #21199372: no URL because No URL format for Journal Basic Clin Pharmacol Toxicol
-#20607725: no URL because No URL format for Journal Mol Carcinog
-#16401428: no URL because No URL format for Journal Curr Biol
 #15533574: no URL because No URL format for Journal Int J Pediatr Otorhinolaryngol
-#15533621: no URL because No URL format for Journal Med Hypotheses
-#15234147: no URL because No URL format for Journal Ophthalmology
-#15234312: no URL because No URL format for Journal Am J Ophthalmol
-#15234655: no URL because No URL format for Journal Am J Med
 #17100396: no URL because No URL format for Journal J Med Assoc Thai
-#17413447: no URL because No URL format for Journal Psychiatr. Genet.
-#17414143: no URL because No URL format for Journal J. Pediatr. Gastroenterol. Nutr.
 #17415575: no URL because No URL format for Journal Arch. Dermatol. Res.
 #17415800: no URL because No URL format for Journal Mov. Disord.
 #17416296: no URL because No URL format for Journal Arch. Med. Res.
@@ -455,25 +465,39 @@ schattauer_journals = [
     ]
 
 wolterskluwer_journals = [
+    'Blood Coagul Fibrinolysis',
     'Clin Dysmorphol',
+    'Curr Opin Hematol',
+    'Eur J Gastroenterol Hepatol',
     'J Hypertens',
     'J Glaucoma',
+    'J Pediatr Hematol Oncol',
+    'J Pediatr Gastroenterol Nutr',
     'Obstet Gynecol',
+    'Pediatr Infect Dis J',
     'Pharmacogenet Genomics',
     'Pharmacogenetics',
     'Plast Reconstr Surg',
+    'Psychiatr Genet',
     ]
 
 karger_journals = [
+    'Acta Haematol',
+    'Cell Physiol Biochem',
     'Cytogenet Genome Res',
+    'Dermatology (Basel)',
     'Horm Res',
     'Hum Hered',
+    'Nephron',
+    'Nephron Physiol',
     ]
 
 springer_journals = [
     'Acta Neuropathol',
     'Ann Surg Oncol',
+    'Arch Dermatol Res',
     'Breast Cancer Res Treat',
+    'Calcif Tissue Int',
     'Cell Mol Neurobiol',
     'Diabetologia',
     'Eur J Pediatr',
@@ -485,6 +509,7 @@ springer_journals = [
     'J Endocrinol Invest',
     'J Inherit Metab Dis',
     'J Neurol',
+    'J Mol Med',
     'J Mol Med (Berl)',
     'J Mol Neurosci',
     'Mod Rheumatol',
@@ -501,6 +526,7 @@ thieme_journals = ['Neuropediatrics', 'Semin Vasc Med', 'Exp Clin Endocrinol Dia
 
 paywall_journals = schattauer_journals + wolterskluwer_journals + springer_journals + thieme_journals + karger_journals
 
+paywall_reason_template = '%s behind %s paywall'  # % (journal, publisher)
 
 def find_article_from_doi(doi):
     #1) lookup on CrossRef
@@ -589,9 +615,6 @@ def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
                 reason = '%s' % e
 
     elif jrnl in vip_journals.keys():
-        # TODO: catch weird stuff like these results from PMID 10071047:
-        #   http://brain.oxfordjournals.org/content/122 ( Pt 2)/None/183.full.pdf
-        # (working URL = http://brain.oxfordjournals.org/content/brain/122/2/183.full.pdf )
         if pma.volume != None and pma.issue is None:
             # try to get a number out of the parts that came after the first number.
             volparts = re_numbers.findall(pma.volume)
