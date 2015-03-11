@@ -2,6 +2,46 @@
 
 # TODO
 #
+#12027577: Seizure -- no URL because No URL format for Journal Seizure
+#12016470: World J Surg -- no URL because No URL format for Journal World J Surg
+#12016472: World J Surg -- no URL because No URL format for Journal World J Surg
+#12016484: World J Surg -- no URL because No URL format for Journal World J Surg
+#12015062: Zhonghua Xue Ye Xue Za Zhi -- no URL because No URL format for Journal Zhonghua Xue Ye Xue Za Zhi
+#12015065: Zhonghua Xue Ye Xue Za Zhi -- no URL because No URL format for Journal Zhonghua Xue Ye Xue Za Zhi
+#12032748: Int. J. Obes. Relat. Metab. Disord. -- no URL because No URL format for Journal Int J Obes Relat Metab Disord
+#11980567: Clin. Sci. -- no URL because No URL format for Journal Clin Sci
+#12035837: Can J Neurol Sci -- no URL because No URL format for Journal Can J Neurol Sci
+#12036192: Clin. Nephrol. -- no URL because No URL format for Journal Clin Nephrol
+#12037434: Eur. Neurol. -- no URL because No URL format for Journal Eur Neurol
+#12055472: Retina (Philadelphia, Pa.) -- no URL because No URL format for Journal Retina (Philadelphia, Pa)
+#12063046: Jpn. J. Ophthalmol. -- no URL because No URL format for Journal Jpn J Ophthalmol
+#12063482: J. Am. Acad. Dermatol. -- no URL because No URL format for Journal J Am Acad Dermatol
+#12056405: Genes Cells -- no URL because No URL format for Journal Genes Cells
+#12065946: Fetal. Diagn. Ther. -- no URL because No URL format for Journal Fetal Diagn Ther
+#12066726: Br J Anaesth -- no URL because No URL format for Journal Br J Anaesth
+#12071635: J. Neuropathol. Exp. Neurol. -- no URL because No URL format for Journal J Neuropathol Exp Neurol
+#12071824: Arch Dermatol -- no URL because No URL format for Journal Arch Dermatol
+#12070551: Saudi Med J -- no URL because No URL format for Journal Saudi Med J
+#12074273: Circ. J. -- no URL because No URL format for Journal Circ J
+#12076704: Oral Oncol. -- no URL because No URL format for Journal Oral Oncol
+#12080609: Rinsho Shinkeigaku -- no URL because No URL format for Journal Rinsho Shinkeigaku
+#12162770: Arch. Otolaryngol. Head Neck Surg. -- no URL because No URL format for Journal Arch Otolaryngol Head Neck Surg
+#12170759: Cancer Biol. Ther. -- no URL because No URL format for Journal Cancer Biol Ther
+#12173465: Mol. Biol. (Mosk.) -- no URL because No URL format for Journal Mol Biol (Mosk)
+#12173720: Mayo Clin. Proc. -- no URL because No URL format for Journal Mayo Clin Proc
+#12202459: Endocr. Rev. -- no URL because No URL format for Journal Endocr Rev
+#12199334: J. Pediatr. Endocrinol. Metab. -- no URL because No URL format for Journal J Pediatr Endocrinol Metab
+#12199344: J. Pediatr. Endocrinol. Metab. -- no URL because No URL format for Journal J Pediatr Endocrinol Metab
+#12087194: Genes Genet. Syst. -- no URL because No URL format for Journal Genes Genet Syst
+#12064832: J. Rheumatol. -- no URL because No URL format for Journal J Rheumatol
+#12049533: Arch Surg -- no URL because No URL format for Journal Arch Surg
+#10458450: J. Urol. -- no URL because No URL format for Journal J Urol
+#10458483: Tohoku J. Exp. Med. -- no URL because No URL format for Journal Tohoku J Exp Med
+#10458491: Tohoku J. Exp. Med. -- no URL because No URL format for Journal Tohoku J Exp Med
+#10470409: Andrologia -- no URL because No URL format for Journal Andrologia
+#10474162: Dev. Dyn. -- no URL because No URL format for Journal Dev Dyn
+#10520237: Ophthalmic Genet. -- no URL because No URL format for Journal Ophthalmic Genet
+#10521250: Ophthalmic Genet. -- no URL because No URL format for Journal Ophthalmic Genet
 #21199372: no URL because No URL format for Journal Basic Clin Pharmacol Toxicol
 #15533574: no URL because No URL format for Journal Int J Pediatr Otorhinolaryngol
 #17100396: no URL because No URL format for Journal J Med Assoc Thai
