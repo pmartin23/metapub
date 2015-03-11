@@ -26,8 +26,7 @@ todo_journals = {
     'Mol Vis': { 'example': 'http://www.molvis.org/molvis/v10/a45/ --> http://www.molvis.org/bin/pdf.cgi?Zheng,10,45'},
     'Singapore Med J': { 'example': 'http://www.sma.org.sg/smj/4708/4708cr4.pdf' },
     'Rev Port Cardiol': { 'example': '16335287: http://www.spc.pt/DL/RPC/artigos/74.pdf' },
-    'World J Gastroenterol': { 'example': 'http://www.wjgnet.com/1007-9327/full/v11/i48/7690.htm --> http://www.wjgnet.com/1007-9327/pdf/v1
-1/i48/7690.pdf' },
+    'World J Gastroenterol': { 'example': 'http://www.wjgnet.com/1007-9327/full/v11/i48/7690.htm --> http://www.wjgnet.com/1007-9327/pdf/v11/i48/7690.pdf' },
     'Genet Mol Res': { 'example': '24668667: http://www.geneticsmr.com/articles/2992 --> http://www.geneticsmr.com//year2014/vol13-1/pdf/gmr2764.pdf' },
     'Arq Bras Endocrinol Metabol': { 'example': '15611820: http://www.scielo.br/pdf/abem/v48n1/19521.pdf' },
     'Neoplasma': { 'example': '17319787: http://www.elis.sk/download_file.php?product_id=1006&session_id=skl2f3grcd19ebnie17u15a571' },
@@ -42,10 +41,26 @@ format_templates = {
     'akademii': 'http://www.akademiai.com/content/{a.pii}/fulltext.pdf',
     'ats': 'http://www.atsjournals.org/doi/pdf/{a.doi}',
     'informa': 'http://informahealthcare.com/doi/pdf/{a.doi}',
+    'lancet': 'http://www.thelancet.com/pdfs/journals/{ja}/PII{a.pii}.pdf',
     'liebert': 'http://online.liebertpub.com/doi/pdf/{a.doi}',
     'plos': 'http://www.plosbiology.org/article/fetchObjectAttachment.action?url=info:doi/{a.doi}&representation=PDF',
     'wiley': 'http://onlinelibrary.wiley.com/doi/{a.doi}/pdf',
     }
+
+lancet_journals = {
+    'Lancet': { 'ja': 'lancet' },
+    'Lancet Diabetes Endocrinol': { 'ja': 'landia' },
+    'Lancet Glob Health': { 'ja': 'langlo' },
+    'Lancet Haematol': { 'ja': 'lanhae' },
+    'Lancet HIV': { 'ja': 'lanhiv' },
+    'Lancet Infect Dis': { 'ja': 'laninf' },
+    'Lancet Neurol': { 'ja': 'laneur' },
+    'Lancet Oncol': { 'ja': 'lanonc' },
+    'Lancet Psychiatry': { 'ja': 'lanpsy' },
+    'Lancet Respir Med': { 'ja': 'lanres' },
+    }
+
+#EBioMedicine
 
 
 # the SD journals are also represented in simple_formats_pii

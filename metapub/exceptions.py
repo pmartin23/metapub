@@ -9,4 +9,9 @@ class InvalidPMID(MetaPubError):
 class CrossRefConnectionError(MetaPubError):
     pass
 
+class NoPDFLink(MetaPubError):
+    pass
+
+class AccessDenied(MetaPubError):
+    pass
 

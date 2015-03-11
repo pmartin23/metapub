@@ -6,7 +6,7 @@ from lxml import etree
 
 from .pubmedfetcher import PubMedFetcher
 from .convert import PubMedArticle2doi, doi2pmid
-from .exceptions import MetaPubError
+from .exceptions import MetaPubError, AccessDenied, NoPDFLink
 from .text_mining import re_numbers
 
 from .findit_formats import *
@@ -19,7 +19,7 @@ def the_doi_2step(doi):
     if response.status_code == 200:
         return response.url
     else:
-        raise MetaPubError('dx.doi.org lookup failed for doi %s (HTTP %i returned)' % (doi, reponse.status_code))
+        raise NoPDFLink('dx.doi.org lookup failed for doi %s (HTTP %i returned)' % (doi, reponse.status_code))
 
 def square_voliss_data_for_pma(pma):
     if pma.volume != None and pma.issue is None:
@@ -34,12 +34,11 @@ def square_voliss_data_for_pma(pma):
             pma.issue = re_numbers.findall(pma.issue)[0]
     return pma
 
-
 sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
 def the_sciencedirect_disco(pma):
     '''  :param: pma (PubMedArticle object)
          :return: url (string)
-         :raises: AccessDeniedError, NoPDFLink
+         :raises: AccessDenied, NoPDFLink
     '''
     #we're looking for a url that looks like this:
     #http://www.sciencedirect.com/science/article/pii/S0022283601953379/pdfft?md5=07db9e1b612f64ea74872842e34316a5&pid=1-s2.0-S0022283601953379-main.pdf
@@ -51,12 +50,13 @@ def the_sciencedirect_disco(pma):
         starturl = the_doi_2step(pma.doi)
 
     if starturl == None:
-        return 'error: pii missing from PubMedArticle XML (needed for ScienceDirect link) AND doi lookup failed. Harsh!' 
+        raise NoPDFLink('pii missing from PubMedArticle XML (needed for ScienceDirect link) AND doi lookup failed. Harsh!') 
 
     try:
         r = requests.get(starturl)
     except requests.exceptions.TooManyRedirects:
-        return 'error: cannot reach %s' % pma.journal
+        raise NoPDFLink('TooManyRedirects: cannot reach %s via %s' % (pma.journal, starturl))
+
     tree = etree.fromstring(r.text, HTMLParser())
     div = tree.cssselect('div.icon_pdf')[0]
     url = div.cssselect('a')[0].get('href')
@@ -64,18 +64,17 @@ def the_sciencedirect_disco(pma):
         return url
     else:
         # give up, it's probably a "shopping cart" link.
-        return 'error: cannot find pdf link (probably paywalled)'
+        # TODO: parse return, raise more nuanced exceptions here.
+        raise NoPDFLink('cannot find pdf link (probably paywalled)')
 
 
 def the_jama_dance(pma):
     '''  :param: pma (PubMedArticle object)
-         :return: string (url or 'error: [error]')
+         :return: url (string)
+         :raises: AccessDenied, NoPDFLink
     '''
     url = the_doi_2step(pma.doi)
     r = requests.get(url)
-    if r.status_code != 200:
-        return 'error: JAMA url returned %i (%s)' % (r.status_code, url)
-
     parser = HTMLParser()
     tree = etree.fromstring(r.text, parser)
     # we're looking for a meta tag like this:
@@ -83,64 +82,56 @@ def the_jama_dance(pma):
     for item in tree.findall('head/meta'):
         if item.get('name')=='citation_pdf_url':
             return item.get('content')
-    return 'error: could not find PDF url in JAMA page (%s).' % url
+    raise NoPDFLink('could not find PDF url in JAMA page (%s).' % url)
 
 def the_jstage_dive(pma):
     '''  :param: pma (PubMedArticle object)
          :return: url (string)
-         :raises: AccessDeniedError, NoPDFLink
+         :raises: AccessDenied, NoPDFLink
     '''
     url = the_doi_2step(pma.doi)
     r = requests.get(url)
-    if r.status_code != 200:
-        return 'error: %i for %s' % (r.status_code, url)
     if r.url.find('jstage') > -1:
         return r.url.replace('_article', '_pdf')
     else:
-        return 'error: %s did not resolve to jstage article' % url
+        raise NoPDFLink('%s did not resolve to jstage article' % url)
 
 def the_wiley_shuffle(pma):
     '''  :param: pma (PubMedArticle object)
          :return: url (string)
-         :raises: AccessDeniedError, NoPDFLink
+         :raises: AccessDenied, NoPDFLink
     '''
     r = requests.get(format_templates['wiley'].format(a=pma))
     if r.headers['content-type'].find('html') > -1:
         if r.text.find('ACCESS DENIED') > -1:
-            return 'error: Wiley says ACCESS DENIED'
+            raise AccessDenied('Wiley says ACCESS DENIED to %s' % r.url)
+
         tree = etree.fromstring(r.text, HTMLParser())
         if tree.find('head/title').text.find('Not Found') > -1:
-            return 'error: Wiley says File Not found'
-
+            raise NoPDFLink('Wiley says File Not found (%s)' % r.url)
         iframe = tree.find('body/div/iframe')
         return iframe.get('src')
+
     elif r.headers['content-type'] == 'application/pdf':
         return r.url
-
-lancet_journals = {
-    'Lancet': { 'ja': 'lancet' },
-    }
 
 def the_lancet_tango(pma):
     '''  :param: pma (PubMedArticle object)
          :return: url (string)
-         :raises: AccessDeniedError, NoPDFLink
+         :raises: AccessDenied, NoPDFLink
     '''
-        if pma.pii:
-            #url = 'http://www.thelancet.com/pdfs/journals/{ja}/PII{a.pii}.pdf'.format(a = pma)
-        if pma.doi:
-            try:
-                url = the_doi_2step(pma.doi).replace('abstract', 'pdf').replace('article', 'pdfs')
-            except MetaPubError, e:
-                reason = '%s' % e
-    
+    if pma.pii:
+        return format_templates['lancet'].format(a = pma, ja=lancet_journals[pma.journal.translate(None, '.')]['ja'])
+    if pma.doi:
+        return the_doi_2step(pma.doi).replace('abstract', 'pdf').replace('article', 'pdfs')
+    else:
+        raise NoPDFLink('pii missing from PubMedArticle XML and DOI lookup failed. Harsh!')
 
 def the_nature_ballet(pma):
     '''  :param: pma (PubMedArticle object)
          :return: url (string)
-         :raises: AccessDeniedError, NoPDFLink
+         :raises: AccessDenied, NoPDFLink
     '''
-
     if pma.pii==None and pma.doi:
         url = the_doi_2step(pma.doi)
     else:
@@ -149,9 +140,8 @@ def the_nature_ballet(pma):
     if r.headers['content-type'].find('pdf') > -1:
         return r.url
     elif r.headers['content-type'].find('html') > -1:
-        return 'error: Nature says ACCESS DENIED'
-    else:
-        return None
+        raise AccessDenied('Nature denied access to %s' % r.url)
+    raise NoPDFLink('unknown problem retrieving from %s' % r.url)
 
 paywall_reason_template = '%s behind %s paywall'  # % (journal, publisher)
 
@@ -167,7 +157,8 @@ PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 EUROPEPMC_PDF_URL = 'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC{a.pmc}&blobtype=pdf'
 def the_pmc_twist(pma):
     '''  :param: pma (PubMedArticle object)
-         :return: string (url or 'error: [error]' or None)
+         :return: url (string)
+         :raises: AccessDeniedError, NoPDFLink
     '''
     url = PMC_PDF_URL.format(a=pma)
     # TODO: differentiate between paper embargo and URL block.
@@ -176,16 +167,16 @@ def the_pmc_twist(pma):
     #   <div class="el-exception-reason">Bulk downloading of content by IP address [162.217…,</div>
     r = requests.get(url)
     if r.headers['content-type'].find('html') > -1:
-               # paper might be embargoed, or we might be blocked.  try EuropePMC.org
+        # paper might be embargoed, or we might be blocked.  try EuropePMC.org
         url = EUROPEPMC_PDF_URL.format(a=pma)
         r = requests.get(url)
         if r.headers['content-type'].find('html') > -1:
-            return 'error: could not get PDF url from either NIH or EuropePMC.org'
+            raise NoPDFLink('could not get PDF url from either NIH or EuropePMC.org')
+
     if r.headers['content-type'].find('pdf') > -1:
         return url
-    else:
-        return 'error: PMC download returned weird content-type %s' % r.headers['content-type']
 
+    raise NoPDFLink('PMC download returned weird content-type %s' % r.headers['content-type'])
 
 
 def find_article_from_pma(pma, use_crossref=True, paywalls=False):
@@ -195,12 +186,11 @@ def find_article_from_pma(pma, use_crossref=True, paywalls=False):
     jrnl = pma.journal.translate(None, '.')
 
     if pma.pmc:
-        url = the_pmc_twist(pma)
-        if url.find('error') > -1:
-            reason = url
-            url = None
-        else:
-            return url, reason
+        try:
+            url = the_pmc_twist(pma)
+            return (url, None)
+        except Exception, e:
+            reason = str(e)
 
     if pma.doi==None and use_crossref:
         pma.doi = PubMedArticle2doi(pma)
@@ -210,6 +200,7 @@ def find_article_from_pma(pma, use_crossref=True, paywalls=False):
             reason = 'DOI missing from PubMedArticle.'
  
     if jrnl in simple_formats_pii.keys():
+        # TODO: find a smarter way to process these (maybe just break them out into publishers)
         if pma.pii:
             url = simple_formats_pii[jrnl].format(a=pma)
             reason = ''
@@ -226,7 +217,7 @@ def find_article_from_pma(pma, use_crossref=True, paywalls=False):
             r = requests.get(url)
             if r.text.find('Access Denial') > -1:
                 url = None
-                reason = 'ScienceDirect says ACCESS DENIED'
+                reason = 'Access Denied by ScienceDirect'
 
     elif jrnl in simple_formats_doi.keys():
         if pma.doi:
@@ -239,34 +230,35 @@ def find_article_from_pma(pma, use_crossref=True, paywalls=False):
                 baseurl = the_doi_2step(pma.doi)
                 url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
                 reason = ''
-            except MetaPubError, e:
+            except Exception, e:
                 reason = '%s' % e
 
     elif jrnl in jstage_journals:
         if pma.doi:
-            url = the_jstage_dive(pma)
-            if result.find('error') > -1:
-                reason = url
-                url = None
-
+            try:
+                url = the_jstage_dive(pma)
+            except Exception, e:
+                reason = str(e)
+            
     elif jrnl in wiley_journals:
         if pma.doi:
-            url = the_wiley_shuffle(pma)
-            if url.find('error') > -1:
-                reason = url
-                url = None
+            try:
+                url = the_wiley_shuffle(pma)
+            except Exception, e:
+                reason = str(e)
 
     elif jrnl in jama_journals:
-        url = the_jama_dance(pma)
-        if url.find('error') > -1:
-            reason = url
-            url = None
+        try:
+            url = the_jama_dance(pma)
+        except Exception, e:
+            reason = str(e)
 
     elif jrnl in vip_journals.keys(): 
         pma = square_voliss_data_for_pma(pma)
         if pma.volume and pma.issue:
             url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
         else:
+            # TODO: try the_doi_2step
             reason = 'volume and maybe also issue data missing from PubMedArticle'
 
     elif jrnl in spandidos_journals.keys():
@@ -274,6 +266,7 @@ def find_article_from_pma(pma, use_crossref=True, paywalls=False):
         if pma.volume and pma.issue:
             url = spandidos_format.format(host=vip_journals[jrnl]['host'], a=pma)
         else:
+            # TODO: try the_doi_2step
             reason = 'volume and maybe also issue data missing from PubMedArticle'
 
     elif jrnl in nature_journals.keys():
@@ -287,6 +280,7 @@ def find_article_from_pma(pma, use_crossref=True, paywalls=False):
             url = cell_format.format( a=pma, ja=cell_journals[jrnl]['ja'],
                     pii=pma.pii.translate(None,'-()') )
         else:
+            # TODO: try the_doi_2step
             reason = 'pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
 
     elif jrnl.find('Lancet') > -1:
@@ -340,7 +334,7 @@ class FindIt(object):
 
         if self.pmid:
             self.pma = fetch.article_by_pmid(self.pmid)
-            print self.pmid
+            #print self.pmid
             try:
                 self.url, self.reason = find_article_from_pma(self.pma, paywalls=self.paywalls)
             except requests.exceptions.ConnectionError, e:
