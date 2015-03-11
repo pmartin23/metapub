@@ -13,6 +13,9 @@
 #17145065: no URL because No URL format for Journal Mutat Res
 #15452722: no URL because No URL format for Journal Graefes Arch Clin Exp Ophthalmol
 #15453866: no URL because No URL format for Journal Acta Ophthalmol Scand
+#10413889: Medicina (B Aires) -- no URL because No URL format for Journal Medicina (B Aires)
+#10415464: Ophthalmic Genet. -- no URL because No URL format for Journal Ophthalmic Genet
+#10411572: J. Pharmacol. Exp. Ther. -- no URL because No URL format for Journal J Pharmacol Exp Ther
 
 
 
@@ -82,6 +85,7 @@ sciencedirect_journals = (
     'J Am Coll Cardiol',
     'J Mol Biol',
     'J Neurol Sci',
+    'Life Sci',
     'Mol Cell Endocrinol',
     'Mol Cell Probes',
     'Mol Genet Metab',
@@ -214,6 +218,7 @@ simple_formats_pii = {
     'Diabetes Res Clin Pract': 'http://www.diabetesresearchclinicalpractice.com/article/{a.pii}/pdf', #ScienceDirect
     'Epilepsy Res': 'http://www.epires-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Eur J Paediatr Neurol': 'http://www.ejpn-journal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Exp Hematol': 'http://www.exphem.org/article/{a.pii}/pdf', #ScienceDirect
     'Fertil Steril': 'http://www.fertstert.org/article/{a.pii}/pdf',    #ScienceDirect
     'Gastroenterology': 'http://www.gastrojournal.org/article/{a.pii}/pdf',
     'Gynecol Oncol': 'http://www.gynecologiconcology-online.net/article/{a.pii}/pdf', #ScienceDirect

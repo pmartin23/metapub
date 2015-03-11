@@ -65,7 +65,7 @@ def the_sciencedirect_disco(pma):
     else:
         # give up, it's probably a "shopping cart" link.
         # TODO: parse return, raise more nuanced exceptions here.
-        raise NoPDFLink('cannot find pdf link (probably paywalled)')
+        raise NoPDFLink('cannot find pdf link (probably behind paywall)')
 
 
 def the_jama_dance(pma):
@@ -133,7 +133,8 @@ def the_nature_ballet(pma):
          :raises: AccessDenied, NoPDFLink
     '''
     if pma.pii==None and pma.doi:
-        url = the_doi_2step(pma.doi)
+        starturl = the_doi_2step(pma.doi)
+        url = starturl.replace('html', 'pdf').replace('abs', 'pdf')
     else:
         url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
     r = requests.get(url)
@@ -160,15 +161,15 @@ def the_pmc_twist(pma):
          :return: url (string)
          :raises: AccessDeniedError, NoPDFLink
     '''
-    url = PMC_PDF_URL.format(a=pma)
+    url = EUROPEPMC_PDF_URL.format(a=pma)
     # TODO: differentiate between paper embargo and URL block.
     #       URL block might be discerned by grepping for this:
     #
     #   <div class="el-exception-reason">Bulk downloading of content by IP address [162.217…,</div>
     r = requests.get(url)
     if r.headers['content-type'].find('html') > -1:
-        # paper might be embargoed, or we might be blocked.  try EuropePMC.org
-        url = EUROPEPMC_PDF_URL.format(a=pma)
+        url = PMC_PDF_URL.format(a=pma)
+        # try the other PMC.
         r = requests.get(url)
         if r.headers['content-type'].find('html') > -1:
             raise NoPDFLink('could not get PDF url from either NIH or EuropePMC.org')
@@ -297,9 +298,9 @@ def find_article_from_pma(pma, use_crossref=True, paywalls=False):
 
     elif jrnl in paywall_journals:
         if paywalls == False:
-            reason = '%s behind obnoxious paywall' % jrnl
+            reason = '%s behind paywall' % jrnl
         else:
-            reason = '%s in paywall; not yet smart enough to navigate paywalls, sorry!' % jrnl
+            reason = '%s behind paywall; not yet smart enough to navigate paywalls, sorry!' % jrnl
 
     elif jrnl in todo_journals:
         reason = 'TODO format -- example: %s' % todo_journals[jrnl]['example']
@@ -328,9 +329,9 @@ class FindIt(object):
         self.url = kwargs.get('url', None)
         self.reason = None
         self.paywalls = kwargs.get('paywalls', False)
+        self.tmpdir = kwargs.get('tmpdir', '/tmp')
 
         self.pma = None
-        #self.cr_top_result = None
 
         if self.pmid:
             self.pma = fetch.article_by_pmid(self.pmid)
@@ -344,7 +345,6 @@ class FindIt(object):
         elif self.doi:
             self.url, self.reason = find_article_from_doi(self.doi, paywalls=self.paywalls)
 
-
     def download(self, filename):
         # verify=False means it ignores bad SSL certs
         response = requests.get(url, stream=True, timeout=CURL_TIMEOUT, verify=False)
@@ -352,8 +352,9 @@ class FindIt(object):
         if not response.ok:
             return 'error'
 
+        # TODO: download file first to self.tmpdir, then copy to final destination
         if response.status_code == 200:
-            if response.headers.get('content-type')=='application/pdf':
+            if response.headers.get('content-type').find('pdf') > -1:
                 with open(filename, 'wb') as handle:
                     for block in response.iter_content(1024):
                         if not block:
