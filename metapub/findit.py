@@ -17,7 +17,21 @@ def the_doi_2step(doi):
     if response.status_code == 200:
         return response.url
     else:
-        raise MetaPubError('dx.doi.org lookup failed for doi %s' % doi)
+        raise MetaPubError('dx.doi.org lookup failed for doi %s (HTTP %i returned)' % (doi, reponse.status_code))
+
+def square_voliss_data_for_pma(pma):
+    if pma.volume != None and pma.issue is None:
+        # try to get a number out of the parts that came after the first number.
+        volparts = re_numbers.findall(pma.volume)
+        if volparts > 1:
+            pma.volume = volparts[0]
+            # take a guess. best we can do. this often works (e.g. Brain journal)
+            pma.issue = volparts[1]
+    if pma.issue and pma.volume:
+        if pma.issue.find('Pt') > -1:
+            pma.issue = re_numbers.findall(pma.issue)[0]
+    return pma
+
 
 format_templates = {
     'acs': 'http://pubs.acs.org/doi/pdf/{a.doi}',
@@ -57,10 +71,22 @@ sciencedirect_journals = [
     ]
 
 sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
-def get_sciencedirect_pdf_url(pma):
-    '''we're looking for a url that looks like this:
-    http://www.sciencedirect.com/science/article/pii/S0022283601953379/pdfft?md5=07db9e1b612f64ea74872842e34316a5&pid=1-s2.0-S0022283601953379-main.pdf'''
-    starturl = sciencedirect_url.format(piit = pma.pii.translate(None,'-()'))
+def the_sciencedirect_disco(pma):
+    '''  :param: pma (PubMedArticle object)
+         :return: string (url or 'error: [error]')
+    '''
+    #we're looking for a url that looks like this:
+    #http://www.sciencedirect.com/science/article/pii/S0022283601953379/pdfft?md5=07db9e1b612f64ea74872842e34316a5&pid=1-s2.0-S0022283601953379-main.pdf
+
+    starturl = None
+    if pma.pii:
+        starturl = sciencedirect_url.format(piit = pma.pii.translate(None,'-()'))
+    elif pma.doi:
+        starturl = the_doi_2step(pma.doi)
+
+    if starturl == None:
+        return 'error: pii missing from PubMedArticle XML (needed for ScienceDirect link) AND doi lookup failed. Harsh!' 
+
     try:
         r = requests.get(starturl)
     except requests.exceptions.TooManyRedirects:
@@ -72,40 +98,43 @@ def get_sciencedirect_pdf_url(pma):
         return url
     else:
         # give up, it's probably a "shopping cart" link.
-        return 'error: cannot find pdf link'
+        return 'error: cannot find pdf link (probably paywalled)'
 
 
 jama_journals = [
-                 'Arch Gen Psychiatry',
-                 'Arch Neurol',
-                 'Arch Ophthalmol',
-                 'JAMA',
-                 'JAMA Dermatol',
-                 'JAMA Facial Plast Surg',
-                 'JAMA Intern Med',
-                 'JAMA Neurol',
-                 'JAMA Oncol',
-                 'JAMA Ophthalmol',
-                 'JAMA Otolaryngol Head Neck Surg',
-                 'JAMA Pediatr',
-                 'JAMA Psychiatry',
-                 'JAMA Surg', 
-                ]
+     'Arch Gen Psychiatry',
+     'Arch Neurol',
+     'Arch Ophthalmol',
+     'JAMA',
+     'JAMA Dermatol',
+     'JAMA Facial Plast Surg',
+     'JAMA Intern Med',
+     'JAMA Neurol',
+     'JAMA Oncol',
+     'JAMA Ophthalmol',
+     'JAMA Otolaryngol Head Neck Surg',
+     'JAMA Pediatr',
+     'JAMA Psychiatry',
+     'JAMA Surg', 
+     ]
 
-def the_jama_dance(doi):
-    url = the_doi_2step(doi)
+def the_jama_dance(pma):
+    '''  :param: pma (PubMedArticle object)
+         :return: string (url or 'error: [error]')
+    '''
+    url = the_doi_2step(pma.doi)
     r = requests.get(url)
     if r.status_code != 200:
-        return 'error'
+        return 'error: JAMA url returned %i (%s)' % (r.status_code, url)
 
     parser = HTMLParser()
     tree = etree.fromstring(r.text, parser)
-    
     # we're looking for a meta tag like this:
     # <meta name="citation_pdf_url" content="http://archneur.jamanetwork.com/data/Journals/NEUR/13776/NOC40008.pdf" />
     for item in tree.findall('head/meta'):
         if item.get('name')=='citation_pdf_url':
             return item.get('content')
+    return 'error: could not find PDF url in JAMA page (%s).' % url
 
 # TODO
 # doiserbia (Library of Serbia) articles can be grabbed by doing the_doi_2step,
@@ -113,6 +142,7 @@ def the_jama_dance(doi):
 doiserbia_journals = ['Genetika']
 
 todo_journals = { 
+    'Pharmacol Rep': { 'example': 'http://www.ncbi.nlm.nih.gov/pubmed/?term=23238479[uid] --> www.if-pan.krakow.pl/pjp/pdf/2012/5_1234.pdf' },
     'Med Sci Monit': { 'example': 'http://www.medscimonit.com/download/index/idArt/869530' },
     'Asian Pac J Cancer Prev': { 'example': 'http://www.apocpcontrol.org/paper_file/issue_abs/Volume12_No7/1771-1776%20c%206.9%20Lei%20Zhong.pdf' },
     'Rev Esp Cardiol': { 'example': 'http://www.revespcardiol.org/en/linkresolver/articulo-resolver/13131646/' },
@@ -141,7 +171,10 @@ jstage_journals = [
     'Endocr J',
     ]
 
-def exit_jstage_left(pma):
+def the_jstage_dive(pma):
+    '''  :param: pma (PubMedArticle object)
+         :return: string (url or 'error: [error]')
+    '''
     url = the_doi_2step(pma.doi)
     r = requests.get(url)
     if r.status_code != 200:
@@ -197,7 +230,6 @@ oa_journals = (
     'BMC genetics',
     )
 
-
 wiley_journals = [
     'Acta Neurol Scand',
     'Ann Hum Genet',
@@ -246,6 +278,7 @@ wiley_journals = [
     'Mol Carcinog',
     'Mov Disord',
     'Muscle Nerve',
+    'Neuropathol Appl Neurobiol',
     'Pediatr Blood Cancer',
     'Pediatr Int',
     'Prenat Diagn',
@@ -257,6 +290,9 @@ wiley_journals = [
     ]
 
 def the_wiley_shuffle(pma):
+    '''  :param: pma (PubMedArticle object)
+         :return: string (url or 'error: [error]')
+    '''
     r = requests.get(format_templates['wiley'].format(a=pma))
     if r.headers['content-type'].find('html') > -1:
         if r.text.find('ACCESS DENIED') > -1:
@@ -306,6 +342,7 @@ simple_formats_pii = {
     'Metabolism': 'http://www.metabolismjournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Metab Clin Exp': 'http://www.metabolismjournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Mol Genet Metab': 'http://www.mgmjournal.com/article/{a.pii}/pdf', #ScienceDirect
+    'Neurobiol Aging': 'http://www.neurobiologyofaging.org/article/{a.pii}/pdf', #ScienceDirect
     'Neuromuscul Disord': 'http://www.nmd-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Parkinsonism Relat Disord': 'http://www.prd-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Pediatr Neurol': 'http://www.pedneur.com/article/{a.pii}/pdf', #ScienceDirect
@@ -313,10 +350,8 @@ simple_formats_pii = {
     'Thromb Res': 'http://www.thrombosisresearch.com/article/{a.pii}/pdf', #ScienceDirect
     } 
 
-# vip = Volume-Issue-Page format -- URLs that have the same format
-# except for the host name
-
-# http://www.bloodjournal.org/content/117/5/1622.full.pdf
+# vip = Volume-Issue-Page format 
+#       URLs that have the same format except for the host name
 
 vip_format = 'http://{host}/content/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
 
@@ -325,7 +360,8 @@ vip_journals = {
         'Am J Hypertens': { 'host': 'ajh.oxfordjournals.org' },
         'Ann Oncol' : {'host' : 'annonc.oxfordjournals.org'},
         'Arterioscler Thromb Vasc Biol' : {'host' : 'atvb.ahajournals.org'},
-        'Blood': { 'host': 'bloodjournal.org' }, #TODO: real url is http://www.bloodjournal.org/content/bloodjournal/122/23/3844.full.pdf
+        #TODO: real url is http://www.bloodjournal.org/content/bloodjournal/122/23/3844.full.pdf
+        'Blood': { 'host': 'bloodjournal.org' }, 
         'Brain': { 'host': 'brain.oxfordjournals.org' },
         'Breast Cancer Res' : { 'host': 'breast-cancer-research.com' },
         'Cancer Discov' : {'host': 'cancerdiscovery.aacrjournals.org'},
@@ -334,12 +370,14 @@ vip_journals = {
         'Carcinogenesis': { 'host': 'carcin.oxfordjournals.org' } ,
         'Cardiovasc Res' : {'host' : 'cardiovascres.oxfordjournals.org'},
         'Circulation': { 'host': 'circ.ahajournals.org' },
+        'Circ Arrhythm Electrophysiol': { 'host': 'circep.ahajournals.org' },
         'Circ Cardiovasc Genet' : {'host' : 'circgenetics.ahajournals.org'},
         'Circ Res' : {'host' : 'circres.ahajournals.org'},
         'Clin Cancer Res' : {'host' : 'clincancerres.aacrjournals.org'},
         'Clin Chem' : {'host' : 'clinchem.org'},
         'Diabetes': {'host': 'diabetes.diabetesjournals.org'},
         'Diabetes Care': { 'host': 'care.diabetesjournals.org' },
+        'Drug Metab Dispos': { 'host': 'dmd.aspetjournals.org' },
         'Endocr Relat Cancer': { 'host': 'erc.endocrinology-journals.org' },
         'Eur Heart J' : {'host' : 'eurheartj.oxfordjournals.org'},
         'Eur J Endocrinol' : {'host' : 'eje-online.org'},
@@ -352,8 +390,6 @@ vip_journals = {
         'Hum Mol Genet': { 'host': 'hmg.oxfordjournals.org' },
         'Hum Reprod': { 'host': 'humrep.oxfordjournals.org' },
         'Hypertension': { 'host': 'hyper.ahajournals.org' },
-        'Int J Oncol' : {'host' : 'spandidos-publications.com/ijo/'},
-        'Int J Mol Med': {'host': 'spandidos-publications.com/ijmm/'},
         'Invest Ophthalmol Vis Sci': { 'host': 'www.iovs.org' },
         'IOVS' : {'host' : 'iovs.org'},
         'J Am Soc Nephrol' : {'host' : 'jasn.asnjournals.org'},
@@ -381,8 +417,6 @@ vip_journals = {
         'Neurology' : {'host' : 'neurology.org'},
         'Nephrol Dial Transplant': {'host': 'ndt.oxfordjournals.org'},
         'Nucleic Acids Res' : {'host' : 'nar.oxfordjournals.org'},
-        'Oncol Lett' : {'host' : 'spandidos-publications.com/ol/'},
-        'Oncol Rep' : {'host' : 'spandidos-publications.com/or/'},
         'Orphanet J Rare Dis' : {'host' : 'ojrd.com'},
         'Pediatrics': {'host': 'pediatrics.aappublications.org'},
         'Proc Natl Acad Sci USA': { 'host': 'pnas.org'},
@@ -390,6 +424,15 @@ vip_journals = {
         'Science': { 'host': 'sciencemag.org' },
         'Thorax': { 'host': 'thorax.bmj.com' },
         }
+
+# Spandidos: just different enough from vip_formats to be obnoxious.
+spandidos_format = 'http://www.spandidos-publications.com/{ja}/{a.volume}/{a.issue}/{a.first_page}/download'
+spandidos_journals = {
+        'Int J Oncol' : {'ja' : 'spandidos-publications.com/ijo/'},
+        'Int J Mol Med': {'ja': 'spandidos-publications.com/ijmm/'},
+        'Oncol Lett' : {'ja' : 'spandidos-publications.com/ol/'},
+        'Oncol Rep' : {'ja' : 'spandidos-publications.com/or/'},
+    }
 
 # cell journals
 #cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
@@ -409,6 +452,7 @@ nature_format = 'http://www.nature.com/{ja}/journal/v{a.volume}/n{a.issue}/pdf/{
 nature_journals = {
     'Eur J Hum Genet': { 'ja': 'ejhg' },
     'Eye (Lond)': { 'ja': 'eye' },
+    'Genes Immun': { 'ja': 'gene' },
     'J Hum Genet': { 'ja': 'jhg' },
     'Kidney Int': { 'ja': 'ki' },
     'Leukemia': { 'ja': 'leu' },
@@ -426,7 +470,11 @@ nature_journals = {
     'Pediatr Res': { 'ja': 'pr' },
     }
 
-def the_nature_show(pma):
+def the_nature_waltz(pma):
+    '''  :param: pma (PubMedArticle object)
+         :return: string (url or 'error: [error]' or None)
+    '''
+
     if pma.pii==None and pma.doi:
         url = the_doi_2step(pma.doi)
     else:
@@ -494,8 +542,10 @@ karger_journals = [
 
 springer_journals = [
     'Acta Neuropathol',
+    'Ann Hematol',
     'Ann Surg Oncol',
     'Arch Dermatol Res',
+    'Biochem Genet',
     'Breast Cancer Res Treat',
     'Calcif Tissue Int',
     'Cell Mol Neurobiol',
@@ -505,6 +555,7 @@ springer_journals = [
     'HNO',
     'Hum Genet',
     'Immunogenetics',
+    'Int J Colorectal Dis',
     'J Bone Miner Metab',
     'J Endocrinol Invest',
     'J Inherit Metab Dis',
@@ -537,46 +588,72 @@ def find_article_from_doi(doi):
     
 
 PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
-def get_pdf_url_from_pmc_unless_embargoed(pma):
+EUROPEPMC_PDF_URL = 'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC{a.pmc}&blobtype=pdf'
+def the_pmc_twist(pma):
+    '''  :param: pma (PubMedArticle object)
+         :return: string (url or 'error: [error]' or None)
+    '''
     url = PMC_PDF_URL.format(a=pma)
+    # TODO: differentiate between paper embargo and URL block.
+    #       URL block might be discerned by grepping for this:
+    #
+    #   <div class="el-exception-reason">Bulk downloading of content by IP address [162.217…,</div>
     r = requests.get(url)
     if r.headers['content-type'].find('html') > -1:
-        return None
-    else:
+               # paper might be embargoed, or we might be blocked.  try EuropePMC.org
+        url = EUROPEPMC_PDF_URL.format(a=pma)
+        r = requests.get(url)
+        if r.headers['content-type'].find('html') > -1:
+            return 'error: could not get PDF url from either NIH or EuropePMC.org'
+    if r.headers['content-type'].find('pdf') > -1:
         return url
+    else:
+        return 'error: PMC download returned weird content-type %s' % r.headers['content-type']
 
 
-def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
+
+def find_article_from_pma(pma, use_crossref=True, paywalls=False):
     reason = None
     url = None
 
     jrnl = pma.journal.translate(None, '.')
 
     if pma.pmc:
-        url = get_pdf_url_from_pmc_unless_embargoed(pma)
-        if url:
-            return url, reason
-
-    if jrnl in simple_formats_pii.keys():
-        if pma.pii:
-            url = simple_formats_pii[jrnl].format(a=pma)
-            r = requests.get(url)
-            if r.text.find('Access Denial') > -1:
-                reason = 'error: ScienceDirect says ACCESS DENIED'
-                url = None
-            return url, reason
+        url = the_pmc_twist(pma)
+        if url.find('error') > -1:
+            reason = url
+            url = None
         else:
-            reason = 'pii missing from PubMedArticle XML'
+            return url, reason
 
-    if pma.doi==None and crossref_doi:
+    if pma.doi==None and use_crossref:
         pma.doi = PubMedArticle2doi(pma)
         if pma.doi==None:
             reason = 'DOI missing from PubMedArticle and CrossRef lookup failed.'
         else:
             reason = 'DOI missing from PubMedArticle.'
  
-    if jrnl in simple_formats_doi.keys():
-        if pma.doi != None:
+    if jrnl in simple_formats_pii.keys():
+        if pma.pii:
+            url = simple_formats_pii[jrnl].format(a=pma)
+            reason = ''
+        elif pma.doi:
+            try:
+                url = the_doi_2step(pma.doi)
+            except MetaPubError, e:
+                reason = '%s' % e
+        else:
+            url = None
+            reason = 'pii missing from PubMedArticle XML and DOI lookup failed. Harsh!'
+
+        if url:
+            r = requests.get(url)
+            if r.text.find('Access Denial') > -1:
+                url = None
+                reason = 'ScienceDirect says ACCESS DENIED'
+
+    elif jrnl in simple_formats_doi.keys():
+        if pma.doi:
             url = simple_formats_doi[jrnl].format(a=pma)
             reason = ''
 
@@ -591,13 +668,10 @@ def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
 
     elif jrnl in jstage_journals:
         if pma.doi:
-            result = exit_jstage_left(pma)
+            url = the_jstage_dive(pma)
             if result.find('error') > -1:
-                reason = result
+                reason = url
                 url = None
-            else:
-                reason = None
-                url = result
 
     elif jrnl in wiley_journals:
         if pma.doi:
@@ -607,34 +681,27 @@ def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
                 url = None
 
     elif jrnl in jama_journals:
-        if pma.doi:
-            try:
-                url = the_jama_dance(pma.doi)
-                reason = ''
-            except MetaPubError, e:
-                reason = '%s' % e
+        url = the_jama_dance(pma)
+        if url.find('error') > -1:
+            reason = url
+            url = None
 
-    elif jrnl in vip_journals.keys():
-        if pma.volume != None and pma.issue is None:
-            # try to get a number out of the parts that came after the first number.
-            volparts = re_numbers.findall(pma.volume)
-            if volparts > 1:
-                pma.volume = volparts[0]
-                # take a guess. best we can do. this often works (e.g. Brain journal)
-                pma.issue = volparts[1]
-            else:
-                reason = 'issue data missing (volume: %s, issue: %s)' % (pma.volume, pma.issue)
-
-        if pma.issue and pma.volume:
-            if pma.issue.find('Pt') > -1:
-                pma.issue = re_numbers.findall(pma.issue)[0]
+    elif jrnl in vip_journals.keys(): 
+        pma = square_voliss_data_for_pma(pma)
+        if pma.volume and pma.issue:
             url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
         else:
-            reason = 'volume and maybe also issue data missing'
+            reason = 'volume and maybe also issue data missing from PubMedArticle'
 
+    elif jrnl in spandidos_journals.keys():
+        pma = square_voliss_data_for_pma(pma)
+        if pma.volume and pma.issue:
+            url = spandidos_format.format(host=vip_journals[jrnl]['host'], a=pma)
+        else:
+            reason = 'volume and maybe also issue data missing from PubMedArticle'
 
     elif jrnl in nature_journals.keys():
-        result = the_nature_show(pma)
+        result = the_nature_waltz(pma)
         if result.find('error') > -1:
             reason = result
             url = None
@@ -647,19 +714,21 @@ def find_article_from_pma(pma, crossref_doi=True, paywalls=False):
                     pii=pma.pii.translate(None,'-()') )
         else:
             reason = 'pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
-    
-    elif jrnl in 'Lancet' and pma.pii is not None:
-        #url = 'http://download.thelancet.com/pdfs/journals/lancet/PII{piit}.pdf'.format(piit = pma.pii.translate(None,'-()'))
-        url = 'http://www.thelancet.com/pdfs/journals/lancet/PII{a.pii}.pdf'.format(a = pma)
 
+    elif jrnl.find('Lancet') > -1:
+        #if pma.pii:
+            #url = 'http://www.thelancet.com/pdfs/journals/{ja}/PII{a.pii}.pdf'.format(a = pma)
+        if pma.doi:
+            try:
+                url = the_doi_2step(pma.doi).replace('abstract', 'pdf').replace('article', 'pdfs')
+            except MetaPubError, e:
+                reason = '%s' % e
+    
     elif jrnl in sciencedirect_journals:
-        if pma.pii:
-            url = get_sciencedirect_pdf_url(pma)
-            if url.find('error') > -1:
-                reason = url
-                url = None
-        else:
-            reason = 'pii missing from PubMedArticle XML (%s in ScienceDirect format)' % jrnl
+        url = the_sciencedirect_disco(pma)
+        if url.find('error') > -1:
+            reason = url
+            url = None
 
     elif jrnl in paywall_journals:
         if paywalls == False:
