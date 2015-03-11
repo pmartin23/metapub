@@ -264,7 +264,7 @@ def find_article_from_pma(pma, use_crossref=True, paywalls=False):
     elif jrnl in spandidos_journals.keys():
         pma = square_voliss_data_for_pma(pma)
         if pma.volume and pma.issue:
-            url = spandidos_format.format(host=vip_journals[jrnl]['host'], a=pma)
+            url = spandidos_format.format(ja=spandidos_journals[jrnl]['ja'], a=pma)
         else:
             # TODO: try the_doi_2step
             reason = 'volume and maybe also issue data missing from PubMedArticle'

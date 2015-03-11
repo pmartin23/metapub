@@ -336,10 +336,10 @@ vip_journals = {
 # Spandidos: just different enough from vip_formats to be obnoxious.
 spandidos_format = 'http://www.spandidos-publications.com/{ja}/{a.volume}/{a.issue}/{a.first_page}/download'
 spandidos_journals = {
-        'Int J Oncol' : {'ja' : 'spandidos-publications.com/ijo/'},
-        'Int J Mol Med': {'ja': 'spandidos-publications.com/ijmm/'},
-        'Oncol Lett' : {'ja' : 'spandidos-publications.com/ol/'},
-        'Oncol Rep' : {'ja' : 'spandidos-publications.com/or/'},
+        'Int J Oncol': { 'ja' : 'ijo' },
+        'Int J Mol Med': { 'ja': 'ijmm' },
+        'Oncol Lett': { 'ja' : 'ol' },
+        'Oncol Rep': { 'ja' : 'or' },
     }
 
 
