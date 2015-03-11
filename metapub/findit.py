@@ -135,7 +135,7 @@ def the_nature_ballet(pma):
     if pma.pii==None and pma.doi:
         url = the_doi_2step(pma.doi)
     else:
-        url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')])
+        url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
     r = requests.get(url)
     if r.headers['content-type'].find('pdf') > -1:
         return r.url
