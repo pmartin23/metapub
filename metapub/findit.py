@@ -19,7 +19,7 @@ def the_doi_2step(doi):
     if response.status_code == 200:
         return response.url
     else:
-        raise NoPDFLink('dx.doi.org lookup failed for doi %s (HTTP %i returned)' % (doi, reponse.status_code))
+        raise NoPDFLink('dx.doi.org lookup failed for doi %s (HTTP %i returned)' % (doi, response.status_code))
 
 def square_voliss_data_for_pma(pma):
     if pma.volume != None and pma.issue is None:
