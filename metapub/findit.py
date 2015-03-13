@@ -165,7 +165,7 @@ def the_pmc_twist(pma):
     # TODO: differentiate between paper embargo and URL block.
     #       URL block might be discerned by grepping for this:
     #
-    #   <div class="el-exception-reason">Bulk downloading of content by IP address [162.217…,</div>
+    #   <div class="el-exception-reason">Bulk downloading of content by IP address [162.217...,</div>
     r = requests.get(url)
     if r.headers['content-type'].find('html') > -1:
         url = PMC_PDF_URL.format(a=pma)
