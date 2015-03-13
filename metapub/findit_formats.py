@@ -2,13 +2,6 @@
 
 # TODO
 #
-#12027577: Seizure -- no URL because No URL format for Journal Seizure
-#12016470: World J Surg -- no URL because No URL format for Journal World J Surg
-#12016472: World J Surg -- no URL because No URL format for Journal World J Surg
-#12016484: World J Surg -- no URL because No URL format for Journal World J Surg
-#12015062: Zhonghua Xue Ye Xue Za Zhi -- no URL because No URL format for Journal Zhonghua Xue Ye Xue Za Zhi
-#12015065: Zhonghua Xue Ye Xue Za Zhi -- no URL because No URL format for Journal Zhonghua Xue Ye Xue Za Zhi
-#12032748: Int. J. Obes. Relat. Metab. Disord. -- no URL because No URL format for Journal Int J Obes Relat Metab Disord
 #11980567: Clin. Sci. -- no URL because No URL format for Journal Clin Sci
 #12035837: Can J Neurol Sci -- no URL because No URL format for Journal Can J Neurol Sci
 #12036192: Clin. Nephrol. -- no URL because No URL format for Journal Clin Nephrol
@@ -52,12 +45,15 @@
 #17145028: no URL because No URL format for Journal Med Clin (Barc)
 #17145065: no URL because No URL format for Journal Mutat Res
 #15452722: no URL because No URL format for Journal Graefes Arch Clin Exp Ophthalmol
-#15453866: no URL because No URL format for Journal Acta Ophthalmol Scand
+
+# HARDER CASES:
+#
 #10413889: Medicina (B Aires) -- no URL because No URL format for Journal Medicina (B Aires)
+#12027577: Seizure -- no URL because No URL format for Journal Seizure
 #10415464: Ophthalmic Genet. -- no URL because No URL format for Journal Ophthalmic Genet
-#10411572: J. Pharmacol. Exp. Ther. -- no URL because No URL format for Journal J Pharmacol Exp Ther
-
-
+#12015062: Zhonghua Xue Ye Xue Za Zhi -- no URL because No URL format for Journal Zhonghua Xue Ye Xue Za Zhi
+#12015065: Zhonghua Xue Ye Xue Za Zhi -- no URL because No URL format for Journal Zhonghua Xue Ye Xue Za Zhi
+#12032748: Int. J. Obes. Relat. Metab. Disord. -- no URL because No URL format for Journal Int J Obes Relat Metab Disord
 
 todo_journals = {
     'Pharmacol Rep': { 'example': 'http://www.ncbi.nlm.nih.gov/pubmed/?term=23238479[uid] --> www.if-pan.krakow.pl/pjp/pdf/2012/5_1234.pdf' },
@@ -108,6 +104,7 @@ lancet_journals = {
 
 # the SD journals are also represented in simple_formats_pii
 sciencedirect_journals = (
+    'Ann Genet',
     'Arch Pediatr',
     'Blood Cells Mol Dis',
     'Biochem Biophys Res Commun' ,
@@ -122,6 +119,7 @@ sciencedirect_journals = (
     'Genomics',
     'Gynecol Obstet Fertil',
     'Hepatol Res',
+    'Hum Immunol',
     'J Am Coll Cardiol',
     'J Mol Biol',
     'J Neurol Sci',
@@ -228,6 +226,7 @@ simple_formats_doi = {
     'Genet Test Mol Biomarkers': format_templates['liebert'],
     'Thyroid': format_templates['liebert'],
 
+    'Endocrinology': 'http://press.endocrine.org/doi/pdf/{a.doi}',
     'Mol Endocrinol': 'http://press.endocrine.org/doi/pdf/{a.doi}',
     'J Periodontol': 'http://www.joponline.org/doi/pdf/{a.doi}',
 
@@ -281,6 +280,7 @@ simple_formats_pii = {
     'Neuromuscul Disord': 'http://www.nmd-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Parkinsonism Relat Disord': 'http://www.prd-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Pediatr Neurol': 'http://www.pedneur.com/article/{a.pii}/pdf', #ScienceDirect
+    'Placenta': 'http://www.placentajournal.org/article/{a.pii}/pdf', #ScienceDirect
     'Surg Neurol': 'http://www.worldneurosurgery.org/article/{a.pii}/pdf', #ScienceDirect
     'Thromb Res': 'http://www.thrombosisresearch.com/article/{a.pii}/pdf', #ScienceDirect
     }
@@ -310,6 +310,7 @@ vip_format = 'http://{host}/content/{a.volume}/{a.issue}/{a.first_page}.full.pdf
 
 vip_journals = {
         'Ann Clin Biochem': { 'host': 'acb.sagepub.com' },
+        'Am J Clin Pathol': { 'host': 'ajcp.ascpjournals.org' },
         'Am J Hypertens': { 'host': 'ajh.oxfordjournals.org' },
         'Ann Oncol' : {'host' : 'annonc.oxfordjournals.org'},
         'Arterioscler Thromb Vasc Biol' : {'host' : 'atvb.ahajournals.org'},
@@ -328,6 +329,7 @@ vip_journals = {
         'Circ Res' : {'host' : 'circres.ahajournals.org'},
         'Clin Cancer Res' : {'host' : 'clincancerres.aacrjournals.org'},
         'Clin Chem' : {'host' : 'clinchem.org'},
+        'Clin Infect Dis': { 'host': 'cid.oxfordjournals.org'},
         'Diabetes': {'host': 'diabetes.diabetesjournals.org'},
         'Diabetes Care': { 'host': 'care.diabetesjournals.org' },
         'Drug Metab Dispos': { 'host': 'dmd.aspetjournals.org' },
@@ -362,6 +364,7 @@ vip_journals = {
         'J Med Genet': { 'host': 'jmg.bmj.com' },
         'J Mol Endocrinol': { 'host': 'jme.endocrinology-journals.org' },
         'J Lipid Res': { 'host': 'www.jlr.org' },
+        'J Pharmacol Exp Ther' { 'host': 'jpet.aspetjournals.org' },
         'Mol Biol Cell' : {'host' : 'molbiolcell.org'},
         'Mol Cell Biol' : {'host': 'mcb.asm.org'},
         'Mol Canc Therapeut' : {'host' : 'mct.aacrjournals.org'},
@@ -391,6 +394,7 @@ spandidos_journals = {
 
 wiley_journals = (
     'Acta Neurol Scand',
+    'Acta Ophthalmol Scand',
     'Ann Hum Genet',
     'Ann Neurol',
     'Am J Hematol',
@@ -442,6 +446,7 @@ wiley_journals = (
     'Pediatr Int',
     'Prenat Diagn',
     'Proteins',
+    'Scand J Immunol',
     'Tissue Antigens',
     'Transfus Med',
     'Transfusion',
@@ -455,6 +460,7 @@ schattauer_journals = [
     ]
 
 wolterskluwer_journals = [
+    'AIDS',
     'Blood Coagul Fibrinolysis',
     'Clin Dysmorphol',
     'Curr Opin Hematol',
@@ -463,6 +469,7 @@ wolterskluwer_journals = [
     'J Glaucoma',
     'J Pediatr Hematol Oncol',
     'J Pediatr Gastroenterol Nutr',
+    'Medicine (Baltimore)',
     'Obstet Gynecol',
     'Pediatr Infect Dis J',
     'Pharmacogenet Genomics',
@@ -494,6 +501,7 @@ springer_journals = [
     'Diabetologia',
     'Eur J Pediatr',
     'Fam Cancer',
+    'Graefes Arch Clin Exp Ophthalmol',
     'HNO',
     'Hum Genet',
     'Immunogenetics',
@@ -510,6 +518,8 @@ springer_journals = [
     'Ophthalmologe',
     'Pediatr Nephrol',
     'Physiol Genomics',
+    'Rheumatol Int',
+    'World J Surg',
     ]
 
 # thieme journals so far don't seem to have any open access content.
