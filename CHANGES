@@ -44,3 +44,5 @@
 3/5/2015, 0.3.4.8, accept integers for numerical id inputs (pmcid and pmid). PubMedArticle.url attribute added.
 3/5/2015, 0.3.4.9, fixes "abstracts appear out of order" problem in PubMedArticle (Issue #5)
 3/5/2015, 0.3.4.10, fixes missing OrderedDict import in PubMedArticle (how did it even work when I tested it?!)
+3/10/2015, 0.3.4.11, added two methods for getting dois from nature.com or biomedcentral.com URLs
+3/13/2015, 0.3.4.12, modified PubMedArticle.__init__ to support parsing xml from Medline gzip files

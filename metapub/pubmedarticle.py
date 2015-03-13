@@ -53,10 +53,15 @@ class PubMedArticle(MetaPubObject):
             super(PubMedArticle, self).__init__(xmlstr, 'PubmedBookArticle', args, kwargs)
             self.pubmed_type = 'book'
             self._root = 'BookDocument'
-        else:
+        elif xmlstr.find('<PubmedArticle>') > -1:
             super(PubMedArticle, self).__init__(xmlstr, 'PubmedArticle', args, kwargs)
             self.pubmed_type = 'article'
             self._root = 'MedlineCitation'
+        else:
+            # assume MedlineCitation is the root XML element
+            super(PubMedArticle, self).__init__(xmlstr, None, args, kwargs)
+            self.pubmed_type = 'article'
+            self._root = '.'
 
         pmt = self.pubmed_type
         
