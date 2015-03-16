@@ -1,0 +1,48 @@
+11/11/2014, 0.0.1, First working version containing PubMedArticle and PubMedFetcher, and upload to Python cheeseshop.
+11/11/2014, 0.0.2, Fixes bug in utils preventing a tmp file from being created for DOIs.
+11/25/2014, 0.0.3, Adds MedGenFetcher / MedGenConcept, demo_pubmed.py and demo_medgen.py CLI scripts, actual README kinda.
+11/25/2014, 0.0.4, Catching PubMedFetcher edge conditions, raise MetaPubError w/ nicer error messages more often.
+11/25/2014, 0.0.5, MetaPubObject class now stores xmlstr in an attribute (I mean, why not).
+11/25/2014, 0.0.5.1, Put last_page attribute into PubMedArticle class.
+11/25/2014, 0.0.5.3, Nomenclature fixes for clarity.
+11/30/2014, 0.0.5.4, MedGenFetcher.get_uid_for_cui. Nomenclature normalization: medgen "id" to "uid", "cuid" to "cui".
+11/30/2014, 0.0.5.5, PubMedArticle gets to_dict() method. Attributes now set at __init__ (instead of magic properties)
+12/01/2014, 0.0.5.6, Minor fixes for PubMedArticle pages attributes.
+12/04/2014, 0.0.6, MedGenConcept attribuets now preprocessed at __init__. Bugfix for modes_of_inheritance.
+12/19/2014, 0.0.7, MedGenConcept.OMIM is now a list. Better exception catching for OMIM data handling.
+12/27/2014, 0.0.8, PubMedFetcher.pmids_for_citation (fetch list of PMIDs for given citation strings).
+1/12/2015, 0.0.8, PubMedArticle.ISSN attribute parsed.
+1/15/2015, 0.0.9, Various minor bugfixes.
+1/19/2015, 0.1.0, PubMedArticle raises MetaPubError if given bad PMID. Minor docstring improvements.
+1/20/2015, 0.1.1, bugfix in PubMedArticle pages processing.
+1/22/2015, 0.1.2, moved Borg class into base.py. Added 'email' arg to MedGenFetcher and PubMedFetcher to pass to eutils.QueryService.
+1/23/2015, 0.2.1, CrossRef class joins the party. added a few new utilities to utils. 
+1/24/2015, 0.2.2, Improvements to pmid_for_citation, allowing transfer of CrossRef slugs directly into function as kwargs.
+1/27/2015, 0.2.3, Bugfixes in string processing in CrossRef. CR result['slugs']['authors'] list instead of ['au1'], ['au2'], etc.
+1/28/2015, 0.2.4, Force crossref result['doi'] to return just the DOI (not a doi.org url as sometimes shows up).
+1/30/2015, 0.2.5, New code in metapub.text_mining and metapub.convert (names may change). Moved PMC stuff to metapub.pubmedcentral.
+1/30/2015, 0.3.0, Major improvements to CrossRef and PubMedFetcher reliability. Consolidation of configuration stuff in .config 
+1/30/2015, 0.3.1, Critical bugfix to CrossRef. Finished metapub.convert.doi2pmid theoretically speaking (not thoroughly tested).
+2/1/2015, 0.3.2, Added absolute_import to all files for Python3 compatibility. Critical bugfixes in metapub.convert and metapub.text_mining.
+2/2/2015, 0.3.2.1, Crossref: `min_score` param added to get_top_result and all metapub.convert functions. default=2.0; set higher (like 3.0) for situations where you need high-confidence results.
+2/2/2015, 0.3.2.2, Better regular expression for DOIs (removes prohibition on angle-brackets).
+2/2/2015, 0.3.2.3, Added ; and : to PUNCS_WE_DONT_LIKE.
+2/2/2015, 0.3.2.4, Added InvalidPMID exception (raised within PubMedFetcher), so now you can specifically catch invalid PMIDs.
+2/5/2015, 0.3.3, PubmedBookArticle support added (i.e. pubmed books like GeneReviews). added PubMedArticle.book_* attributes.
+2/5/2015, 0.3.3.2, Code cleanup and a bugfix for the display of a pubmed book's year.
+2/5/2015, 0.3.3.3, Improved output of PubMedArticle.abstract for 'book' type objects.
+2/13/2015, 0.3.3.4, Handle cases where PubMedArticle contains multiple abstracts (similar to books). example pmid: 18612690
+2/13/2015, 0.3.3.5, Merged in CrossRef query improvements by Naomi Fox. Bugfix in PubMedFetcher (wrong function name, oops).
+2/17/2015, 0.3.4, Merged in pubmedcentral.py missing import statements by Naomi Fox. [critical bugfix]
+2/17/2015, 0.3.4.1, added CrossRefConnectionError. Made that and InvalidPMID into subclasses of MetaPubError.
+2/18/2015, 0.3.4.2, added PubMedFetcher.pmids_for_query w/ pubmed advanced query support -- untested and only returns resultant XML right now.
+2/19/2015, 0.3.4.3, expanded text_mining doi matching to allow optional whitespace inclusion around the '/' (it happens!)
+2/19/2015, 0.3.4.4, setup.py sources version from metapub/__version__.py
+2/23/2015, 0.3.4.5, setup.py dup's version in metapub/__version__.py (too many packaging hassles).
+2/23/2015, 0.3.4.6, added text_mining.pick_pmid
+3/5/2015, 0.3.4.7, PubMedFetcher.article_by_pmcid prepends "PMC" when input is raw integer. (Fix for Issue #4)
+3/5/2015, 0.3.4.8, accept integers for numerical id inputs (pmcid and pmid). PubMedArticle.url attribute added.
+3/5/2015, 0.3.4.9, fixes "abstracts appear out of order" problem in PubMedArticle (Issue #5)
+3/5/2015, 0.3.4.10, fixes missing OrderedDict import in PubMedArticle (how did it even work when I tested it?!)
+3/10/2015, 0.3.4.11, added two methods for getting dois from nature.com or biomedcentral.com URLs
+3/13/2015, 0.3.4.12, modified PubMedArticle.__init__ to support parsing xml from Medline gzip files
