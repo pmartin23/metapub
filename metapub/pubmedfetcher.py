@@ -120,7 +120,7 @@ class PubMedFetcher(Borg):
         # ("2015/3/1"[Date - Create] : "2015/3/3"[Date - Create]) 
         # ("2015/2/14"[CRDT] : "2015/3/14"[CRDT])
         created_date_template = '"%s"[CRDT]'
-        date_range_template = "(%s : %s)"
+        date_range_template = " (%s : %s)"
         if since:
             start = created_date_template % since
             if until:
@@ -129,7 +129,6 @@ class PubMedFetcher(Borg):
                 end = '"3000"[CRDT]'
 
             query += date_range_template % (start, end)
-            print(query)
         
         # unique ID referents.
         q['PMID'] = kpick(kwargs, options=['pmid', 'uid', 'pubmed_id'])
@@ -146,8 +145,7 @@ class PubMedFetcher(Borg):
         q['EDAT'] = kpick(kwargs, options=['edat', 'entrez date'])
 
         # Journal name:
-        q['TA'] = kpick(kwargs, options=['ta', 'journal title abbreviation', 'journal']) # most like PubMedArticle.journal
-        q['JT'] = kpick(kwargs, options=['jt', 'journal title', 'jtitle'])      # most like CrossRef results
+        q['TA'] = kpick(kwargs, options=['ta', 'journal', 'jtitle', 'journal title'])
 
         # Article-level characteristics (title, authors, etc):
         q['TIAB'] = kpick(kwargs, options=['tiab', 'abstract', 'title/abstract'])
@@ -169,7 +167,6 @@ class PubMedFetcher(Borg):
         q['VI'] = kpick(kwargs, options=['vi', 'volume', 'vol'])
 
         # Content characteristics
-        q['GS'] = kpick(kwargs, options=['gs', 'gene symbol', 'gene'])
         q['LA'] = kpick(kwargs, options=['la', 'language'])
         q['TW'] = kpick(kwargs, options=['tw', 'text'])
         q['PS'] = kpick(kwargs, options=['ps', 'personal name as subject']) 
@@ -184,7 +181,7 @@ class PubMedFetcher(Borg):
         q['SH'] = kpick(kwargs, options=['sh', 'mesh subheadings'])
 
         # Publication characteristics
-        q['DCOM'] = kpick(kwargs, options=['dcom', 'completion date')]
+        q['DCOM'] = kpick(kwargs, options=['dcom', 'completion date'])
         q['DP'] = kpick(kwargs, options=['dp', 'date of publication', 'year', 'pdat']) #most aligned w/ PubMedArticle.year and CrossRef 'year'
         q['LID'] = kpick(kwargs, options=['lid', 'location id', 'location identifier'])
         q['PUBN'] = kpick(kwargs, options=['pubn', 'publisher'])
@@ -200,12 +197,14 @@ class PubMedFetcher(Borg):
         
         for feature in q.keys():
             if q[feature] != None:
-                query +='%s[%s] ' % (q[feature], feature)
+                query +=' %s[%s]' % (q[feature], feature)
         
         # option to query pubmed central only:
         # pubmed pmc[sb]
         if pmc_only:
-            query += 'pubmed pmc[sb]'
+            query += ' pubmed pmc[sb]'
+
+        print(query)
 
         results = self.qs.esearch({'db': 'pubmed', 'term': query})
         return results
