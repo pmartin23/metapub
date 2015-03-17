@@ -1,0 +1,146 @@
+=======
+Metapub
+=======
+
+Metapub is a Python library that provides python objects fetched via eutils 
+that represent papers and concepts found within the NLM.
+
+These objects abstract some interactions with pubmed, and intends to 
+encompass as many types of database lookups and summaries as can be 
+provided via Eutils / Entrez.
+
+PubMedArticle / PubMedFetcher
+-----------------------------
+
+Basic usage::
+
+  fetch = PubMedFetcher()
+  article = fetch.article_by_pmid('123456')
+  print article.title
+  print article.journal, article.year, article.volume, article.issue
+  print article.authors
+
+
+PubMedFetcher also includes the following special methods.
+
+`article_by_doi`: (attempt to) fetch an article by looking up the DOI first.
+
+`article_by_pmcid`: fetch an article by looking up the PMCID first.
+
+`pmids_from_citation`: produces a list of possible PMIDs for the submitted
+    citation, where the citation is submitted as a collection of keyword
+    arguments.  At least 3 of the 5, preferably 4 or 5 for best results,
+    must be included::
+
+        aulast or author_last_fm1
+        year
+        volume
+        first_page or spage
+        journal or jtitle
+
+    (*Note* this function is still very "alpha". Citation lookups prefer
+    Medline XML style journal strings, so use those when possible.)
+
+
+metapub.pubmedcentral.* 
+-----------------------
+
+The PubMedCentral functions are a loose collection of conversion 
+methods for academic publishing IDs, allowing conversion (where possible)
+between the following ID types::
+
+    doi (Digital object identifier)
+    pmid (PubMed ID)
+    pmcid (Pubmed Central ID (including versioned document ID)
+
+The following methods are supplied, returning a string (if found) or None::
+
+    get_pmid_for_otherid(string)
+    get_doi_for_otherid(string)
+    get_pmcid_for_otherid(string)
+
+As implied by the function names, you can supply any valid ID type ("otherid")
+to acquire the desired ID type.
+
+
+
+MedGenConcept / MedGenFetcher
+-----------------------------
+
+Basic usage::
+
+  fetch = MedGenFetcher()
+  concept = fetch.concept_by_uid('336867')
+  print concept.name
+  print concept.description
+  print concept.associated_genes
+  print concept.modes_of_inheritance
+
+
+CrossRef
+--------
+
+The CrossRef object provides an object layer into search.crossref.org's API.
+See http://search.crossref.org
+
+CrossRef excels at resolving DOIs into article citation details. 
+
+CrossRef can also be used to resolve a DOI /from/ article citation details, with
+a bit of finagling.  The "get_top_result" function was built to do some light
+interpretation of the json-based results of a CrossRef lookup.
+
+Result scores under 2.0 are usually False matches.
+Result scores over 3.0 are always (?) True.  
+Between 2.0 and 3.0 is a grey area: be wary and check results against any known info you may have.
+
+Current testing (as of 1/23/2015) indicates that a cleverly-formed CrossRef 
+query can return results 99% correct about 90% of the time.  
+
+The more `params` submitted with the query, the more accurate the results may be. 
+
+
+Basic usage::
+
+  CR = CrossRef()       # starts the query cache engine
+  results = CR(search_string, params)
+  top_result = CR.get_top_result(results)
+
+Example starting from a known pubmed ID::
+
+  pma = PubMedFetcher().article_by_pmid(known_pmid)
+  results = CR.query_from_PubMedArticle(pma)
+  top_result = CR.get_top_result(results, CR.last_params, use_best_guess=True)
+
+NOTE: if you don't supply "CR.last_params", you can't use the "use_best_guess"
+operator. In cases where all results have scores under 2, no results will 
+be returned unless use_best_guess=True.  That's often desired behavior, 
+since results with scores under 2 are usually pretty bad.
+
+More Information
+----------------
+
+Digital Identifiers of Scientific Literature: what they are, when they're 
+used, and what they look like.
+
+http://www.biosciencewriters.com/Digital-identifiers-of-scientific-literature-PMID-PMCID-NIHMS-DOI-and-how-to-use-them.aspx
+
+
+About, and a Disclaimer
+-----------------------
+
+Metapub relies on the very neat eutils package created by Reece
+Hart, which you can check out here:
+
+http://bitbucket.org/biocommons/eutils
+
+This library is in its very early stages and there's a lot that may
+change, and quite a bit planned for implementation in 2015.
+
+Feel free to use the library with confidence that each released version 
+is well tested -- and in a couple of cases, some of its code is already
+in production -- but until (say) version 0.5, don't expect consistency
+between versions.
+
+YMMV, At your own risk, etc.
+
+--Naomi Most (@nthmost)
