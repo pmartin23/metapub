@@ -21,7 +21,7 @@ print params
 print stuff
 
 params = { 'mesh': 'breast neoplasm' }
-stuff = fetch.pmids_for_query(since='2015/1/1', until='2015/3/1', pmc_only=True, **params)
+stuff = fetch.pmids_for_query(since='2014', until='2015/3/1', pmc_only=True, **params)
 
 print params
 print stuff
