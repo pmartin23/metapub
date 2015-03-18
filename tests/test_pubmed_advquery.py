@@ -17,8 +17,8 @@ class TestPubmedFetcher(unittest.TestCase):
                     'volume': 61, 
                     'author1_lastfm': 'Hegmann' }
 
-        stuff = fetch.pmids_for_query(**params)
-        print stuff
+        pmids = self.fetch.pmids_for_query(**params)
+        assert len(pmids)==1
 
         params = { 'TA':'Journal of Neural Transmission', 
                     'pdat':2014, 
@@ -26,12 +26,11 @@ class TestPubmedFetcher(unittest.TestCase):
                     'aulast': 'Freitag'
          } 
 
-        stuff = fetch.pmids_for_query(**params)
-        print stuff
+        pmids = self.fetch.pmids_for_query(**params)
+        assert len(pmids) == 1
 
-        params = { 'mesh': 'breast neoplasm' }
-        stuff = fetch.pmids_for_query(since='2015/1/1', until='2015/3/1', pmc_only=True, **params)
-
-        print params
-        print stuff
+        #params = { 'mesh': 'breast neoplasm' }
+        #stuff = fetch.pmids_for_query(since='2015/1/1', until='2015/3/1', pmc_only=True, **params)
+        #print params
+        #print stuff
 
