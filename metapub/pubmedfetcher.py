@@ -3,8 +3,8 @@ from __future__ import absolute_import, print_function
 __doc__ = '''metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed'''
 __author__ = 'nthmost'
 
-import xml.etree.ElementTree as ET
 from eutils.exceptions import EutilsBadRequestError
+from lxml import etree
 import requests
 
 from .pubmedarticle import PubMedArticle
@@ -14,6 +14,14 @@ from .text_mining import re_pmid
 from .exceptions import *
 from .base import Borg
 from .config import DEFAULT_EMAIL
+
+def get_uids_from_esearch_result(xmlstr):
+    dom = etree.fromstring(xmlstr)
+    uids = []
+    idlist = dom.find('IdList')
+    for item in idlist.findall('Id'):
+        uids.append(item.text.strip())
+    return uids
 
 class PubMedFetcher(Borg):
     '''PubMedFetcher (a Borg singleton object)
@@ -206,9 +214,8 @@ class PubMedFetcher(Borg):
 
         print(query)
 
-        results = self.qs.esearch({'db': 'pubmed', 'term': query})
-        return results
-
+        result = self.qs.esearch({'db': 'pubmed', 'term': query})
+        return get_uids_from_esearch_result(result)
 
     def pmids_for_citation(self, **kwargs):
         '''returns list of pmids for given citation. requires at least 3/5 of these keyword arguments:
@@ -259,6 +266,10 @@ def _reduce_author_string(author_string):
     author1 = authors[0]
     # presume last name is at the end of the string
     return author1.split(' ')[-1]
+
+
+
+
 
 
 """ 
@@ -317,3 +328,8 @@ Version
 Volume [VI]
 """
 
+'''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE eSearchResult PUBLIC "-//NLM//DTD esearch 20060628//EN" "http://eutils.ncbi.nlm.nih.gov/eutils/dtd/20060628/esearch.dtd">
+<eSearchResult><Count>1</Count><RetMax>1</RetMax><RetStart>0</RetStart><QueryKey>1</QueryKey><WebEnv>NCID_1_129952677_165.112.9.37_9001_1426564126_1266564592_0MetA0_S_MegaStore_F_1</WebEnv><IdList>
+<Id>25023161</Id>
+</IdList><TranslationSet><Translation>     <From>Journal of Neural Transmission[TA]</From>     <To>"J Neural Transm"[Journal] OR "J Neural Transm"[Journal] OR "J Neural Transm Suppl"[Journal] OR "J Neural Transm Park Dis Dement Sect"[Journal] OR "J Neural Transm Gen Sect"[Journal]</To>    </Translation></TranslationSet><TranslationStack>   <TermSet>    <Term>2014[DP]</Term>    <Field>DP</Field>    <Count>1171381</Count>    <Explode>N</Explode>   </TermSet>   <TermSet>    <Term>"J Neural Transm"[Journal]</Term>    <Field>Journal</Field>    <Count>1177</Count>    <Explode>N</Explode>   </TermSet>   <TermSet>    <Term>"J Neural Transm"[Journal]</Term>    <Field>Journal</Field>    <Count>3005</Count>    <Explode>N</Explode>   </TermSet>   <OP>OR</OP>   <TermSet>    <Term>"J Neural Transm Suppl"[Journal]</Term>    <Field>Journal</Field>    <Count>1409</Count>    <Explode>N</Explode>   </TermSet>   <OP>OR</OP>   <TermSet>    <Term>"J Neural Transm Park Dis Dement Sect"[Journal]</Term>    <Field>Journal</Field>    <Count>226</Count>    <Explode>N</Explode>   </TermSet>   <OP>OR</OP>   <TermSet>    <Term>"J Neural Transm Gen Sect"[Journal]</Term>    <Field>Journal</Field>    <Count>526</Count>    <Explode>N</Explode>   </TermSet>   <OP>OR</OP>   <OP>GROUP</OP>   <OP>AND</OP>   <TermSet>    <Term>121[VI]</Term>    <Field>VI</Field>    <Count>44530</Count>    <Explode>N</Explode>   </TermSet>   <OP>AND</OP>   <TermSet>    <Term>Freitag[1AU]</Term>    <Field>1AU</Field>    <Count>496</Count>    <Explode>N</Explode>   </TermSet>   <OP>AND</OP>  </TranslationStack><QueryTranslation>2014[DP] AND ("J Neural Transm"[Journal] OR "J Neural Transm"[Journal] OR "J Neural Transm Suppl"[Journal] OR "J Neural Transm Park Dis Dement Sect"[Journal] OR "J Neural Transm Gen Sect"[Journal]) AND 121[VI] AND Freitag[1AU]</QueryTranslation></eSearchResult>'''
