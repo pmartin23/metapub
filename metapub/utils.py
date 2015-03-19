@@ -48,4 +48,11 @@ def remove_html_markup(s):
                 out = out + c
     return out
 
+def lowercase_keys(d):
+    result = {}
+    for key, value in d.items():
+        result[key.lower()] = value
+    return result
+
+
 

@@ -1,18 +1,27 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
-"""metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed"""
+__doc__ = '''metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed'''
+__author__ = 'nthmost'
 
-import xml.etree.ElementTree as ET
 from eutils.exceptions import EutilsBadRequestError
+from lxml import etree
 import requests
 
 from .pubmedarticle import PubMedArticle
 from .pubmedcentral import get_pmid_for_otherid
-from .utils import kpick, parameterize
+from .utils import kpick, parameterize, lowercase_keys
 from .text_mining import re_pmid
 from .exceptions import *
 from .base import Borg
 from .config import DEFAULT_EMAIL
+
+def get_uids_from_esearch_result(xmlstr):
+    dom = etree.fromstring(xmlstr)
+    uids = []
+    idlist = dom.find('IdList')
+    for item in idlist.findall('Id'):
+        uids.append(item.text.strip())
+    return uids
 
 class PubMedFetcher(Borg):
     '''PubMedFetcher (a Borg singleton object)
@@ -95,51 +104,121 @@ class PubMedFetcher(Borg):
             raise MetaPubError('No PMID available for doi %s' % doi)
         return self._eutils_article_by_pmid(pmid)
 
-    def _eutils_pmids_for_query(self, query='', **kwargs):
+    def _eutils_pmids_for_query(self, query='', since=None, until=None, pmc_only=False, **kwargs):
+            
         '''returns list of pmids for given freeform query string plus 
-            keyword arguments.'''
+            keyword arguments.
+
+        :param: query (string) default ''
+        :param: since (string) default None  # Y/m/d format expected. Y alone or Y/m allowed.
+        :param: until (string) default None  # Y/m/d format expected. Y alone or Y/m allowed.
+        :param: pmc_only (bool) default False  # constructs query to only search Pubmed Central.
+        '''
+
+        # lowercase all the things.
+        kwargs = lowercase_keys(kwargs)
+
         q = {}
-        q['AID'] = kpick(kwargs, options=['AID', 'doi']) 
-        q['PMC'] = kpick(kwargs, options=['pmc', 'pmcid'])
-        q['TA'] = kpick(kwargs, options=['TA', 'jtitle', 'journal']) 
-        q['DP'] = kpick(kwargs, options=['DP', 'year', 'pdat'])
-        q['1AU'] = kpick(kwargs, options=['1AU', 'aulast', 'author1_lastfm', 'author1_last_fm'])
-        q['OT'] = kwargs.get('OT', None)
-        q['PT'] = kpick(kwargs, options=['PT', 'pubmed_type'])
-        q['MH'] = kpick(kwargs, options=['MH', 'mesh', 'MeSH Terms'])
-        q['FAU'] = kpick(kwargs, options=['FAU', 'first_author', 'author1'])
-        q['IP'] = kpick(kwargs, options=['IP', 'issue'])
-        q['TI'] = kpick(kwargs, options=['TI', 'title', 'atitle', 'article_title'])
-        q['TW'] = kpick(kwargs, options=['TW', 'text'])
-        q['LA'] = kpick(kwargs, options=['LA', 'language'])
-        q['VI'] = kpick(kwargs, options=['VI', 'volume', 'vol'])
-        q['PUBN'] = kpick(kwargs, options=['PUBN', 'publisher'])
-        q['book'] = kwargs.get('book', None)
-        q['ISBN'] = kwargs.get('ISBN', None)
-        q['LASTAU'] = kwargs.get('LASTAU', None)
+        if query:
+            q['ALL'] = query
 
-        #MeSH Date [MHDA]
-        #MeSH Major Topic [MAJR]
-        #MeSH Subheadings [SH]
-        #MeSH Terms [MH]        
-        #q['MHDA'] = kwargs.get('MHDA', None)
+        # Search within date range (since / until)
+        # 
+        # working examples. search by creation date only works within defined ranges (not "< X" or "> Y")
+        # ("2015/3/1"[Date - Create] : "2015/3/3"[Date - Create]) 
+        # ("2015/2/14"[CRDT] : "2015/3/14"[CRDT])
+        created_date_template = '"%s"[CRDT]'
+        date_range_template = " (%s : %s)"
+        if since:
+            start = created_date_template % since
+            if until:
+                end = created_date_template % until
+            else:
+                end = '"3000"[CRDT]'
 
+            query += date_range_template % (start, end)
+
+        # unique ID referents.
         q['PMID'] = kpick(kwargs, options=['pmid', 'uid', 'pubmed_id'])
+        q['AID'] = kpick(kwargs, options=['aid', 'doi']) 
+        q['book'] = kwargs.get('book', None)
+        q['JID'] = kpick(kwargs, options=['jid', 'nlm uid', 'nlm unique id'])
+        q['ISBN'] = kwargs.get('ISBN', None)
+        q['RN'] = kpick(kwargs, options=['rn', 'rcn', 'ecn'])
+        q['GR'] = kpick(kwargs, options=['gr', 'grant number'])
+
+        # Pubmed Date features:
+        q['DA'] = kpick(kwargs, options=['da', 'date created'])
+        q['LR'] = kpick(kwargs, options=['lr', 'date revised', 'date last revised'])
+        q['EDAT'] = kpick(kwargs, options=['edat', 'entrez date'])
+
+        # Journal name:
+        q['TA'] = kpick(kwargs, options=['ta', 'journal', 'jtitle', 'journal title'])
+
+        # Article-level characteristics (title, authors, etc):
+        q['TIAB'] = kpick(kwargs, options=['tiab', 'abstract', 'title/abstract'])
+        q['TI'] = kpick(kwargs, options=['ti', 'title', 'atitle', 'article_title'])
+        q['TT'] = kpick(kwargs, options=['tt', 'transliterated title'])
+
+        q['AU'] = kpick(kwargs, options=['au', 'author'])
+        q['1AU'] = kpick(kwargs, options=['1au', 'aulast', 'author1_lastfm', 'author1_last_fm'])
+        q['FAU'] = kpick(kwargs, options=['fau', 'first_author', 'author1'])
+        q['LASTAU'] = kpick(kwargs, options=['lastau', 'last author'])
+        q['CN'] = kpick(kwargs, options=['cn', 'corporate author'])
+        q['FIR'] = kpick(kwargs, options=['fir', 'full investigator name'])
+        q['IR'] = kpick(kwargs, options=['ir', 'investigator'])
+        q['PG'] = kpick(kwargs, options=['pg', 'pages', 'spage', 'first_page'])
+
+        # Volume / Issue characteristics
+        q['IP'] = kpick(kwargs, options=['ip', 'issue'])
+        q['VTI'] = kpick(kwargs, options=['vta', 'volume title'])
+        q['VI'] = kpick(kwargs, options=['vi', 'volume', 'vol'])
+
+        # Content characteristics
+        q['LA'] = kpick(kwargs, options=['la', 'language'])
+        q['TW'] = kpick(kwargs, options=['tw', 'text'])
+        q['PS'] = kpick(kwargs, options=['ps', 'personal name as subject']) 
+        q['PA'] = kpick(kwargs, options=['pa', 'pharmacological action'])
+        q['SB'] = kpick(kwargs, options=['sb', 'subset'])
+        q['NM'] = kpick(kwargs, options=['nm', 'supplementary concept'])
+
+        # MeSH characteristics 
+        q['MHDA'] = kpick(kwargs, options=['mhda', 'mesh date'])
+        q['MH'] = kpick(kwargs, options=['mh', 'mesh', 'mesh terms'])
+        q['MAJR'] = kpick(kwargs, options=['majr', 'mesh major topic', 'mesh major'])
+        q['SH'] = kpick(kwargs, options=['sh', 'mesh subheadings'])
+
+        # Publication characteristics
+        q['DCOM'] = kpick(kwargs, options=['dcom', 'completion date'])
+        q['DP'] = kpick(kwargs, options=['dp', 'date of publication', 'year', 'pdat']) #most aligned w/ PubMedArticle.year and CrossRef 'year'
+        q['LID'] = kpick(kwargs, options=['lid', 'location id', 'location identifier'])
+        q['PUBN'] = kpick(kwargs, options=['pubn', 'publisher'])
+        q['PT'] = kpick(kwargs, options=['pt', 'pubmed_type', 'publication type'])
+        q['PL'] = kpick(kwargs, options=['pk', 'place of publication'])
+
+        # Miscellaneous, alphabetized by Medline feature tag.
+        q['AD'] = kpick(kwargs, options=['ad', 'affiliation']) 
+        q['OT'] = kpick(kwargs, options=['ot', 'other term'])
+        q['NM'] = kpick(kwargs, options=['nm', 'substance Name'])
+        q['SI'] = kpick(kwargs, options=['si', 'secondary source id']) 
+
         
-        if query != '':
-            query = query + ' '
         for feature in q.keys():
             if q[feature] != None:
-                query +='%s[%s] ' % (q[feature], feature)
+                query +=' %s[%s]' % (q[feature], feature)
         
         # option to query pubmed central only:
         # pubmed pmc[sb]
-        if kwargs.get('pmc_only', False):
-            query += 'pubmed pmc[sb]'
+        if pmc_only:
+            query += ' pubmed pmc[sb]'
 
-        results = self.qs.esearch({'db': 'pubmed', 'term': query})
-        return results
+        # RetMax / RetStart -- like pagination for PMID results.
+        retmax = int(kwargs.get('retmax', 250))
+        retstart = int(kwargs.get('retstart', 0))
 
+        result = self.qs.esearch({'db': 'pubmed', 'term': query, 
+                                    'retmax': retmax, 'retstart': retstart})
+        return get_uids_from_esearch_result(result)
 
     def pmids_for_citation(self, **kwargs):
         '''returns list of pmids for given citation. requires at least 3/5 of these keyword arguments:
@@ -155,6 +234,7 @@ class PubMedFetcher(Borg):
         # journal_title|year|volume|first_page|author_name|your_key|
         base_uri = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/ecitmatch.cgi?db=pubmed&retmode=xml&bdata={journal_title}|{year}|{volume}|{first_page}|{author_name}|metapub|'
 
+        kwargs = lowercase_keys(kwargs)
         journal_title = kpick(kwargs, options=['jtitle', 'journal', 'journal_title'], default='')
         author_name = _reduce_author_string(kpick(kwargs, 
                         options=['aulast', 'author1_last_fm', 'author', 'authors'], default=''))
@@ -247,3 +327,8 @@ Version
 Volume [VI]
 """
 
+'''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE eSearchResult PUBLIC "-//NLM//DTD esearch 20060628//EN" "http://eutils.ncbi.nlm.nih.gov/eutils/dtd/20060628/esearch.dtd">
+<eSearchResult><Count>1</Count><RetMax>1</RetMax><RetStart>0</RetStart><QueryKey>1</QueryKey><WebEnv>NCID_1_129952677_165.112.9.37_9001_1426564126_1266564592_0MetA0_S_MegaStore_F_1</WebEnv><IdList>
+<Id>25023161</Id>
+</IdList><TranslationSet><Translation>     <From>Journal of Neural Transmission[TA]</From>     <To>"J Neural Transm"[Journal] OR "J Neural Transm"[Journal] OR "J Neural Transm Suppl"[Journal] OR "J Neural Transm Park Dis Dement Sect"[Journal] OR "J Neural Transm Gen Sect"[Journal]</To>    </Translation></TranslationSet><TranslationStack>   <TermSet>    <Term>2014[DP]</Term>    <Field>DP</Field>    <Count>1171381</Count>    <Explode>N</Explode>   </TermSet>   <TermSet>    <Term>"J Neural Transm"[Journal]</Term>    <Field>Journal</Field>    <Count>1177</Count>    <Explode>N</Explode>   </TermSet>   <TermSet>    <Term>"J Neural Transm"[Journal]</Term>    <Field>Journal</Field>    <Count>3005</Count>    <Explode>N</Explode>   </TermSet>   <OP>OR</OP>   <TermSet>    <Term>"J Neural Transm Suppl"[Journal]</Term>    <Field>Journal</Field>    <Count>1409</Count>    <Explode>N</Explode>   </TermSet>   <OP>OR</OP>   <TermSet>    <Term>"J Neural Transm Park Dis Dement Sect"[Journal]</Term>    <Field>Journal</Field>    <Count>226</Count>    <Explode>N</Explode>   </TermSet>   <OP>OR</OP>   <TermSet>    <Term>"J Neural Transm Gen Sect"[Journal]</Term>    <Field>Journal</Field>    <Count>526</Count>    <Explode>N</Explode>   </TermSet>   <OP>OR</OP>   <OP>GROUP</OP>   <OP>AND</OP>   <TermSet>    <Term>121[VI]</Term>    <Field>VI</Field>    <Count>44530</Count>    <Explode>N</Explode>   </TermSet>   <OP>AND</OP>   <TermSet>    <Term>Freitag[1AU]</Term>    <Field>1AU</Field>    <Count>496</Count>    <Explode>N</Explode>   </TermSet>   <OP>AND</OP>  </TranslationStack><QueryTranslation>2014[DP] AND ("J Neural Transm"[Journal] OR "J Neural Transm"[Journal] OR "J Neural Transm Suppl"[Journal] OR "J Neural Transm Park Dis Dement Sect"[Journal] OR "J Neural Transm Gen Sect"[Journal]) AND 121[VI] AND Freitag[1AU]</QueryTranslation></eSearchResult>'''
