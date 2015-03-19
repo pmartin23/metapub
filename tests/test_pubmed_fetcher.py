@@ -16,3 +16,8 @@ class TestPubmedFetcher(unittest.TestCase):
         fetch = PubMedFetcher()
         article = fetch.article_by_pmid(pmid)
         assert str(article.pmid) == pmid
+
+        pmid = '25763451'
+        fetch = PubMedFetcher()
+        article = fetch.article_by_pmid(pmid)
+        assert str(article.pmid) == pmid

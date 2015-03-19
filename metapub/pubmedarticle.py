@@ -179,14 +179,17 @@ class PubMedArticle(MetaPubObject):
         return self._get('BookDocument/Book/Medium')
 
     def _get_book_contribution_date(self):
-        return self._construct_datetime(self.content.find('BookDocument/ContributionDate'))
+        contribution_date_element = self.content.find('BookDocument/ContributionDate')
+        if contribution_date_element:
+            return self._construct_datetime(self.content.find('BookDocument/ContributionDate'))
+        return None
 
     def _get_book_date_revised(self):
         return self._construct_datetime(self.content.find('BookDocument/DateRevised'))
 
     def _get_book_synonyms(self):
         syn_list = self.content.find('BookDocument/ItemList')
-        if syn_list.get('ListType')=='Synonyms':
+        if syn_list and syn_list.get('ListType')=='Synonyms':
             return [item.text for item in self.content.findall('BookDocument/ItemList/Item')]
         else:
             return []
@@ -202,7 +205,9 @@ class PubMedArticle(MetaPubObject):
         return self._get('PubmedBookData/PublicationStatus')
 
     def _get_book_year(self):
-        return self.book_contribution_date.year
+        if self.book_contribution_date:
+            return self.book_contribution_date.year
+        return None
 
     def _get_pmid(self):
         return self._get(self._root+'/PMID')
