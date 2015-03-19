@@ -29,8 +29,15 @@ class TestPubmedFetcher(unittest.TestCase):
         pmids = self.fetch.pmids_for_query(**params)
         assert len(pmids) == 1
 
-        #params = { 'mesh': 'breast neoplasm' }
-        #stuff = fetch.pmids_for_query(since='2015/1/1', until='2015/3/1', pmc_only=True, **params)
-        #print params
-        #print stuff
+    def test_specified_return_slice(self):
+        pmids = self.fetch.pmids_for_query(since='2015/3/1', retmax=1000)
+        assert len(pmids)==1000
+
+        pmids = self.fetch.pmids_for_query(since='2015/3/1', retstart=200, retmax=500)
+        assert len(pmids)==500
+
+    def test_pmc_only(self):
+        params = { 'mesh': 'breast neoplasm' }
+        stuff = self.fetch.pmids_for_query(since='2015/1/1', until='2015/3/1', pmc_only=True, **params)
+        print stuff
 

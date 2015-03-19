@@ -137,7 +137,7 @@ class PubMedFetcher(Borg):
                 end = '"3000"[CRDT]'
 
             query += date_range_template % (start, end)
-        
+
         # unique ID referents.
         q['PMID'] = kpick(kwargs, options=['pmid', 'uid', 'pubmed_id'])
         q['AID'] = kpick(kwargs, options=['aid', 'doi']) 
@@ -212,9 +212,12 @@ class PubMedFetcher(Borg):
         if pmc_only:
             query += ' pubmed pmc[sb]'
 
-        print(query)
+        # RetMax / RetStart -- like pagination for PMID results.
+        retmax = int(kwargs.get('retmax', 250))
+        retstart = int(kwargs.get('retstart', 0))
 
-        result = self.qs.esearch({'db': 'pubmed', 'term': query})
+        result = self.qs.esearch({'db': 'pubmed', 'term': query, 
+                                    'retmax': retmax, 'retstart': retstart})
         return get_uids_from_esearch_result(result)
 
     def pmids_for_citation(self, **kwargs):
@@ -266,10 +269,6 @@ def _reduce_author_string(author_string):
     author1 = authors[0]
     # presume last name is at the end of the string
     return author1.split(' ')[-1]
-
-
-
-
 
 
 """ 

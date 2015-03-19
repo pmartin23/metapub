@@ -20,8 +20,9 @@ stuff = fetch.pmids_for_query(**params)
 print params
 print stuff
 
-params = { 'mesh': 'breast neoplasm' }
-stuff = fetch.pmids_for_query(since='2014', until='2015/3/1', pmc_only=True, **params)
+#params = { 'mesh': 'breast neoplasm' }
+#stuff = fetch.pmids_for_query(since='2014', until='2015/3/1', pmc_only=True, **params)
 
-print params
-print stuff
+pmids = fetch.pmids_for_query(since='2015/3/1', retmax=1000)
+assert len(pmids)==1000
+
