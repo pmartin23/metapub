@@ -251,10 +251,12 @@ simple_formats_pii = {
     'Biol Psychiatry': 'http://www.biologicalpsychiatryjournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Bone': 'http://www.thebonejournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Brain Dev': 'http://www.brainanddevelopment.com/article/{a.pii}/pdf', #ScienceDirect
+    'Cancer Cell Int': 'http://www.cancerci.com/content/pdf/{a.pii}.pdf', #Biomed Central
     'Cancer Genet Cytogenet': 'http://www.cancergeneticsjournal.org/article/{a.pii}/pdf', #ScienceDirect
     'Cancer Lett': 'http://www.cancerletters.info/article/{a.pii}/pdf', #ScienceDirect
     'Clin Neurol Neurosurg': 'http://www.clineu-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Diabetes Res Clin Pract': 'http://www.diabetesresearchclinicalpractice.com/article/{a.pii}/pdf', #ScienceDirect
+    'Diagn Pathol': 'http://www.diagnosticpathology.org/content/pdf/{a.pii}.pdf', # Biomed Central
     'Epilepsy Res': 'http://www.epires-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Eur J Paediatr Neurol': 'http://www.ejpn-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Exp Hematol': 'http://www.exphem.org/article/{a.pii}/pdf', #ScienceDirect
