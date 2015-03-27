@@ -180,7 +180,7 @@ def the_pmc_twist(pma):
     raise NoPDFLink('PMC download returned weird content-type %s' % r.headers['content-type'])
 
 
-def find_article_from_pma(pma, use_crossref=True, paywalls=False):
+def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
     reason = None
     url = None
 
@@ -297,7 +297,7 @@ def find_article_from_pma(pma, use_crossref=True, paywalls=False):
             reason = str(e)
 
     elif jrnl in paywall_journals:
-        if paywalls == False:
+        if use_paywalls == False:
             reason = '%s behind paywall' % jrnl
         else:
             reason = '%s behind paywall; not yet smart enough to navigate paywalls, sorry!' % jrnl
@@ -328,7 +328,7 @@ class FindIt(object):
         self.doi = kwargs.get('doi', None)
         self.url = kwargs.get('url', None)
         self.reason = None
-        self.paywalls = kwargs.get('paywalls', False)
+        self.use_paywalls = kwargs.get('use_paywalls', False)
         self.tmpdir = kwargs.get('tmpdir', '/tmp')
 
         self.pma = None
@@ -337,13 +337,23 @@ class FindIt(object):
             self.pma = fetch.article_by_pmid(self.pmid)
             #print self.pmid
             try:
-                self.url, self.reason = find_article_from_pma(self.pma, paywalls=self.paywalls)
+                self.url, self.reason = find_article_from_pma(self.pma, use_paywalls=self.use_paywalls)
             except requests.exceptions.ConnectionError, e:
                 self.url = None
                 self.reason = 'tx_error: %r' % e
 
         elif self.doi:
-            self.url, self.reason = find_article_from_doi(self.doi, paywalls=self.paywalls)
+            self.url, self.reason = find_article_from_doi(self.doi, use_paywalls=self.use_paywalls)
+
+    def to_dict(self):
+        return { 'pmid': self.pmid,
+                 'doi': self.doi,
+                 'reason': self.reason,
+                 'use_paywalls': self.use_paywalls,
+                 'url': self.url,
+                 'pubmed_url': self.pubmed_url,
+                 'pma': self.pma
+               }
 
     def download(self, filename):
         # verify=False means it ignores bad SSL certs

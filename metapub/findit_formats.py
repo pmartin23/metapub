@@ -472,6 +472,7 @@ wolterskluwer_journals = [
     'J Pediatr Hematol Oncol',
     'J Pediatr Gastroenterol Nutr',
     'Medicine (Baltimore)',
+    'Neuroreport',
     'Obstet Gynecol',
     'Pediatr Infect Dis J',
     'Pharmacogenet Genomics',
