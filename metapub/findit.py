@@ -1,5 +1,44 @@
 from __future__ import absolute_import
 
+__doc__='''find_it: provides FindIt object, providing a tidy object layer
+            into the get_pdf_from_pma function.
+
+        The get_pdf_from_pma function selects possible PDF links for the 
+        given article represented in a PubMedArticle object.
+
+        The FindIt class allows lookups of the PDF starting from only a 
+        DOI or a PMID, using the following classmethods:
+
+        FindIt.from_pmid(pmid, **kwargs)
+
+        FindIt.from_doi(doi, **kwargs)
+
+        The machinery in this code performs all necessary data lookups 
+        (e.g. looking up a missing DOI, or using a DOI to get a PubMedArticle)
+        to end up with a url and reason, which attaches to the FindIt object
+        in the following attributes:
+
+        source = FindIt(pmid=PMID)
+        source.url
+        source.reason
+        source.pmid
+        source.doi
+
+        *** IMPORTANT NOTE ***
+
+        In many cases, this code performs intermediary HTTP requests in order to 
+        scrape a PDF url out of a page, and sometimes tests the url to make sure
+        that what's being sent back is in fact a PDF.
+
+        If you would like these requests to go through a proxy (e.g. if you would
+        like to prevent making multiple requests of the same pages, which may have
+        effects like getting your IP shut off from PubMedCentral), set the 
+        HTTP_PROXY environment variable in your code or on the command line before
+        using any FindIt functionality.
+'''
+
+__author__='nthmost'
+
 import requests
 from lxml.html import HTMLParser
 from lxml import etree
@@ -147,9 +186,11 @@ def the_nature_ballet(pma):
 paywall_reason_template = '%s behind %s paywall'  # % (journal, publisher)
 
 def find_article_from_doi(doi):
-    #1) lookup on CrossRef
-    #2) pull a PubMedArticle based on CrossRef results
-    #3) run it through find_article_from_pma
+    ''' :param: doi (string)
+        :return: (url, reason)
+    '''
+    #1) pull a PubMedArticle based on CrossRef lookup (using doi2pmid)
+    #2) run it through find_article_from_pma
     pma = fetch.article_by_pmid(doi2pmid(doi))
     return find_article_from_pma(pma)
     
@@ -158,8 +199,8 @@ PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 EUROPEPMC_PDF_URL = 'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC{a.pmc}&blobtype=pdf'
 def the_pmc_twist(pma):
     '''  :param: pma (PubMedArticle object)
-         :return: url (string)
-         :raises: AccessDeniedError, NoPDFLink
+         :return: url
+         :raises: NoPDFLink
     '''
     url = EUROPEPMC_PDF_URL.format(a=pma)
     # TODO: differentiate between paper embargo and URL block.
@@ -181,6 +222,28 @@ def the_pmc_twist(pma):
 
 
 def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
+    ''' The real workhorse of FindIt.
+
+        Based on the contents of the supplied PubMedArticle object, this function
+        returns the best possible download link for a Pubmed PDF.
+
+        Returns (url, reason) -- url being self-explanatory, and "reason" containing
+        any qualifying message about why the url came back the way it did.
+
+        Reasons may include (but are not limited to):
+
+            "DOI missing from PubMedArticle and CrossRef lookup failed."
+            "pii missing from PubMedArticle XML"
+            "No URL format for Journal %s"
+            "TODO format             
+
+            
+
+        :param: (pma PubMedArticle object) 
+        :param: use_crossref (bool) default: True
+        :param: use_paywalls (bool) default: False [not yet implemented]
+        :return: (url, reason)
+    '''
     reason = None
     url = None
 
@@ -297,10 +360,10 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
             reason = str(e)
 
     elif jrnl in paywall_journals:
-        if use_paywalls == False:
-            reason = '%s behind paywall' % jrnl
-        else:
+        if use_paywalls:
             reason = '%s behind paywall; not yet smart enough to navigate paywalls, sorry!' % jrnl
+        else:
+            reason = '%s behind paywall' % jrnl
 
     elif jrnl in todo_journals:
         reason = 'TODO format -- example: %s' % todo_journals[jrnl]['example']
@@ -349,29 +412,8 @@ class FindIt(object):
         return { 'pmid': self.pmid,
                  'doi': self.doi,
                  'reason': self.reason,
-                 'use_paywalls': self.use_paywalls,
                  'url': self.url,
-                 'pubmed_url': self.pubmed_url,
-                 'pma': self.pma
                }
-
-    def download(self, filename):
-        # verify=False means it ignores bad SSL certs
-        response = requests.get(url, stream=True, timeout=CURL_TIMEOUT, verify=False)
-
-        if not response.ok:
-            return 'error'
-
-        # TODO: download file first to self.tmpdir, then copy to final destination
-        if response.status_code == 200:
-            if response.headers.get('content-type').find('pdf') > -1:
-                with open(filename, 'wb') as handle:
-                    for block in response.iter_content(1024):
-                        if not block:
-                            break
-                        handle.write(block)
-            return response.headers.get('content-type')
-        else:
-            return response.status_code
-
+               #'use_paywalls': self.use_paywalls,
+               #'pma': self.pma
 
