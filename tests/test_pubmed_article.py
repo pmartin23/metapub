@@ -241,50 +241,50 @@ xml_str2 = '''
             <PublicationType>Journal Article</PublicationType>
         </PublicationTypeList>
     </Article>
-<MedlineJournalInfo>
-<Country>Egypt</Country>
-<MedlineTA>J Egypt Soc Parasitol</MedlineTA>
-<NlmUniqueID>8102141</NlmUniqueID>
-<ISSNLinking>1110-0583</ISSNLinking>
-</MedlineJournalInfo>
-<CitationSubset>IM</CitationSubset>
-<MeshHeadingList>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N">Animals</DescriptorName>
-</MeshHeading>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N">Communicable Diseases, Emerging</DescriptorName>
-<QualifierName MajorTopicYN="Y">epidemiology</QualifierName>
-</MeshHeading>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N">Culicidae</DescriptorName>
-</MeshHeading>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N" Type="Geographic">Egypt</DescriptorName>
-<QualifierName MajorTopicYN="N">epidemiology</QualifierName>
-</MeshHeading>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N">Humans</DescriptorName>
-</MeshHeading>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N">Insect Vectors</DescriptorName>
-</MeshHeading>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N">Phlebovirus</DescriptorName>
-</MeshHeading>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N">Rift Valley Fever</DescriptorName>
-<QualifierName MajorTopicYN="Y">epidemiology</QualifierName>
-</MeshHeading>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N" Type="Geographic">Saudi Arabia</DescriptorName>
-<QualifierName MajorTopicYN="N">epidemiology</QualifierName>
-</MeshHeading>
-<MeshHeading>
-<DescriptorName MajorTopicYN="N" Type="Geographic">Sudan</DescriptorName>
-<QualifierName MajorTopicYN="N">epidemiology</QualifierName>
-</MeshHeading>
-</MeshHeadingList>
+    <MedlineJournalInfo>
+        <Country>Egypt</Country>
+        <MedlineTA>J Egypt Soc Parasitol</MedlineTA>
+        <NlmUniqueID>8102141</NlmUniqueID>
+        <ISSNLinking>1110-0583</ISSNLinking>
+    </MedlineJournalInfo>
+    <CitationSubset>IM</CitationSubset>
+    <MeshHeadingList>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N">Animals</DescriptorName>
+        </MeshHeading>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N">Communicable Diseases, Emerging</DescriptorName>
+            <QualifierName MajorTopicYN="Y">epidemiology</QualifierName>
+        </MeshHeading>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N">Culicidae</DescriptorName>
+        </MeshHeading>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N" Type="Geographic">Egypt</DescriptorName>
+            <QualifierName MajorTopicYN="N">epidemiology</QualifierName>
+        </MeshHeading>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N">Humans</DescriptorName>
+        </MeshHeading>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N">Insect Vectors</DescriptorName>
+        </MeshHeading>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N">Phlebovirus</DescriptorName>
+        </MeshHeading>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N">Rift Valley Fever</DescriptorName>
+            <QualifierName MajorTopicYN="Y">epidemiology</QualifierName>
+        </MeshHeading>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N" Type="Geographic">Saudi Arabia</DescriptorName>
+            <QualifierName MajorTopicYN="N">epidemiology</QualifierName>
+        </MeshHeading>
+        <MeshHeading>
+            <DescriptorName MajorTopicYN="N" Type="Geographic">Sudan</DescriptorName>
+            <QualifierName MajorTopicYN="N">epidemiology</QualifierName>
+        </MeshHeading>
+    </MeshHeadingList>
 </MedlineCitation>
 '''
 
@@ -310,6 +310,7 @@ class TestPubMedArticle(unittest.TestCase):
         '''
         article = PubMedArticle(xml_str2)
         assert str(article.pmid) == '23697015'
+
 
 
 
