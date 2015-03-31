@@ -47,6 +47,7 @@ from .pubmedfetcher import PubMedFetcher
 from .convert import PubMedArticle2doi, doi2pmid
 from .exceptions import MetaPubError, AccessDenied, NoPDFLink
 from .text_mining import re_numbers
+from .utils import asciify
 
 from .findit_formats import *
 
@@ -247,7 +248,9 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
     reason = None
     url = None
 
-    jrnl = pma.journal.translate(None, '.')
+    # protect against unicode character mishaps in journal names.
+    # (did you know that unicode.translate takes ONE argument whilst str.translate takes TWO?! true story)
+    jrnl = asciify(pma.journal).translate(None, '.')
 
     if pma.pmc:
         try:
