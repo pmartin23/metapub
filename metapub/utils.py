@@ -4,7 +4,7 @@ import os
 from lxml import etree
 import unicodedata
 
-PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\""
+PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\"&"
 
 def kpick(args, options, default=None):
     for opt in options:
@@ -22,10 +22,14 @@ def asciify(inp):
     else:
         return ''
 
+def squash_spaces(inp):
+    '''convert multiple ' ' chars to a singles'''
+    return ' '.join(inp.split())
+
 def parameterize(inp, sep='+'):
     '''make strings suitable for submission to GET-based query service. strips
         out these characters: %s''' % PUNCS_WE_DONT_LIKE
-    return asciify(inp).replace(' ', sep).translate(None, PUNCS_WE_DONT_LIKE)
+    return squash_spaces(asciify(inp).translate(None, PUNCS_WE_DONT_LIKE)).replace(' ', sep)
 
 def deparameterize(inp, sep='+'):
     '''somewhat-undo parameterization in string. replace separators (sep) with spaces.'''
