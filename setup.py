@@ -1,10 +1,11 @@
 import glob, os
 
 from setuptools import setup, find_packages
+from metapub import __version__ as metapub_version
 
 setup(
     name = 'metapub',
-    version = '0.3.6',
+    version = metapub_version,
     description = 'Pubmed / NCBI / eutils interaction library, handling the metadata of pubmed papers.',
     url = 'https://bitbucket.org/nthmost/metapub',
     author = 'Naomi Most',
