@@ -6,7 +6,7 @@ from metapub import MedGenFetcher
 try:
     term = sys.argv[1]
 except IndexError:
-    print 'Supply a Hugo gene name to this script as its argument.'
+    print 'Supply a disease/syndrome/condition name in quotation marks as the argument to this script.'
     sys.exit()
 
 ####
@@ -19,9 +19,7 @@ fetch = MedGenFetcher()
 uids = fetch.uids_by_term(term)
 print uids
 
-# TODO: Term Hierarchy Children (only 1 tier below), Term Hierarchy Parents (only 1 tier above)
-
-headers = ['CUI', 'Hugo', 'Title', 'Semantic Type', 'MedGenUID', 
+headers = ['CUI', 'Title', 'Semantic Type', 'MedGenUID', 
            'OMIM ID', 'Modes of Inheritance', 'Assoc Genes', ]
 
 table = []
@@ -39,13 +37,16 @@ for this_id in uids:
     concept = fetch.concept_by_uid(this_id)
     #print concept.to_dict()
     assert concept.medgen_uid == this_id
-    line = [concept.CUI, term, concept.title, concept.semantic_type, concept.medgen_uid]
 
-    line.append(_join_or_NA(concept.OMIM))
-    line.append(_join_or_NA(concept.modes_of_inheritance, 'name'))
-    line.append(_join_or_NA(concept.associated_genes, 'hgnc')) 
+    if concept.associated_genes:
+        line = [concept.CUI, concept.title, concept.semantic_type, concept.medgen_uid]
+        line.append(_join_or_NA(concept.OMIM))
+        line.append(_join_or_NA(concept.modes_of_inheritance, 'name'))
+        line.append(_join_or_NA(concept.associated_genes, 'hgnc')) 
+        table.append(line)
+    else:
+        continue
 
-    table.append(line)
 
 print tabulate(table, headers, tablefmt="simple")
 
