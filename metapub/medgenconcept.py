@@ -18,8 +18,11 @@ class MedGenConcept(MetaPubObject):
         if self._get('error'):
             raise MetaPubError('Supplied XML for MedGenConcept contained explicit error: %s' % self._get('error') )
 
-        # ConceptMeta is an XML document embedded within the XML response. Boo-urns. 
-        self.meta = etree.fromstring('<ConceptMeta>'+self.content.find('ConceptMeta').text+'</ConceptMeta>')
+        # sometimes, ConceptMeta is an XML document embedded within the XML response. Boo-urns. 
+        try:
+            self.meta = etree.fromstring('<ConceptMeta>'+self.content.find('ConceptMeta').text+'</ConceptMeta>')
+        except TypeError:
+            self.meta = self.content.find('ConceptMeta')
         
         self.modes_of_inheritance = self._get_modes_of_inheritance()
         self.OMIM = self._get_OMIM()        # is a list, since sometimes there are more than one.
