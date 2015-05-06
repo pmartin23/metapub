@@ -50,3 +50,4 @@
 3/19/2015, 0.3.5.1 bug fix so PubMedArticle wouldn't fail on PubmedBookData xml with some missing tags
 3/31/2015, 0.3.6, Debut of FindIt
 4/17/2015, 0.3.7, changes to utils.parameterize, added ampersand to set of replaced chars and removed extra whitespace
+5/6/2015, 0.3.8, added ability to get related PubMed article IDs via MedGenFetcher uid and cui.

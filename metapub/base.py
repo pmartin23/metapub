@@ -2,6 +2,21 @@ from __future__ import absolute_import
 
 from lxml import etree
 
+
+def parse_elink_response(xmlstr):
+    '''return all Ids from an elink XML response'''
+    dom = etree.fromstring(xmlstr)
+    ids = []
+    if dom.find('LinkSet/LinkSetDb/LinkName').text:
+        linkset = dom.find('LinkSet/LinkSetDb')
+        for link in linkset.getchildren():
+            if link.find('Id') is not None:
+                ids.append(link.find('Id').text)
+        return ids
+    else:
+        return None
+
+
 class MetaPubObject(object):
 
     def __init__(self, xmlstr, root=None, *args, **kwargs):

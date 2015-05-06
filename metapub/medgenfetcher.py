@@ -6,7 +6,7 @@ from lxml import etree
 
 from .exceptions import MetaPubError
 from .medgenconcept import MedGenConcept
-from .base import Borg
+from .base import Borg, parse_elink_response
 from .config import DEFAULT_EMAIL
 
 class MedGenFetcher(Borg):
@@ -46,7 +46,10 @@ class MedGenFetcher(Borg):
             self.qs = ec.QueryService(email=email)
             self.uids_by_term = self._eutils_uids_by_term
             self.concept_by_uid = self._eutils_concept_by_uid
+            self.concept_by_cui = self._eutils_concept_by_cui
             self.uid_for_cui = self._eutils_uid_for_cui
+            self.pubmeds_for_uid = self._eutils_pubmeds_for_uid
+            self.pubmeds_for_cui = self._eutils_pubmeds_for_cui
         else:
             raise NotImplementedError('coming soon: fetch from local medgen via medgen-mysql.')
 
@@ -64,16 +67,6 @@ class MedGenFetcher(Borg):
             uids.append(item.text.strip())
         return uids
     
-    def _eutils_concept_by_uid(self, uid):
-        '''wraps results of an esummary fcgi call to medgen when ID is known.
-        
-        :return: MedGenConcept object
-        '''
-        # http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=medgen&id=336867
-        uid = str(uid)
-        result = self.qs.esummary( { 'db': 'medgen', 'id': uid } )
-        return MedGenConcept(result)
-
     def _eutils_uid_for_cui(self, cui):
         '''given a ConceptID (cui), return a medgen ID.'''
         #http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=medgen&term=C0000039
@@ -87,4 +80,35 @@ class MedGenFetcher(Borg):
         except AttributeError:
             raise MetaPubError('Invalid CUID: did not return MedGen id.')
         return uid
+
+    def _eutils_concept_by_uid(self, uid):
+        # http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=medgen&id=336867
+        '''Returns MedGenConcept result of lookup of medgen uid. 
+        
+        :param uid: (string or int) medgen uid
+        :return: MedGenConcept object
+        '''
+        uid = str(uid)
+        result = self.qs.esummary( { 'db': 'medgen', 'id': uid } )
+        return MedGenConcept(result)
+
+    def _eutils_concept_by_cui(self, cui):
+        '''Returns MedGenConcept result of lookup of CUI. 
+        
+        :param uid: (string) Concept id (CUI)
+        :return: MedGenConcept object
+        '''
+        uid = self._eutils_uid_for_cui(cui)
+        return self._eutils_concept_by_uid(uid)
+
+
+    def _eutils_pubmeds_for_uid(self, uid):
+        response = self.qs.elink( { 'dbfrom': 'medgen', 'id': uid, 'db': 'pubmed'} )
+        ids = parse_elink_response(response)
+        return ids
+
+    def _eutils_pubmeds_for_cui(self, cui):
+        '''given a ConceptID (cui), return a list of related pubmed article IDs.'''
+        uid = self._eutils_uid_for_cui(cui)
+        return self._eutils_pubmeds_for_uid(uid)
 
