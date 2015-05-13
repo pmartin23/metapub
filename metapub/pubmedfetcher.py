@@ -115,6 +115,8 @@ class PubMedFetcher(Borg):
 
             "journal" == "jtitle" == "journal_title" == "TA"
 
+        Keyword arguments are case-INsensitive since they are lowercased upon arrival.
+
         Example of series of queries to accomplish "pagination" of data:
 
         first_250 = fetch.pmids_for_query('some query')
@@ -123,6 +125,8 @@ class PubMedFetcher(Borg):
         :param: query (string) default ''
         :param: since (string) default None  # Y/m/d format expected. Y alone or Y/m allowed.
         :param: until (string) default None  # Y/m/d format expected. Y alone or Y/m allowed.
+        :param: retstart (int) default 0
+        :param: retmax (int) default 250
         :param: pmc_only (bool) default False  # constructs query to only search Pubmed Central.
         
         '''
@@ -222,10 +226,6 @@ class PubMedFetcher(Borg):
         # pubmed pmc[sb]
         if pmc_only:
             query += ' pubmed pmc[sb]'
-
-        # RetMax / RetStart -- like pagination for PMID results.
-        retmax = int(kwargs.get('retmax', 250))
-        retstart = int(kwargs.get('retstart', 0))
 
         result = self.qs.esearch({ 'db': 'pubmed', 'term': query, 
                                    'retmax': retmax, 'retstart': retstart })
