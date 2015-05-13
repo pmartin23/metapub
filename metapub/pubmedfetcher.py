@@ -104,15 +104,27 @@ class PubMedFetcher(Borg):
             raise MetaPubError('No PMID available for doi %s' % doi)
         return self._eutils_article_by_pmid(pmid)
 
-    def _eutils_pmids_for_query(self, query='', since=None, until=None, pmc_only=False, **kwargs):
+    def _eutils_pmids_for_query(self, query='', since=None, until=None, retstart=0, retmax=250,
+                pmc_only=False, **kwargs):
             
-        '''returns list of pmids for given freeform query string plus 
-            keyword arguments.
+        '''returns list of pmids for given freeform query string plus keyword arguments.
+            
+        All Pubmed Advanced Query tokens (e.g. "TI" for title) are supported, plus many 
+        "soft" keywords that will, when parsed, map to the correct token for you. For example,
+        you can supply journal name with any of the following keywords:
+
+            "journal" == "jtitle" == "journal_title" == "TA"
+
+        Example of series of queries to accomplish "pagination" of data:
+
+        first_250 = fetch.pmids_for_query('some query')
+        second_250 = fetch.pmids_for_query('some query', retstart=500, retmax=250)
 
         :param: query (string) default ''
         :param: since (string) default None  # Y/m/d format expected. Y alone or Y/m allowed.
         :param: until (string) default None  # Y/m/d format expected. Y alone or Y/m allowed.
         :param: pmc_only (bool) default False  # constructs query to only search Pubmed Central.
+        
         '''
 
         # lowercase all the things.
@@ -153,7 +165,7 @@ class PubMedFetcher(Borg):
         q['EDAT'] = kpick(kwargs, options=['edat', 'entrez date'])
 
         # Journal name:
-        q['TA'] = kpick(kwargs, options=['ta', 'journal', 'jtitle', 'journal title'])
+        q['TA'] = kpick(kwargs, options=['ta', 'journal', 'jtitle', 'journal_title'])
 
         # Article-level characteristics (title, authors, etc):
         q['TIAB'] = kpick(kwargs, options=['tiab', 'abstract', 'title/abstract'])
@@ -202,7 +214,6 @@ class PubMedFetcher(Borg):
         q['NM'] = kpick(kwargs, options=['nm', 'substance Name'])
         q['SI'] = kpick(kwargs, options=['si', 'secondary source id']) 
 
-        
         for feature in q.keys():
             if q[feature] != None:
                 query +=' %s[%s]' % (q[feature], feature)
@@ -216,8 +227,8 @@ class PubMedFetcher(Borg):
         retmax = int(kwargs.get('retmax', 250))
         retstart = int(kwargs.get('retstart', 0))
 
-        result = self.qs.esearch({'db': 'pubmed', 'term': query, 
-                                    'retmax': retmax, 'retstart': retstart})
+        result = self.qs.esearch({ 'db': 'pubmed', 'term': query, 
+                                   'retmax': retmax, 'retstart': retstart })
         return get_uids_from_esearch_result(result)
 
     def pmids_for_citation(self, **kwargs):

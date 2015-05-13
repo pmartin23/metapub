@@ -52,3 +52,4 @@
 4/17/2015, 0.3.7, changes to utils.parameterize, added ampersand to set of replaced chars and removed extra whitespace
 5/6/2015, 0.3.8, added ability to get related PubMed article IDs via MedGenFetcher uid and cui.
 5/6/2015, 0.3.8.1, support both normal and broken ConceptMeta embeddings in MedGenConcept xml.
+5/6/2015, 0.3.8.2, minor changes to PubMedFetcher. "journal_title" standardized as keyword for advanced query & citation lookups.
