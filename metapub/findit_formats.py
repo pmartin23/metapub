@@ -172,13 +172,18 @@ jstage_journals = [
 cell_format = 'http://www.cell.com{ja}/pdf/{pii}.pdf'
 cell_journals = {
     'Am J Hum Genet': { 'ja': '/AJHG' },
-    'Cell': { 'ja': '' },
-    'Trends Mol Med': { 'ja': '/trends' },
     'Cancer Cell': { 'ja': '/cancer-cell' },
-    'Neuron': {'ja': '/neuron' },
-    'Mol Cell': {'ja': '/molecular-cell' },
-    'Curr Biol': {'ja': '/current-biology' },
+    'Cell': { 'ja': '' },
     'Cell Host Microbe': {'ja': '/cell-host-microbe' },
+    'Cell Metab': {'ja': '/cell-metabolism' },
+    'Cell Stem Cell': {'ja': '/cell-stem-cell' },
+    'Chem Biol': {'ja': '/chemistry-biology' },
+    'Curr Biol': {'ja': '/current-biology' },
+    'Immunity': {'ja': '/immunity' },
+    'Mol Cell': {'ja': '/molecular-cell' },
+    'Neuron': {'ja': '/neuron' },
+    'Structure': {'ja': '/structure' },
+    'Trends Mol Med': { 'ja': '/trends' },
     }
 
 # nature journals
