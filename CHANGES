@@ -55,3 +55,4 @@
 5/6/2015, 0.3.8.2, minor changes to PubMedFetcher. "journal_title" standardized as keyword for advanced query & citation lookups.
 5/6/2015, 0.3.8.4, bugfixes in advanced query. Added Cell Host & Microbe to FindIt formats.
 5/6/2015, 0.3.8.5, added FindIt formats for Neuron, Cell Stem Cell, Structure, others.
+5/6/2015, 0.3.8.6, fixed link to homepage of project

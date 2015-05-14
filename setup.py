@@ -6,7 +6,7 @@ setup(
     name = 'metapub',
     version = '0.3.8.5',
     description = 'Pubmed / NCBI / eutils interaction library, handling the metadata of pubmed papers.',
-    url = 'https://bitbucket.org/nthmost/metapub',
+    url = 'https://bitbucket.org/metapub/metapub',
     author = 'Naomi Most',
     maintainer = 'Naomi Most',
     author_email = 'naomi@nthmost.com',
