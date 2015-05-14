@@ -53,3 +53,4 @@
 5/6/2015, 0.3.8, added ability to get related PubMed article IDs via MedGenFetcher uid and cui.
 5/6/2015, 0.3.8.1, support both normal and broken ConceptMeta embeddings in MedGenConcept xml.
 5/6/2015, 0.3.8.2, minor changes to PubMedFetcher. "journal_title" standardized as keyword for advanced query & citation lookups.
+5/6/2015, 0.3.8.4, bugfixes in advanced query. Added Cell Host & Microbe to FindIt formats.

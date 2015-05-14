@@ -9,6 +9,8 @@ stuff = fetch.pmids_for_query(**params)
 print params
 print stuff
 
+# the following article was deleted from pubmed (or changed such that this
+# set of parameters no longer returns an article)
 params = { 'TA':'Journal of Neural Transmission', 
                     'pdat':2014, 
                     'vol':121, 

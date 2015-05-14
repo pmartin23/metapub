@@ -20,6 +20,7 @@ class TestPubmedFetcher(unittest.TestCase):
         pmids = self.fetch.pmids_for_query(**params)
         assert len(pmids)==1
 
+        # this pubmed ID was deleted
         params = { 'TA':'Journal of Neural Transmission', 
                     'pdat':2014, 
                     'vol':121, 
@@ -27,7 +28,7 @@ class TestPubmedFetcher(unittest.TestCase):
          } 
 
         pmids = self.fetch.pmids_for_query(**params)
-        assert len(pmids) == 1
+        assert len(pmids) == 0
 
     def test_specified_return_slice(self):
         pmids = self.fetch.pmids_for_query(since='2015/3/1', retmax=1000)

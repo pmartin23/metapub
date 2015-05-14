@@ -178,6 +178,7 @@ cell_journals = {
     'Neuron': {'ja': '/neuron' },
     'Mol Cell': {'ja': '/molecular-cell' },
     'Curr Biol': {'ja': '/current-biology' },
+    'Cell Host Microbe': {'ja': '/cell-host-microbe' },
     }
 
 # nature journals
