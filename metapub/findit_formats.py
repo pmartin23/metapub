@@ -179,6 +179,7 @@ cell_journals = {
     'Cell Stem Cell': {'ja': '/cell-stem-cell' },
     'Chem Biol': {'ja': '/chemistry-biology' },
     'Curr Biol': {'ja': '/current-biology' },
+    'Dev Cell': {'ja': '/developmental-cell' },
     'Immunity': {'ja': '/immunity' },
     'Mol Cell': {'ja': '/molecular-cell' },
     'Neuron': {'ja': '/neuron' },
