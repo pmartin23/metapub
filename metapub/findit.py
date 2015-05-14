@@ -236,9 +236,7 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
             "DOI missing from PubMedArticle and CrossRef lookup failed."
             "pii missing from PubMedArticle XML"
             "No URL format for Journal %s"
-            "TODO format             
-
-            
+            "TODO format"
 
         :param: (pma PubMedArticle object) 
         :param: use_crossref (bool) default: True
@@ -344,10 +342,19 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
 
     elif jrnl in cell_journals.keys():
         if pma.pii:
+            # the front door
             url = cell_format.format( a=pma, ja=cell_journals[jrnl]['ja'],
                     pii=pma.pii.translate(None,'-()') )
+        #elif pma.doi:
+            # the side door
+        #    try:
+        #        baseurl = the_doi_2step(pma.doi)
+        #        url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
+        #        reason = ''
+        #    except Exception, e:
+        #        reason = '%s' % e
         else:
-            # TODO: try the_doi_2step
+            #reason = 'pii missing from PubMedArticle XML (%s in Cell format) and no DOI either (harsh!)' % jrnl
             reason = 'pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
 
     elif jrnl.find('Lancet') > -1:

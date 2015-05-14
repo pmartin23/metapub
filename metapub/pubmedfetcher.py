@@ -220,7 +220,7 @@ class PubMedFetcher(Borg):
 
         for feature in q.keys():
             if q[feature] != None:
-                query +=' %s[%s]' % (q[feature], feature)
+                query +=' "%s"[%s]' % (q[feature], feature)
         
         # option to query pubmed central only:
         # pubmed pmc[sb]
