@@ -9,6 +9,7 @@ import requests
 
 from .pubmedarticle import PubMedArticle
 from .pubmedcentral import get_pmid_for_otherid
+from .pubmed_clinicalqueries import *
 from .utils import kpick, parameterize, lowercase_keys
 from .text_mining import re_pmid
 from .exceptions import *
@@ -16,6 +17,7 @@ from .base import Borg
 from .config import DEFAULT_EMAIL
 
 def get_uids_from_esearch_result(xmlstr):
+    #from IPython import embed; embed()
     dom = etree.fromstring(xmlstr)
     uids = []
     idlist = dom.find('IdList')
@@ -106,6 +108,7 @@ class PubMedFetcher(Borg):
 
     def _eutils_pmids_for_query(self, query='', since=None, until=None, retstart=0, retmax=250,
                 pmc_only=False, **kwargs):
+        print(query)
             
         '''returns list of pmids for given freeform query string plus keyword arguments.
             
@@ -230,6 +233,31 @@ class PubMedFetcher(Borg):
         result = self.qs.esearch({ 'db': 'pubmed', 'term': query, 
                                    'retmax': retmax, 'retstart': retstart })
         return get_uids_from_esearch_result(result)
+
+    #def pmids_for_clinical_query(self, query, 
+    #    available optimizations:
+    #        broad   (default)
+    #        narrow
+        
+    def pmids_for_medical_genetics_query(self, query, category='all', since=None, until=None,
+                    retstart=0, retmax=250, pmc_only=False, **kwargs):
+        '''
+        available categories:
+            all     (default)
+            diagnosis
+            differential_diagnosis
+            clinical_description
+            management
+            genetic_counseling
+            genetic_testing
+    
+        see PubMedFetcher.pmids_for_query for advanced query documentation.
+        '''
+        if query:
+            query += ' '+ medical_genetics_query_map[category]
+        else:
+            raise MetaPubError('Query string required for Medical Genetics query.')
+        return self.pmids_for_query(query, retstart=retstart, retmax=retmax, since=since, until=until, **kwargs) 
 
     def pmids_for_citation(self, **kwargs):
         '''returns list of pmids for given citation. requires at least 3/5 of these keyword arguments:
