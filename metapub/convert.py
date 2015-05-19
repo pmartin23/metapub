@@ -30,7 +30,7 @@ def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
 def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
     # let MetaPubError pass back to the caller if pmid is not for realz..
     _start_engines()
-    pma = fetch.article_by_pmid(pmid)
+    pma = pm_fetch.article_by_pmid(pmid)
     return PubMedArticle2doi(pma, use_best_guess, min_score=2.0)
 
 def doi2pmid(doi, use_best_guess=False, min_score=2.0):
@@ -44,7 +44,7 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     _start_engines()
     doi = doi.strip()
     try:
-        pma = fetch.article_by_doi(doi)
+        pma = pm_fetch.article_by_doi(doi)
         return pma.pmid
     except:
         pass

@@ -12,8 +12,6 @@ import pandas
 
 CURL_TIMEOUT = 2000
 
-sync_incoming_dir = os.path.expanduser('~/DATA/LibraryX/incoming')
-
 ####
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("eutils").setLevel(logging.WARNING)
