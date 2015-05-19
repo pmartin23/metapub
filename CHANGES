@@ -58,3 +58,4 @@
 5/6/2015, 0.3.8.6, fixed link to homepage of project
 5/18/2015, 0.3.8.7, bugfix in metapub.convert to fix pmid2doi (was totally broken!)
 5/18/2015, 0.3.8.8, pmid2doi: if PubMedArticle object has doi, return that before checking CrossRef.
+5/19/2015, 0.3.8.9, bugfix in metapub.convert to fix PubMedArticle2doi
