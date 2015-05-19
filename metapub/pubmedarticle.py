@@ -256,7 +256,6 @@ class PubMedArticle(MetaPubObject):
         if j is None:
             # e.g., http://www.ncbi.nlm.nih.gov/pubmed?term=21242195
             j = self._get(self._root+'/Article/Journal/Title')
-        assert j is not None
         return j
 
     def _get_pages(self):
@@ -317,7 +316,6 @@ class PubMedArticle(MetaPubObject):
         if y is None:
             # case applicable for pmid:9887384 (at least)
             y = self._get(self._root+'/Article/Journal/JournalIssue/PubDate/MedlineDate')[0:4]
-        assert y is not None
         return y
 
     def _get_doi(self):
