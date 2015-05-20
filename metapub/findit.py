@@ -55,6 +55,7 @@ fetch = PubMedFetcher()
 
 DX_DOI_URL = 'http://dx.doi.org/%s'
 def the_doi_2step(doi):
+    'takes a DOI (string), returns a url to a paper'
     response = requests.get(DX_DOI_URL % doi)
     if response.status_code == 200:
         return response.url
@@ -62,6 +63,8 @@ def the_doi_2step(doi):
         raise NoPDFLink('dx.doi.org lookup failed for doi %s (HTTP %i returned)' % (doi, response.status_code))
 
 def square_voliss_data_for_pma(pma):
+    '''takes a PubMedArticle object, returns same object with corrected volume/issue 
+    information (if needed)'''
     if pma.volume != None and pma.issue is None:
         # try to get a number out of the parts that came after the first number.
         volparts = re_numbers.findall(pma.volume)
