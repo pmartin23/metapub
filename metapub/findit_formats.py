@@ -129,6 +129,7 @@ sciencedirect_journals = (
     'Mol Genet Metab',
     'Mol Immunol',
     'Mutat Res',
+    'Neuromuscul Disord',
     'Neurosci Lett',
     'Pediatr Pulmonol',
     )
@@ -193,12 +194,15 @@ nature_journals = {
     'Eur J Hum Genet': { 'ja': 'ejhg' },
     'Eye (Lond)': { 'ja': 'eye' },
     'Genes Immun': { 'ja': 'gene' },
+    'Genet Med': { 'ja': 'gim' },
+    'J Invest Dermatol': { 'ja': 'jid' },
     'J Hum Genet': { 'ja': 'jhg' },
     'Kidney Int': { 'ja': 'ki' },
     'Leukemia': { 'ja': 'leu' },
     'Mod Pathol': { 'ja': 'modpathol' },
     'Mol Psychiatry': { 'ja': 'mp' },
     'Nature': { 'ja': 'nature' },
+    'Nat Clin Pract Endocrinol Metab': { 'ja': 'nrendo' },
     'Nat Genet': { 'ja': 'ng' },
     'Nat Neurosci': { 'ja': 'neuro' },
     'Nat Med': { 'ja': 'nm' },
@@ -209,11 +213,6 @@ nature_journals = {
     'Oncogene': { 'ja': 'onc' },
     'Pediatr Res': { 'ja': 'pr' },
     }
-
-# the doi2step_journals should work in nature_journals, but the urls are weird. 
-# e.g. http://www.nature.com/gim/journal/v8/n11/pdf/gim2006115a.pdf
-#      http://www.nature.com/jid/journal/v113/n2/full/5603216a.html
-doi2step_journals = [ 'Genet Med', 'J Invest Dermatol', 'Nat Clin Pract Endocrinol Metab' ]
 
 
 # simple formats are used for URLs that can be deduced from PubMedArticle XML
@@ -284,7 +283,6 @@ simple_formats_pii = {
     'Med Hypotheses': 'http://www.medical-hypotheses.com/article/{a.pii}/pdf', #ScienceDirect
     'Metabolism': 'http://www.metabolismjournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Metab Clin Exp': 'http://www.metabolismjournal.com/article/{a.pii}/pdf', #ScienceDirect
-    'Mol Genet Metab': 'http://www.mgmjournal.com/article/{a.pii}/pdf', #ScienceDirect
     'Neurobiol Aging': 'http://www.neurobiologyofaging.org/article/{a.pii}/pdf', #ScienceDirect
     'Neuromuscul Disord': 'http://www.nmd-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Parkinsonism Relat Disord': 'http://www.prd-journal.com/article/{a.pii}/pdf', #ScienceDirect
@@ -294,23 +292,23 @@ simple_formats_pii = {
     'Thromb Res': 'http://www.thrombosisresearch.com/article/{a.pii}/pdf', #ScienceDirect
     }
 
+#    The following were taken out of simple_formats_pii but kept in the sciencedirect_journals list:
+#    'Mol Genet Metab': 'http://www.mgmjournal.com/article/{a.pii}/pdf', #ScienceDirect
 
-oa_journals = (
-    # open access journals (always free, everywhere, the way it should be)
 
-    # ISOAbbreviations:
-    'PLoS Biol.',
-    'PLoS Comput. Biol.',
-    'PLoS Genet.',
-    'PLoS Med.',
-    'PLoS ONE',
-    'PLoS Pathog.',
-
-    # non ISOAbbreviations:
-    'BMC cancer',
-    'BMC bioinformatics',
-    'BMC genetics',
+# Many BMC journals start with "BMC" (they're covered automatically) --
+#   this list covers the ones that don't.
+BMC_journals = (
+    'Diagn Pathol',
+    'Genome Biol',
+    'Genome Med',
+    'Hum Genomics',
+    'J Clin Bioinforma',
+    'J Transl Med',
     )
+
+# the "aid" is the second half of the DOI string (after the slash)
+BMC_format = 'http://www.biomedcentral.com/content/pdf/{aid}.pdf'
 
 # vip = Volume-Issue-Page format 
 #       URLs that have the same format except for the host name

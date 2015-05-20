@@ -110,6 +110,14 @@ def the_sciencedirect_disco(pma):
         # TODO: parse return, raise more nuanced exceptions here.
         raise NoPDFLink('cannot find pdf link (probably behind paywall)')
 
+def the_biomed_calypso(pma):
+    baseid = pma.doi if pma.doi else pma.pii
+    if baseid:
+        article_id = baseid.split('/')[1]
+    else:
+        raise NoPDFLink('BMC article requires DOI (none extant)')
+    return BMC_format.format(aid=article_id)
+
 
 def the_jama_dance(pma):
     '''  :param: pma (PubMedArticle object)
@@ -294,14 +302,14 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
             url = simple_formats_doi[jrnl].format(a=pma)
             reason = ''
 
-    elif jrnl in doi2step_journals:
-        if pma.doi:
-            try:
-                baseurl = the_doi_2step(pma.doi)
-                url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
-                reason = ''
-            except Exception, e:
-                reason = '%s' % e
+    #elif jrnl in doi2step_journals:
+    #    if pma.doi:
+    #        try:
+    #            baseurl = the_doi_2step(pma.doi)
+    #            url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
+    #            reason = ''
+    #        except Exception, e:
+    #            reason = '%s' % e
 
     elif jrnl in jstage_journals:
         if pma.doi:
@@ -309,6 +317,13 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
                 url = the_jstage_dive(pma)
             except Exception, e:
                 reason = str(e)
+
+    elif jrnl.find('BMC')==0 or jrnl in BMC_journals:
+        # Many Biomed Central journals start with "BMC", but many more don't.
+        try:
+            url = the_biomed_calypso(pma)
+        except Exception, e:
+            reason = str(e)
             
     elif jrnl in wiley_journals:
         if pma.doi:
