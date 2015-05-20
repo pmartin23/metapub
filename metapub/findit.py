@@ -172,11 +172,13 @@ def the_nature_ballet(pma):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
-    if pma.pii==None and pma.doi:
+    if pma.doi:
         starturl = the_doi_2step(pma.doi)
-        url = starturl.replace('html', 'pdf').replace('abs', 'pdf')
-    else:
+        url = starturl.replace('html', 'pdf').replace('abs', 'pdf').replace('full', 'pdf')
+    elif pma.pii:
         url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
+    else:
+        raise NoPDFLink('Not enough information to compose a link for Nature (no DOI or PII)')
     r = requests.get(url)
     if r.headers['content-type'].find('pdf') > -1:
         return r.url

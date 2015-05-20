@@ -60,3 +60,5 @@
 5/18/2015, 0.3.8.8, pmid2doi: if PubMedArticle object has doi, return that before checking CrossRef.
 5/19/2015, 0.3.8.9, bugfix in metapub.convert to fix PubMedArticle2doi
 5/19/2015, 0.3.8.10, taking assert statements out of PubMedArticle, they're causing undue trouble.
+5/19/2015, 0.3.8.11, added pubmed_clinicalqueries.py (beginning of work on Clinical Queries and Medical Genetics queries)
+5/19/2015, 0.3.8.12, FindIt: adjustment to the_nature_ballet (use the_doi2step first rather than the pii format)

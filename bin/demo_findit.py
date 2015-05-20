@@ -3,6 +3,7 @@ from metapub.findit import FindIt
 JAMA_pmids = ['25742465', '23754022', '25739104']
 
 PMC_pmids = ['25717385',     # Lancet Psychiatry
+             '17534376',     # Eur J Hum Genet
         ]  
 
 Lancet_pmids = ['25529582',     # marked Free Article
@@ -24,9 +25,9 @@ def print_urls_and_reasons_from_pmid_list(pmids):
     for pmid in pmids:
         source = FindIt(pmid=pmid)
         if source.url:
-            print pmid, source.url
+            print pmid, source.url, source.pma.journal
         else:
-            print pmid, source.reason
+            print pmid, source.reason, source.pma.journal
 
 print "PMC (or should be):"
 print_urls_and_reasons_from_pmid_list(PMC_pmids)
