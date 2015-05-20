@@ -315,7 +315,10 @@ class PubMedArticle(MetaPubObject):
         y = self._get(self._root+'/Article/Journal/JournalIssue/PubDate/Year')
         if y is None:
             # case applicable for pmid:9887384 (at least)
-            y = self._get(self._root+'/Article/Journal/JournalIssue/PubDate/MedlineDate')[0:4]
+            try:
+                y = self._get(self._root+'/Article/Journal/JournalIssue/PubDate/MedlineDate')[0:4]
+            except TypeError:
+                pass
         return y
 
     def _get_doi(self):
