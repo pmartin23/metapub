@@ -13,7 +13,7 @@ from .pubmed_clinicalqueries import *
 from .utils import kpick, parameterize, lowercase_keys
 from .text_mining import re_pmid
 from .exceptions import *
-from .base import Borg
+from .base import Borg, parse_elink_response
 from .config import DEFAULT_EMAIL
 
 def get_uids_from_esearch_result(xmlstr):
@@ -24,6 +24,16 @@ def get_uids_from_esearch_result(xmlstr):
     for item in idlist.findall('Id'):
         uids.append(item.text.strip())
     return uids
+
+def parse_related_pmids_result(xmlstr):
+    outd = {}
+    dom = etree.fromstring(xmlstr)
+    for linkset in dom.findall('LinkSet/LinkSetDb'):
+        heading = linkset.find('LinkName').text.split('_')[-1]
+        outd[heading] = []
+        for Id in linkset.findall('Link/Id'):
+            outd[heading].append(Id.text)
+    return outd
 
 class PubMedFetcher(Borg):
     '''PubMedFetcher (a Borg singleton object)
@@ -297,6 +307,23 @@ class PubMedFetcher(Borg):
                 pmids.append(pmid.strip())
         return pmids
                 
+    def related_pmids(self, pmid):
+        '''For supplied pmid, return related ids of related pubmed articles,
+        organized into a dictionary keyed by type of relation.  The keys include:
+
+            * pubmed    (all related links)
+            * citedin   (papers that cited this paper)
+            * five      (the "five" that pubmed displays as the top related results)
+            * reviews   (review papers that cite this paper)
+            * combined  (?)
+
+        query example:
+        http://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi?retmode=xml&dbfrom=pubmed&id=14873513&cmd=neighbor
+        '''
+        outd = { }
+        xmlstr = self.qs.elink( { 'dbfrom': 'pubmed', 'id': pmid, 'cmd': 'neighbor' } )
+        outd = parse_related_pmids_result(xmlstr)
+        return outd
 
 def _reduce_author_string(author_string):
     # try splitting by commas
@@ -308,6 +335,7 @@ def _reduce_author_string(author_string):
     author1 = authors[0]
     # presume last name is at the end of the string
     return author1.split(' ')[-1]
+
 
 
 """ 
