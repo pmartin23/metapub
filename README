@@ -41,6 +41,13 @@ PubMedFetcher also includes the following special methods.
     (*Note* this function is still very "alpha". Citation lookups prefer
     Medline XML style journal strings, so use those when possible.)
 
+`pmids_for_query`: returns list of pmids for given freeform query string plus keyword arguments.
+            
+All Pubmed Advanced Query tokens (e.g. "TI" for title) are supported 
+(see NCBI Search Field Descriptions and Tags 
+
+http://www.ncbi.nlm.nih.gov/books/NBK3827/
+
 
 metapub.pubmedcentral.* 
 -----------------------

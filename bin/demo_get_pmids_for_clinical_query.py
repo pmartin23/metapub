@@ -1,7 +1,22 @@
+from __future__ import print_function
+
 from metapub import PubMedFetcher
 fetch = PubMedFetcher()
-results = fetch.pmids_for_medical_genetics_query('Brugada Syndrome', 'diagnosis')
 
-print results
+term = 'Global developmental delay'
 
+print('%s: etiology broad' % term)
+results = fetch.pmids_for_clinical_query(term, 'etiology', debug=True)
+
+print('First three results:')
+print(results[:3])
+
+print('')
+
+print('%s: etiology narrow' % term)
+
+results = fetch.pmids_for_clinical_query(term, 'etiology', 'narrow', debug=True)
+print('First three results:')
+print(results[:3])
+print('')
 

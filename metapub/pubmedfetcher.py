@@ -118,8 +118,6 @@ class PubMedFetcher(Borg):
 
     def _eutils_pmids_for_query(self, query='', since=None, until=None, retstart=0, retmax=250,
                 pmc_only=False, **kwargs):
-        print(query)
-            
         '''returns list of pmids for given freeform query string plus keyword arguments.
             
         All Pubmed Advanced Query tokens (e.g. "TI" for title) are supported, plus many 
@@ -141,14 +139,13 @@ class PubMedFetcher(Borg):
         :param: retstart (int) default 0
         :param: retmax (int) default 250
         :param: pmc_only (bool) default False  # constructs query to only search Pubmed Central.
-        
         '''
 
         # lowercase all the things.
         kwargs = lowercase_keys(kwargs)
 
         q = {}
-        if query:
+        if query and not kwargs.get('clinical_query', False):
             q['ALL'] = query
 
         # Search within date range (since / until)
@@ -240,33 +237,75 @@ class PubMedFetcher(Borg):
         if pmc_only:
             query += ' pubmed pmc[sb]'
 
+        if kwargs.get('debug', False):
+            print(query)
+
         result = self.qs.esearch({ 'db': 'pubmed', 'term': query, 
                                    'retmax': retmax, 'retstart': retstart })
         return get_uids_from_esearch_result(result)
 
-    #def pmids_for_clinical_query(self, query, 
-    #    available optimizations:
-    #        broad   (default)
-    #        narrow
+    def pmids_for_clinical_query(self, query, category, optimization='broad', 
+            since=None, until=None, retstart=0, retmax=250, pmc_only=False, **kwargs):
+        '''Takes a query and a category (required, see below) and returns a list
+        of pubmed IDs returned by NCBI for that query.
+            
+        See also PubMedFetcher.pmids_for_query for other parameters.
+
+            available categories:
+
+                therapy
+                diagnosis
+                etiology
+                prognosis
+                prediction
+        
+           available optimizations:
+                broad   (default)
+                narrow
+
+        :param: query (string)
+        :param: category (string)
+        :param: optimization (string) [default: broad]
+        :return: list of pubmed IDs 
+        '''
+
+        key = '%s_%s' % (category, optimization)
+        if query:
+            query += ' '+ clinical_query_map[key]
+        else:
+            raise MetaPubError('Query string required for Clinical Query.')
+
+        kwargs['clinical_query'] = True
+        return self.pmids_for_query(query, retstart=retstart, retmax=retmax, since=since, until=until, **kwargs)
+        
         
     def pmids_for_medical_genetics_query(self, query, category='all', since=None, until=None,
                     retstart=0, retmax=250, pmc_only=False, **kwargs):
-        '''
-        available categories:
-            all     (default)
-            diagnosis
-            differential_diagnosis
-            clinical_description
-            management
-            genetic_counseling
-            genetic_testing
-    
-        see PubMedFetcher.pmids_for_query for advanced query documentation.
+        '''Takes a query and category (see below) and returns a list of pubmed IDs.
+        IDs returned by NCBI for that query.
+
+        See also PubMedFetcher.pmids_for_query for other parameters.
+
+            available categories:
+
+                all     (default)
+                diagnosis
+                differential_diagnosis
+                clinical_description
+                management
+                genetic_counseling
+                genetic_testing
+
+        :param: query (string)
+        :param: category (string) [default: all]
+        :return: list of pubmed IDs 
         '''
         if query:
             query += ' '+ medical_genetics_query_map[category]
         else:
             raise MetaPubError('Query string required for Medical Genetics query.')
+
+        kwargs['clinical_query'] = True
         return self.pmids_for_query(query, retstart=retstart, retmax=retmax, since=since, until=until, **kwargs) 
 
     def pmids_for_citation(self, **kwargs):
