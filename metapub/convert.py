@@ -19,6 +19,13 @@ def _start_engines():
         pm_fetch = PubMedFetcher()
 
 def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
+    '''starting with a PubMedArticle object, use CrossRef to find a DOI for given article.
+
+        :param: pma (PubMedArticle object)
+        :param: use_best_guess (bool) [default: False]
+        :param: min_score (float) [default: 2.0]
+    '''
+
     _start_engines()
     results = crossref.query_from_PubMedArticle(pma)
     top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
@@ -28,6 +35,13 @@ def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
         return None
 
 def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
+    '''starting with a pubmed ID, lookup article in pubmed. If DOI found in PubMedArticle object,
+        return it.  Otherwise, use CrossRef to find the DOI for given article.
+
+        :param: pmid (string or int)
+        :param: use_best_guess (bool) [default: False]
+        :param: min_score (float) [default: 2.0]
+    '''
     # let MetaPubError pass back to the caller if pmid is not for realz..
     _start_engines()
     pma = pm_fetch.article_by_pmid(pmid)

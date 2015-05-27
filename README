@@ -23,14 +23,22 @@ Basic usage::
 
 PubMedFetcher also includes the following special methods.
 
-`article_by_doi`: (attempt to) fetch an article by looking up the DOI first.
+*article_by_doi* 
 
-`article_by_pmcid`: fetch an article by looking up the PMCID first.
+      (Attempt to) fetch an article by looking up the DOI first.
 
-`pmids_from_citation`: produces a list of possible PMIDs for the submitted
-    citation, where the citation is submitted as a collection of keyword
-    arguments.  At least 3 of the 5, preferably 4 or 5 for best results,
-    must be included::
+
+*article_by_pmcid* 
+    
+      Fetch an article by looking up the PMCID first.
+
+
+*pmids_from_citation*
+
+      Produces a list of possible PMIDs for the submitted
+      citation, where the citation is submitted as a collection of keyword
+      arguments.  At least 3 of the 5, preferably 4 or 5 for best results,
+      must be included::
 
         aulast or author_last_fm1
         year
@@ -38,15 +46,50 @@ PubMedFetcher also includes the following special methods.
         first_page or spage
         journal or jtitle
 
-    (*Note* this function is still very "alpha". Citation lookups prefer
-    Medline XML style journal strings, so use those when possible.)
+      Use NLM Title Abbreviation (aka ISO Abbreviation) journal strings whenever possible.
 
-`pmids_for_query`: returns list of pmids for given freeform query string plus keyword arguments.
+
+*pmids_for_query*
+
+      Returns list of pmids for given freeform query string plus keyword arguments.
             
-All Pubmed Advanced Query tokens (e.g. "TI" for title) are supported 
-(see NCBI Search Field Descriptions and Tags 
+      All Pubmed Advanced Query tokens are supported.  
 
-http://www.ncbi.nlm.nih.gov/books/NBK3827/
+      See [NCBI Search Field Descriptions and Tags](http://www.ncbi.nlm.nih.gov/books/NBK3827/)
+
+
+*pmids_for_clinical_query*
+
+      Composes a "Clinical Query" as on this page: (http://www.ncbi.nlm.nih.gov/pubmed/clinical/)
+
+      Supply a "category" (required) and an optimization ("broad" or "narrow") for this function.
+      Available categories:
+
+      * therapy
+      * diagnosis
+      * etiology
+      * prognosis
+      * prediction
+
+
+      All keyword arguments for PubMedFetcher.pmids_for_query available.
+
+
+*pmids_for_medical_genetics_query*
+
+      Composes a "Medical Genetics Query" as described here: (http://www.ncbi.nlm.nih.gov/books/NBK3827/#pubmedhelp.Medical_Genetics_Search_Filte)
+
+      Supply a "category" (required) and an optimization ("broad" or "narrow") for this function.
+      Available categories:
+
+      * therapy
+      * diagnosis
+      * etiology
+      * prognosis
+      * prediction
+
+
+      All keyword arguments for PubMedFetcher.pmids_for_query available.
 
 
 metapub.pubmedcentral.* 
@@ -103,7 +146,7 @@ Between 2.0 and 3.0 is a grey area: be wary and check results against any known 
 Current testing (as of 1/23/2015) indicates that a cleverly-formed CrossRef 
 query can return results 99% correct about 90% of the time.  
 
-The more `params` submitted with the query, the more accurate the results may be. 
+The more *params* submitted with the query, the more accurate the results may be. 
 
 
 Basic usage::
@@ -122,6 +165,34 @@ NOTE: if you don't supply "CR.last_params", you can't use the "use_best_guess"
 operator. In cases where all results have scores under 2, no results will 
 be returned unless use_best_guess=True.  That's often desired behavior, 
 since results with scores under 2 are usually pretty bad.
+
+
+Miscellaneous Utilities
+-----------------------
+
+Currently underdocumented utilities that you might find useful.
+
+In metapub.utils:
+
+  * *asciify* (nuke all the unicode from orbit; it's the only way to be sure)
+  * *parameterize* (make strings suitable for submission to GET-based query service)
+  * *deparameterize* (somewhat-undo parameterization in string)
+  * *remove_html_markup* (remove html and xml tags from text. preserves HTML entities like &amp;)
+
+
+In metapub.text_mining:
+
+  * *find_doi_in_string* (returns the first seen DOI in the input string)
+  * *findall_dois_in_text* (returns all seen DOIs in input string)
+  * *pick_pmid* (return longest numerical string from text (string) as the pmid)
+
+
+In metapub.convert:
+
+  * *PubMedArticle2doi* (uses CrossRef to find a DOI for given PubMedArticle object.)
+  * *pmid2doi* (returns first found doi for pubmed ID "by any means necessary.)
+  * *doi2pmid* (uses CrossRef and eutils to return a PMID for given DOI if possible.)
+
 
 More Information
 ----------------
