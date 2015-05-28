@@ -92,11 +92,11 @@ class PubMedFetcher(Borg):
         if result.find('ERROR') > -1:
             raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle' % pmid)
 
-        try:
-            return PubMedArticle(result)
-        except AttributeError:
+        #try:
+        return PubMedArticle(result)
+        #except AttributeError:
             # in this case, eutils let us fetch a good-looking pmid, but it did not parse as an article.
-            raise InvalidPMID('Pubmed ID "%s" not found' % pmid)
+        #    raise InvalidPMID('Pubmed ID "%s" not found' % pmid)
 
     def _eutils_article_by_pmcid(self, pmcid):
         # if user submitted a bare number, prepend "PMC" to make sure it is submitted correctly 

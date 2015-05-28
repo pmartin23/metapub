@@ -65,3 +65,4 @@
 5/19/2015, 0.3.8.13, FindIt: added the_biomed_calypso to resolve links to BMC content
 5/21/2015, 0.3.9, PubMedFetcher: added related_pmids (uses elink query) 
 5/26/2015, 0.3.10, PubMedFetcher: added pmids_for_clinical_query and pmids_for_medical_genetics_query. Documentation improvements.
+5/28/2015, 0.3.10, PubMedArticle: added mesh (dictionary of MeSH headings) and chemicals (dictionary of chemical substances)

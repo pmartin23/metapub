@@ -86,6 +86,12 @@ class PubMedArticle(MetaPubObject):
         self.pmc = None if pmt=='book' else self._get_pmc()
         self.issn = None if pmt=='book' else self._get_issn()
 
+        #MeSH headings ('article' only)
+        self.mesh = self._get_mesh_headings()
+
+        #Chemical associations ('article' only)
+        self.chemicals = self._get_chemicals()
+
         # 'book' only:
         self.book_accession_id = None if pmt=='article' else self._get_bookaccession_id()
         self.book_title = None if pmt=='article' else self._get_book_title()
@@ -335,6 +341,40 @@ class PubMedArticle(MetaPubObject):
 
     def _get_issn(self):
         return self._get(self._root+'/Article/Journal/ISSN')
+
+    def _get_mesh_headings(self):
+        if self.pubmed_type=='book':
+            return None
+
+        meshtags = self.content.findall('MedlineCitation/MeshHeadingList/MeshHeading')
+        outd = { }
+        for mesh in meshtags:
+            descript = mesh.find('DescriptorName')  # should always be present
+            qual = mesh.find('QualifierName')       # may not be present
+
+            DUI = descript.get('UI')
+            outd[DUI] = { 
+                    'descriptor_name': descript.text,
+                    'major_topic': True if descript.get('MajorTopicYN')=='Y' else False,
+                    'qualifier_name': None if qual is None else qual.text,
+                    'qualifier_ui': None if qual is None else qual.get('UI'),
+                }
+        return outd
+
+    def _get_chemicals(self):
+        if self.pubmed_type=='book':
+            return None
+
+        outd = {}
+        chemicals = self.content.findall('MedlineCitation/ChemicalList/Chemical')
+        for chem in chemicals:
+            substance = chem.find('NameOfSubstance')
+            regnum = chem.find('RegistryNumber').text  # very often this is '0'
+            outd[substance.get('UI')] = { 
+                    'substance_name': substance.text,
+                    'registry_number': regnum
+                }
+        return outd
     
     def __str__(self):
         if self.pubmed_type == 'article':

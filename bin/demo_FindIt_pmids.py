@@ -63,7 +63,7 @@ except IndexError:
     outdir = os.path.join(basedir, pmid_file)
 
 try:
-    os.mkdir(outdir)
+    os.makedirs(outdir)
 except OSError:
     pass
 

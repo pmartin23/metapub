@@ -24,14 +24,27 @@ except IndexError:
 fetch = PubMedFetcher()
 
 article = fetch.article_by_pmid(pmid)
+print ''
 print article.pmid, article.title
-#print 'pages: '+article.pages
+print ''
 print 'authors: %s' % ','.join(article.authors)
+print ''
 print 'abstract: %s' % article.abstract
+print ''
 print 'pii: '+str(article.pii)
 print 'doi: '+str(article.doi)
 print 'pmc: '+str(article.pmc)
 print 'volume: '+article.volume
 print 'issue: '+article.issue
-#print article.xmlstr
+print 'pages: '+article.pages
+print ''
+print 'MeSH headings: '
+for DUI in article.mesh.keys():
+    print DUI, article.mesh[DUI]['descriptor_name'], article.mesh.get('qualifier_name', '')
 
+if article.chemicals:
+    print 'Chemical List'
+    for DUI in article.chemicals.keys():
+        print DUI, article.chemicals[DUI]['substance_name']
+
+#print article.xmlstr
