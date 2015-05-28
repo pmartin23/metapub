@@ -92,6 +92,12 @@ class PubMedArticle(MetaPubObject):
         #Chemical associations ('article' only)
         self.chemicals = self._get_chemicals()
 
+        #Grant information (?? 'article' only ??)
+        self.grants = self._get_grantlist()
+
+        #Publication Types (?? 'article' only ??)
+        self.publication_types = self._get_publication_types()
+
         # 'book' only:
         self.book_accession_id = None if pmt=='article' else self._get_bookaccession_id()
         self.book_title = None if pmt=='article' else self._get_book_title()
@@ -186,7 +192,7 @@ class PubMedArticle(MetaPubObject):
 
     def _get_book_contribution_date(self):
         contribution_date_element = self.content.find('BookDocument/ContributionDate')
-        if contribution_date_element:
+        if contribution_date_element is not None:
             return self._construct_datetime(self.content.find('BookDocument/ContributionDate'))
         return None
 
@@ -195,7 +201,7 @@ class PubMedArticle(MetaPubObject):
 
     def _get_book_synonyms(self):
         syn_list = self.content.find('BookDocument/ItemList')
-        if syn_list and syn_list.get('ListType')=='Synonyms':
+        if syn_list is not None and syn_list.get('ListType')=='Synonyms':
             return [item.text for item in self.content.findall('BookDocument/ItemList/Item')]
         else:
             return []
@@ -375,7 +381,22 @@ class PubMedArticle(MetaPubObject):
                     'registry_number': regnum
                 }
         return outd
+
+    def _get_publication_types(self):
+        outd = {}
+        pubtypes = self.content.findall('MedlineCitation/PublicationTypeList')
+        for pt in pubtypes:
+            outd[pt.get('UI')] = pt.text
+        return outd
     
+    def _get_grantlist(self):
+        outl = []
+        grants = self.content.findall('MedlineCitation/GrantList')
+        for gr in grants:
+            outl.append( {'agency': gr.get('Agency', None), 'country': gr.get('Country', None)} )
+        return outl
+        
+
     def __str__(self):
         if self.pubmed_type == 'article':
             return( '%s (%s. %s, %s:%s)' % (
