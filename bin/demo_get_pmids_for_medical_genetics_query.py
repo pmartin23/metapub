@@ -5,7 +5,7 @@ fetch = PubMedFetcher()
 
 
 #print('Brugada Syndrome: diagnosis')
-results = fetch.pmids_for_medical_genetics_query('Brugada Syndrome', 'diagnosis', debug=True)
+results = fetch.pmids_for_medical_genetics_query('Brugada Syndrome', 'diagnosis', debug=True, year=2013)
 
 print('First three results:')
 print(results[:3])
