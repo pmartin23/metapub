@@ -29,7 +29,8 @@ print article.pmid, article.title
 print ''
 print 'authors: %s' % ','.join(article.authors)
 print ''
-print 'abstract: %s' % article.abstract
+excerpt = '(empty)' if article.abstract is None else article.abstract[:100] + '[...]'
+print 'abstract: %s' % excerpt
 print ''
 print 'pii: '+str(article.pii)
 print 'doi: '+str(article.doi)
@@ -37,14 +38,26 @@ print 'pmc: '+str(article.pmc)
 print 'volume: '+article.volume
 print 'issue: '+article.issue
 print 'pages: '+article.pages
+print 'year: '+article.year
 print ''
 print 'MeSH headings: '
 for DUI in article.mesh.keys():
-    print DUI, article.mesh[DUI]['descriptor_name'], article.mesh.get('qualifier_name', '')
+    print '\t', DUI, article.mesh[DUI]['descriptor_name'], article.mesh.get('qualifier_name', '')
+
+if article.publication_types:
+    print '\nPublication Type Information'
+    for pt in article.publication_types.keys():
+        print '\t', pt, article.publication_types[pt]
 
 if article.chemicals:
-    print 'Chemical List'
+    print '\nChemical List'
     for DUI in article.chemicals.keys():
-        print DUI, article.chemicals[DUI]['substance_name']
+        print '\t', DUI, article.chemicals[DUI]['substance_name']
+
+if article.grants:
+    print '\nGrant Information'
+    for gr in grants:
+        print '\t', gr
 
 #print article.xmlstr
+print ''

@@ -384,7 +384,7 @@ class PubMedArticle(MetaPubObject):
 
     def _get_publication_types(self):
         outd = {}
-        pubtypes = self.content.findall('MedlineCitation/PublicationTypeList')
+        pubtypes = self.content.findall('MedlineCitation/Article/PublicationTypeList/PublicationType')
         for pt in pubtypes:
             outd[pt.get('UI')] = pt.text
         return outd

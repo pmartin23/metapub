@@ -91,6 +91,8 @@ for pmid in [pick_pmid(pmid) for pmid in pmids if pmid.strip() != '']:
         findit['journal'].append('NA')
         continue
     
+    #print pmid, 'Grant info (if any): '
+    #print source.pma.grants
 
     if source.pma is None:
         print "%s: no PubMedArticle" % pmid

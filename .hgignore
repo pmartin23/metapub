@@ -11,4 +11,4 @@ dist/
 *.egg-info
 build/
 sandbox/
-bin/findit
+findit/

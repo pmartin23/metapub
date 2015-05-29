@@ -55,6 +55,10 @@
 #12015065: Zhonghua Xue Ye Xue Za Zhi -- no URL because No URL format for Journal Zhonghua Xue Ye Xue Za Zhi
 #12032748: Int. J. Obes. Relat. Metab. Disord. -- no URL because No URL format for Journal Int J Obes Relat Metab Disord
 
+
+doi2step_journals = [ 'Nat Nanotechnol' ]
+
+
 todo_journals = {
     'Pharmacol Rep': { 'example': 'http://www.ncbi.nlm.nih.gov/pubmed/?term=23238479[uid] --> www.if-pan.krakow.pl/pjp/pdf/2012/5_1234.pdf' },
     'Med Sci Monit': { 'example': 'http://www.medscimonit.com/download/index/idArt/869530' },
@@ -72,6 +76,8 @@ todo_journals = {
     'Clinics (Sao Paulo)': { 'example': '17823699: http://www.scielo.br/scielo.php?script=sci_arttext&pid=S1807-59322007000400003' },
     'Asian J Androl': {'example': '18097502: http://www.asiaandro.com/Abstract.asp?doi=10.1111/j.1745-7262.2008.00376.x' },
     'Anesthesiology': {'example': '18212565: http://dx.doi.org/10.1097/01.anes.0000299431.81267.3e --> html w/ <a id="pdfLink" data-article-url="THE_URL">' },
+    'Nat Prod Commun': {'example': '19634325 (no direct link found yet) -- http://www.naturalproduct.us/' },
+
     }
 
 
@@ -202,17 +208,51 @@ nature_journals = {
     'Mod Pathol': { 'ja': 'modpathol' },
     'Mol Psychiatry': { 'ja': 'mp' },
     'Nature': { 'ja': 'nature' },
+    'Nat Chem': { 'ja': 'nchem' },
     'Nat Clin Pract Endocrinol Metab': { 'ja': 'nrendo' },
+    'Nat Clin Pract Cardiovasc Med': { 'ja': 'nrcardio' },
+    'Nat Clin Pract Oncol': { 'ja': 'nrclinonc' },
+    'Nat Clin Pract Gastroenterol Hepatol': { 'ja': 'nrgastro' },
+    'Nat Clin Pract Urol': { 'ja': 'nrurol' },
+    'Nat Clin Pract Neurol': { 'ja': 'nrneurol' },
+    'Nat Clin Pract Nephrol': { 'ja': 'nrneph' },
+    'Nat Clin Pract Rheumatol': { 'ja': 'nrrheum' },
     'Nat Genet': { 'ja': 'ng' },
+    'Nat Commun': {'ja': 'ncomms' },
     'Nat Neurosci': { 'ja': 'neuro' },
+    'Nat Mater': { 'ja': 'nmat' },
     'Nat Med': { 'ja': 'nm' },
     'Nat Methods': { 'ja': 'nmeth' },
-    'Nat Rev. Genet': { 'ja': 'nrg' },
+    'Nat Protoc': { 'ja': 'nprot' },
+    'Nat Rev Drug Discov': { 'ja': 'nrd' },
+    'Nat Rev Cardiol': { 'ja': 'nrcardio' },
+    'Nat Rev Clin Oncol': { 'ja': 'nrclinonc' },
+    'Nat Rev Endocrinol': { 'ja': 'nrendo' },
+    'Nat Rev Genet': { 'ja': 'nrg' },
+    'Nat Rev Gastroenterol Hepatol': { 'ja': 'nrgastro' },
+    'Nat Rev Nephrol': { 'ja': 'nrneph' },
+    'Nat Rev Neurol': { 'ja': 'nrneurol' },
+    'Nat Rev Rheumatol': { 'ja': 'nrrheum' },
+    'Nat Rev Urol': { 'ja': 'nrurol' },
     'Nature reviews Immunology': { 'ja': 'nri' },
     'Neuropsychopharmacology': { 'ja': 'npp' },
     'Oncogene': { 'ja': 'onc' },
     'Pediatr Res': { 'ja': 'pr' },
     }
+
+#All in PMC:
+ #Nat Comput
+ #Nat Clim Chang
+ #Nat Geosci
+ #Nat Resour Model
+ #Nat Lang Linguist Theory
+ #Nat Photonics
+ #Nat Phys
+ #Nat Prod Bioprospect
+ #Nat Lang Eng
+ #Nat Rep Stem Cells
+ #Nat Sci (Irvine)
+ #Nat Sci Sleep
 
 
 # simple formats are used for URLs that can be deduced from PubMedArticle XML
@@ -465,6 +505,9 @@ wiley_journals = (
 schattauer_journals = [
     'Thromb Haemost',
     ]
+
+# Royal Society of Chemistry
+RSC_journals = [ 'Nat Prod Rep' ]
 
 wolterskluwer_journals = [
     'AIDS',

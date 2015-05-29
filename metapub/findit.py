@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 __doc__='''find_it: provides FindIt object, providing a tidy object layer
             into the get_pdf_from_pma function.
@@ -50,6 +50,7 @@ from .text_mining import re_numbers
 from .utils import asciify
 
 from .findit_formats import *
+from .findit_cantdo_list import FINDIT_CANTDO_LIST
 
 fetch = PubMedFetcher()
 
@@ -57,7 +58,7 @@ DX_DOI_URL = 'http://dx.doi.org/%s'
 def the_doi_2step(doi):
     'takes a DOI (string), returns a url to a paper'
     response = requests.get(DX_DOI_URL % doi)
-    if response.status_code == 200:
+    if response.status_code in [200, 401, 301, 302, 307, 308]:
         return response.url
     else:
         raise NoPDFLink('dx.doi.org lookup failed for doi %s (HTTP %i returned)' % (doi, response.status_code))
@@ -183,13 +184,27 @@ def the_nature_ballet(pma):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
+    url = ''
     if pma.doi:
-        starturl = the_doi_2step(pma.doi)
-        url = starturl.replace('html', 'pdf').replace('abs', 'pdf').replace('full', 'pdf')
-    elif pma.pii:
-        url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
-    else:
-        raise NoPDFLink('Not enough information to compose a link for Nature (no DOI or PII)')
+        try:
+            starturl = the_doi_2step(pma.doi)
+            url = starturl.replace('html', 'pdf').replace('abs', 'pdf').replace('full', 'pdf')
+        except NoPDFLink:
+            # alright, let's try the pii route.
+            pass
+
+    if url=='':
+        if pma.pii:
+            print('URL: ', url)
+            url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
+        else:
+            if pma.doi:
+                print('DOI: ', pma.doi)
+                raise NoPDFLink('the_doi2step failed and no PII in metadata')
+            else:
+                print('pii: ', pma.pii)
+                raise NoPDFLink('not enough information to compose a link for Nature (no DOI or PII)')
+
     r = requests.get(url)
     if r.headers['content-type'].find('pdf') > -1:
         return r.url
@@ -397,6 +412,9 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
 
     elif jrnl in todo_journals:
         reason = 'TODO format -- example: %s' % todo_journals[jrnl]['example']
+
+    elif jrnl in FINDIT_CANTDO_LIST:
+        reason = 'this journal is in the "can\'t do" list'
 
     else:
         reason = 'No URL format for Journal %s' % jrnl

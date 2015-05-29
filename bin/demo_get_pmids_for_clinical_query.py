@@ -20,3 +20,10 @@ print('First three results:')
 print(results[:3])
 print('')
 
+print('tyrosine kinase inhibitor: diagnosis')
+results = fetch.pmids_for_clinical_query('tyrosine kinase inhibitor', 'diagnosis', 'broad', debug=True, year=2013)
+print(len(results))
+print('First three results:')
+print(results[:3])
+print('')
+
