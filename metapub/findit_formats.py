@@ -77,7 +77,7 @@ todo_journals = {
     'Asian J Androl': {'example': '18097502: http://www.asiaandro.com/Abstract.asp?doi=10.1111/j.1745-7262.2008.00376.x' },
     'Anesthesiology': {'example': '18212565: http://dx.doi.org/10.1097/01.anes.0000299431.81267.3e --> html w/ <a id="pdfLink" data-article-url="THE_URL">' },
     'Nat Prod Commun': {'example': '19634325 (no direct link found yet) -- http://www.naturalproduct.us/' },
-
+    'Oncotarget': {'example': '26008984 (pii = 3900) --> http://www.impactjournals.com/oncotarget/index.php?journal=oncotarget&page=article&op=view&path=3900' },
     }
 
 
@@ -194,7 +194,7 @@ cell_journals = {
     'Trends Mol Med': { 'ja': '/trends' },
     }
 
-# nature journals
+# nature journals -- COMPLETE
 nature_format = 'http://www.nature.com/{ja}/journal/v{a.volume}/n{a.issue}/pdf/{a.pii}.pdf'
 nature_journals = {
     'Eur J Hum Genet': { 'ja': 'ejhg' },
@@ -240,19 +240,6 @@ nature_journals = {
     'Pediatr Res': { 'ja': 'pr' },
     }
 
-#All in PMC:
- #Nat Comput
- #Nat Clim Chang
- #Nat Geosci
- #Nat Resour Model
- #Nat Lang Linguist Theory
- #Nat Photonics
- #Nat Phys
- #Nat Prod Bioprospect
- #Nat Lang Eng
- #Nat Rep Stem Cells
- #Nat Sci (Irvine)
- #Nat Sci Sleep
 
 
 # simple formats are used for URLs that can be deduced from PubMedArticle XML
@@ -337,7 +324,7 @@ simple_formats_pii = {
 
 
 # Many BMC journals start with "BMC" (they're covered automatically) --
-#   this list covers the ones that don't.
+#   this list covers the ones that don't.  #TODO: Gather up the ones not in here yet.
 BMC_journals = (
     'Diagn Pathol',
     'Genome Biol',
@@ -428,7 +415,15 @@ vip_journals = {
         'Thorax': { 'host': 'thorax.bmj.com' },
         }
 
-# Spandidos: just different enough from vip_formats to be obnoxious.
+# Science (AAAS) -- requires login "as a courtesy to the community".  Mkay.
+aaas_format = 'http://{ja}.sciencemag.org/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
+aaas_journals = {
+        'Sci Signal': { 'ja': 'stke' },
+        'Sci Transl Med': { 'ja': 'stm' },
+    }
+
+
+# Spandidos: volume/issue/firstpage AND a journal abbreviation. Fancy.
 spandidos_format = 'http://www.spandidos-publications.com/{ja}/{a.volume}/{a.issue}/{a.first_page}/download'
 spandidos_journals = {
         'Int J Oncol': { 'ja' : 'ijo' },
@@ -436,7 +431,6 @@ spandidos_journals = {
         'Oncol Lett': { 'ja' : 'ol' },
         'Oncol Rep': { 'ja' : 'or' },
     }
-
 
 
 wiley_journals = (
@@ -581,3 +575,16 @@ thieme_journals = ['Neuropediatrics', 'Semin Vasc Med', 'Exp Clin Endocrinol Dia
 paywall_journals = schattauer_journals + wolterskluwer_journals + springer_journals + thieme_journals + karger_journals
 
 
+#All in PMC (no need to write formats for):
+ #Nat Comput
+ #Nat Clim Chang
+ #Nat Geosci
+ #Nat Resour Model
+ #Nat Lang Linguist Theory
+ #Nat Photonics
+ #Nat Phys
+ #Nat Prod Bioprospect
+ #Nat Lang Eng
+ #Nat Rep Stem Cells
+ #Nat Sci (Irvine)
+ #Nat Sci Sleep

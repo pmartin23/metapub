@@ -120,6 +120,17 @@ def the_biomed_calypso(pma):
     return BMC_format.format(aid=article_id)
 
 
+def the_aaas_tango(pma):
+    ja = aaas_journals[pma.journal]
+    if pma.volume and pma.issue and pma.first_page:
+        url = aaas_format.format(ja=ja, a=pma)
+    elif pma.doi:
+        url = the_doi2step(pma.doi)
+    else:
+        raise NoPDFLink('Not enough information in PubMedArticle for AAAS journal.')
+    return url
+
+
 def the_jama_dance(pma):
     '''  :param: pma (PubMedArticle object)
          :return: url (string)
