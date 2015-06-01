@@ -1,6 +1,9 @@
 import os, sys, logging, shutil, subprocess
 import requests
 
+from requests.packages import urllib3 
+urllib3.disable_warnings()
+
 from metapub import PubMedFetcher 
 from metapub.exceptions import MetaPubError
 from metapub import FindIt

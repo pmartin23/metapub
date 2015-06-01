@@ -24,6 +24,7 @@ def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
         :param: pma (PubMedArticle object)
         :param: use_best_guess (bool) [default: False]
         :param: min_score (float) [default: 2.0]
+        :return: doi (string) or None
     '''
 
     _start_engines()
@@ -33,6 +34,28 @@ def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
         return top_result['doi']
     else:
         return None
+
+def PubMedArticle2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
+    '''Starting with a PubMedArticle object, use CrossRef to find a DOI for given article.
+
+        Returns a tuple containing the DOI and the score CrossRef returned for the
+        lookup.  If there was no good result above the min_score threshold, the tuple 
+        will contain (None, 0.0).
+
+        :param: pma (PubMedArticle object)
+        :param: use_best_guess (bool) [default: False]
+        :param: min_score (float) [default: 2.0]
+        :return: (doi, score) (string, float) or (None, 0.0)
+    '''
+
+    _start_engines()
+    results = crossref.query_from_PubMedArticle(pma)
+    top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
+    if top_result:
+        return (top_result['doi'], top_result['score'])
+    else:
+        return (None, 0.0)
+
 
 def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
     '''starting with a pubmed ID, lookup article in pubmed. If DOI found in PubMedArticle object,
