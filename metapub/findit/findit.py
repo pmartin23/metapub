@@ -98,13 +98,6 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
         except Exception, e:
             reason = str(e)
 
-    if pma.doi==None and use_crossref:
-        pma.doi = PubMedArticle2doi(pma)
-        if pma.doi==None:
-            reason = 'DOI missing from PubMedArticle and CrossRef lookup failed.'
-        else:
-            reason = 'DOI missing from PubMedArticle.'
- 
     if jrnl in simple_formats_pii.keys():
         # TODO: find a smarter way to process these (maybe just break them out into publishers)
         if pma.pii:
