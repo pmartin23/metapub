@@ -426,3 +426,18 @@ def _au_to_last_fm(au):
     raise MetaPubError("Author structure not recognized")
 
 
+def square_voliss_data_for_pma(pma):
+    '''takes a PubMedArticle object, returns same object with corrected volume/issue 
+    information (if needed)'''
+    if pma.volume != None and pma.issue is None:
+        # try to get a number out of the parts that came after the first number.
+        volparts = re_numbers.findall(pma.volume)
+        if len(volparts) > 1:
+            pma.volume = volparts[0]
+            # take a guess. best we can do. this often works (e.g. Brain journal)
+            pma.issue = volparts[1]
+    if pma.issue and pma.volume:
+        if pma.issue.find('Pt') > -1:
+            pma.issue = re_numbers.findall(pma.issue)[0]
+    return pma
+

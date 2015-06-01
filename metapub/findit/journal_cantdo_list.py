@@ -1,5 +1,5 @@
 
-FINDIT_CANTDO_LIST = [
+JOURNAL_CANTDO_LIST = [
     'Nat Monspel Ser Bot',
     'Nat Prod Lett',
     'Nat Hist',

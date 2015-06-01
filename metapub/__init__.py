@@ -10,5 +10,5 @@ from .medgenconcept import MedGenConcept
 from .crossref import CrossRef
 from .findit import FindIt
 
-__version__ = '0.3.11.1'
+__version__ = '0.3.11.2'
 

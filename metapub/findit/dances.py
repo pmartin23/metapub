@@ -1,58 +1,17 @@
 from __future__ import absolute_import, print_function
 
-__doc__='''find_it: provides FindIt object, providing a tidy object layer
-            into the get_pdf_from_pma function.
-
-        The get_pdf_from_pma function selects possible PDF links for the 
-        given article represented in a PubMedArticle object.
-
-        The FindIt class allows lookups of the PDF starting from only a 
-        DOI or a PMID, using the following classmethods:
-
-        FindIt.from_pmid(pmid, **kwargs)
-
-        FindIt.from_doi(doi, **kwargs)
-
-        The machinery in this code performs all necessary data lookups 
-        (e.g. looking up a missing DOI, or using a DOI to get a PubMedArticle)
-        to end up with a url and reason, which attaches to the FindIt object
-        in the following attributes:
-
-        source = FindIt(pmid=PMID)
-        source.url
-        source.reason
-        source.pmid
-        source.doi
-
-        *** IMPORTANT NOTE ***
-
-        In many cases, this code performs intermediary HTTP requests in order to 
-        scrape a PDF url out of a page, and sometimes tests the url to make sure
-        that what's being sent back is in fact a PDF.
-
-        If you would like these requests to go through a proxy (e.g. if you would
-        like to prevent making multiple requests of the same pages, which may have
-        effects like getting your IP shut off from PubMedCentral), set the 
-        HTTP_PROXY environment variable in your code or on the command line before
-        using any FindIt functionality.
-'''
-
 __author__='nthmost'
 
 import requests
 from lxml.html import HTMLParser
 from lxml import etree
 
-from .pubmedfetcher import PubMedFetcher
-from .convert import PubMedArticle2doi, doi2pmid
-from .exceptions import MetaPubError, AccessDenied, NoPDFLink
-from .text_mining import re_numbers
-from .utils import asciify
+from ..exceptions import MetaPubError, AccessDenied, NoPDFLink
+from ..text_mining import re_numbers
+from ..utils import asciify
 
-from .findit_formats import *
-from .findit_cantdo_list import FINDIT_CANTDO_LIST
+from .journal_formats import *
 
-fetch = PubMedFetcher()
 
 DX_DOI_URL = 'http://dx.doi.org/%s'
 def the_doi_2step(doi):
@@ -225,15 +184,6 @@ def the_nature_ballet(pma):
 
 paywall_reason_template = '%s behind %s paywall'  # % (journal, publisher)
 
-def find_article_from_doi(doi):
-    ''' :param: doi (string)
-        :return: (url, reason)
-    '''
-    #1) pull a PubMedArticle based on CrossRef lookup (using doi2pmid)
-    #2) run it through find_article_from_pma
-    pma = fetch.article_by_pmid(doi2pmid(doi))
-    return find_article_from_pma(pma)
-    
 
 PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 EUROPEPMC_PDF_URL = 'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC{a.pmc}&blobtype=pdf'
@@ -433,6 +383,18 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
     return (url, reason)
 
 
+def find_article_from_doi(doi):
+    '''pull a PubMedArticle based on CrossRef lookup (using doi2pmid),
+    then run it through find_article_from_pma.
+
+        :param: doi (string)
+        :return: (url, reason)
+    '''
+    pma = fetch.article_by_pmid(doi2pmid(doi))
+    return find_article_from_pma(pma)
+    
+
+
 class FindIt(object):
 
     @classmethod
@@ -450,29 +412,46 @@ class FindIt(object):
         self.doi = kwargs.get('doi', None)
         self.url = kwargs.get('url', None)
         self.reason = None
+        self.use_crossref = kwargs.get('use_crossref', True)
         self.use_paywalls = kwargs.get('use_paywalls', False)
+        self.doi_min_score = kwargs.get('doi_min_score', 2.3)
         self.tmpdir = kwargs.get('tmpdir', '/tmp')
-
+        self.doi_score = None
         self.pma = None
 
         if self.pmid:
-            self.pma = fetch.article_by_pmid(self.pmid)
-            #print self.pmid
-            try:
-                self.url, self.reason = find_article_from_pma(self.pma, use_paywalls=self.use_paywalls)
-            except requests.exceptions.ConnectionError, e:
-                self.url = None
-                self.reason = 'tx_error: %r' % e
-
+            self._load_pma_from_pmid()
         elif self.doi:
-            self.url, self.reason = find_article_from_doi(self.doi, use_paywalls=self.use_paywalls)
+            self._load_pma_from_doi()
+
+        try:
+            self.url, self.reason = find_article_from_pma(self.pma, use_paywalls=self.use_paywalls) 
+        except requests.exceptions.ConnectionError, e:
+            self.url = None
+            self.reason = 'tx_error: %r' % e
+
+
+    def _load_pma_from_pmid(self):
+        self.pma = fetch.article_by_pmid(self.pmid)
+        if self.pma.doi:
+            self.doi_score==10.0
+        
+	if self.pma.doi==None:
+            if self.use_crossref:
+	        self.pma.doi, self.doi_score = PubMedArticle2doi_with_score(self.pma, min_score=self.doi_min_score)
+                if self.pma.doi == None:
+                    self.reason = 'DOI missing from PubMedArticle and CrossRef lookup failed.'
+
+    def _load_pma_from_doi(self):
+        self.pmid = doi2pmid(doi)
+        self.pma = fetch.article_by_pmid(self.pmid)
+        self.doi_score = 10.0
 
     def to_dict(self):
         return { 'pmid': self.pmid,
                  'doi': self.doi,
                  'reason': self.reason,
                  'url': self.url,
+                 'doi_score': self.doi_score,
                }
-               #'use_paywalls': self.use_paywalls,
-               #'pma': self.pma
 
