@@ -165,14 +165,14 @@ def the_nature_ballet(pma):
 
     if url=='':
         if pma.pii:
-            print('URL: ', url)
+            #print('URL: ', url)
             url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
         else:
             if pma.doi:
-                print('DOI: ', pma.doi)
+            #    print('DOI: ', pma.doi)
                 raise NoPDFLink('the_doi2step failed and no PII in metadata')
             else:
-                print('pii: ', pma.pii)
+            #    print('pii: ', pma.pii)
                 raise NoPDFLink('not enough information to compose a link for Nature (no DOI or PII)')
 
     r = requests.get(url)
