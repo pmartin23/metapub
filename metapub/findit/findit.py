@@ -226,8 +226,8 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
     elif jrnl in todo_journals:
         reason = 'TODO format -- example: %s' % todo_journals[jrnl]['example']
 
-    elif jrnl in FINDIT_CANTDO_LIST:
-        reason = 'this journal is in the "can\'t do" list'
+    elif jrnl in JOURNAL_CANTDO_LIST:
+        reason = 'CANTDO: this journal is in the "can\'t do" list (see metapub/findit/journal_cantdo_list.py)'
 
     else:
         reason = 'No URL format for Journal %s' % jrnl
@@ -244,7 +244,6 @@ def find_article_from_doi(doi):
     '''
     pma = fetch.article_by_pmid(doi2pmid(doi))
     return find_article_from_pma(pma)
-    
 
 
 class FindIt(object):
@@ -275,6 +274,8 @@ class FindIt(object):
             self._load_pma_from_pmid()
         elif self.doi:
             self._load_pma_from_doi()
+        else:
+            raise MetaPubError('Supply either a pmid or a doi to instantiate. e.g. FindIt(pmid=1234567)')
 
         try:
             self.url, self.reason = find_article_from_pma(self.pma, use_paywalls=self.use_paywalls) 
@@ -292,11 +293,16 @@ class FindIt(object):
 	        self.pma.doi, self.doi_score = PubMedArticle2doi_with_score(self.pma, min_score=self.doi_min_score)
                 if self.pma.doi == None:
                     self.reason = 'DOI missing from PubMedArticle and CrossRef lookup failed.'
+                else:
+                    self.doi = self.pma.doi
 
     def _load_pma_from_doi(self):
-        self.pmid = doi2pmid(doi)
-        self.pma = fetch.article_by_pmid(self.pmid)
-        self.doi_score = 10.0
+        self.pmid = doi2pmid(self.doi)
+        if self.pmid:
+            self.pma = fetch.article_by_pmid(self.pmid)
+            self.doi_score = 10.0
+        else:
+            raise MetaPubError('Could not get a PMID for DOI %s' % self.doi)
 
     def to_dict(self):
         return { 'pmid': self.pmid,
