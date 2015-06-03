@@ -147,8 +147,11 @@ class PubMedFetcher(Borg):
         q = {}
         
         query = query.strip()
-        if query and not kwargs.get('clinical_query', False):
+        # if we find brackets in the query string, assume they are query keyword tags.
+        # otherwise, submit the query string with an "ALL" keyword tag.
+        if query.find('[') == -1 and not kwargs.get('clinical_query', False):
             q['ALL'] = query
+            query = ''
 
         # Search within date range (since / until)
         # 
