@@ -167,6 +167,13 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
             # TODO: try the_doi_2step
             reason = 'volume and maybe also issue data missing from PubMedArticle'
 
+    elif jrnl in aaas_journals.keys():
+        pma = square_voliss_data_for_pma(pma)
+        try:
+            url = the_aaas_tango(pma)
+        except Exception, e:
+            reason = str(e)
+
     elif jrnl in spandidos_journals.keys():
         pma = square_voliss_data_for_pma(pma)
         if pma.volume and pma.issue:

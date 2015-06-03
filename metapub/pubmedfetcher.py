@@ -145,6 +145,8 @@ class PubMedFetcher(Borg):
         kwargs = lowercase_keys(kwargs)
 
         q = {}
+        
+        query = query.strip()
         if query and not kwargs.get('clinical_query', False):
             q['ALL'] = query
 
@@ -220,7 +222,7 @@ class PubMedFetcher(Borg):
         q['LID'] = kpick(kwargs, options=['lid', 'location id', 'location identifier'])
         q['PUBN'] = kpick(kwargs, options=['pubn', 'publisher'])
         q['PT'] = kpick(kwargs, options=['pt', 'pubmed_type', 'publication type'])
-        q['PL'] = kpick(kwargs, options=['pk', 'place of publication'])
+        q['PL'] = kpick(kwargs, options=['pl', 'place of publication'])
 
         # Miscellaneous, alphabetized by Medline feature tag.
         q['AD'] = kpick(kwargs, options=['ad', 'affiliation']) 
@@ -230,7 +232,7 @@ class PubMedFetcher(Borg):
 
         for feature in q.keys():
             if q[feature] != None:
-                query +=' "%s"[%s]' % (q[feature], feature)
+                query += ' "%s"[%s]' % (q[feature], feature)
         
         # option to query pubmed central only:
         # pubmed pmc[sb]

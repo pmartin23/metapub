@@ -2,6 +2,8 @@ from __future__ import absolute_import, print_function
 
 __author__='nthmost'
 
+from urlparse import urljoin, urlsplit
+
 import requests
 from lxml.html import HTMLParser
 from lxml import etree
@@ -80,14 +82,35 @@ def the_biomed_calypso(pma):
 
 
 def the_aaas_tango(pma):
-    ja = aaas_journals[pma.journal]
-    if pma.volume and pma.issue and pma.first_page:
-        url = aaas_format.format(ja=ja, a=pma)
+    ja = aaas_journals[pma.journal]['ja']
+    if pma.volume and pma.issue and pma.pages:
+        pdfurl = aaas_format.format(ja=ja, a=pma)
     elif pma.doi:
-        url = the_doi2step(pma.doi)
+        pdfurl = the_doi2step(pma.doi) + '.full.pdf'
     else:
-        raise NoPDFLink('Not enough information in PubMedArticle for AAAS journal.')
-    return url
+        raise NoPDFLink('DOI lookup failed and not enough info in PubMedArticle for AAAS journal.')
+
+    response = requests.get(pdfurl)
+    if response.status_code==200:
+        return response.url
+    elif response.status_code==403:
+        #try to navigate the login form
+        tree = etree.fromstring(response.content, HTMLParser())
+        form = tree.cssselect('form')[1]
+        fbi = form.fields.get('form_build_id')
+
+        baseurl = urlsplit(response.url)
+        post_url = baseurl.scheme + '://' + baseurl.hostname + form.action
+
+        payload = { 'pass': '434264', 'name': 'nthmost', 'form_build_id': fbi, 'remember_me': 1 }
+        response = requests.post(post_url, data=payload)
+        if response.status_code==403:
+            return AccessDenied('AAAS subscription-only paper')
+        elif response.headers['content-type'].find('pdf') > -1:
+            return response.url
+    else:
+        return NoPDFLink('AAAS returned %s for url %s' % (response.status_code, pdfurl))
+    return pdfurl
 
 
 def the_jama_dance(pma):
