@@ -73,7 +73,7 @@ def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
     return PubMedArticle2doi(pma, use_best_guess, min_score=2.0)
 
 def pmid2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
-        '''Starting with a pubmed ID, lookup article in pubmed. 
+    '''Starting with a pubmed ID, lookup article in pubmed. 
         
         If DOI found in PubMedArticle object, that doi and 10.0 for the doi_score, 
         i.e. the tuple (doi, 10.0).
