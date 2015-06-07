@@ -67,3 +67,4 @@
 5/26/2015, 0.3.10, PubMedFetcher: added pmids_for_clinical_query and pmids_for_medical_genetics_query. Documentation improvements.
 5/28/2015, 0.3.11, PubMedArticle: added mesh (dictionary of MeSH headings) and chemicals (dictionary of chemical substances). FindIt: added AAAS (ScienceMag) format and completed set of Nature journal formats for FindIt.
 6/5/2015, 0.3.12, convert: added pmid2doi_with_score, which returns (doi, doi_score).
+6/5/2015, 0.3.12.1, convert: bugfix to PubMedArticle2doi_with_score (typo in variable name)

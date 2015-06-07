@@ -35,7 +35,7 @@ def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
     else:
         return None
 
-def PubMedArticle2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
+def PubMedArticle2doi_with_score(pma, use_best_guess=False, min_score=2.0):
     '''Starting with a PubMedArticle object, use CrossRef to find a DOI for given article.
 
         Returns a tuple containing the DOI and the score CrossRef returned for the
