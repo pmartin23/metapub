@@ -337,6 +337,11 @@ class PubMedFetcher(Borg):
                      'author_name': parameterize(author_name, '+'),
                    }
 
+        # clean up any "n/a" values.  eutils doesn't understand them.
+        for k in inp_dict:
+            if inp_dict[k].lower() == 'n/a':
+                inp_dict[k] = ''
+
         req = base_uri.format(**inp_dict)
         content = requests.get(req).text
         pmids = []

@@ -68,3 +68,4 @@
 5/28/2015, 0.3.11, PubMedArticle: added mesh (dictionary of MeSH headings) and chemicals (dictionary of chemical substances). FindIt: added AAAS (ScienceMag) format and completed set of Nature journal formats for FindIt.
 6/5/2015, 0.3.12, convert: added pmid2doi_with_score, which returns (doi, doi_score).
 6/5/2015, 0.3.12.1, convert: bugfix to PubMedArticle2doi_with_score (typo in variable name)
+6/8/2015, 0.3.12.2, PubMedFetcher: improvement to pmids_for_citation call to eutils. change all 'n/a' parameter values for eutils to ''
