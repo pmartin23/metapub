@@ -2,6 +2,8 @@ from metapub.findit import FindIt
 
 JAMA_pmids = ['25742465', '23754022', '25739104']
 
+JCI_pmids = ['26011642', '25985270', '26030226']
+
 BMC_pmids = ['25943194',     # BMC Genet
              '20170543',     # BMC Cancer
              '25927199',     # BMC Bioinformatics
@@ -44,6 +46,10 @@ def print_urls_and_reasons_from_pmid_list(pmids):
 print ""
 print "PMC (or should be):"
 print_urls_and_reasons_from_pmid_list(PMC_pmids)
+
+print ""
+print "J Clin Invest (JCI):"
+print_urls_and_reasons_from_pmid_list(JCI_pmids)
 
 print ""
 print "BMC journals:"

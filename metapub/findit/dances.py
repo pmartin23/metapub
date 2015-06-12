@@ -39,6 +39,37 @@ def square_voliss_data_for_pma(pma):
             pma.issue = re_numbers.findall(pma.issue)[0]
     return pma
 
+def the_jci_polka(pma):
+    '''Dance of the Journal of Clinical Investigation, which should be largely free.
+
+         :param: pma (PubMedArticle object)
+         :return: url (string)
+         :raises: AccessDenied, NoPDFLink
+    '''
+    # approach: pii with dx.doi.org fallback to get pdf "view" page; scrape pdf download link.
+    if pma.pii:
+        starturl = format_templates['jci'].format(a=pma)
+    elif pma.doi:
+        starturl = the_doi_2step(pma.doi)
+        starturl = starturl + '/pdf'
+    else:
+        raise NoPDFLink('No pii or doi in PubMedArticle, needed for JCI link.')
+
+    # Iter 1: do this until we see it stop working.
+    return starturl.replace('/pdf', '/version/1/pdf/render')
+
+    # Iter 2: load pdf page. Look for "Download" link like this: 
+    #   <a href="/articles/view/78031/version/1/pdf/render">Download</a>
+    #
+    #pdfpage = requests.get(starturl)
+    #if not pdfpage.ok or pdfpage.content.find('Download') == -1:
+    #    raise NoPDFLink('JCI pdf page load did not return a Download link.')
+
+    #tree = etree.fromstring(pdfpage.text, HTMLParser())
+    #a = tree.cssselect('//*[@id="assets_controller"]/div/div/div[2]/div/div/div/div/h3/a')
+    #url = a.get('href')
+    #return url
+
 sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
 def the_sciencedirect_disco(pma):
     '''  :param: pma (PubMedArticle object)

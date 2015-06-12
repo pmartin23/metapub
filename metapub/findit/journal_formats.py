@@ -45,6 +45,7 @@
 #17145028: no URL because No URL format for Journal Med Clin (Barc)
 #17145065: no URL because No URL format for Journal Mutat Res
 #15452722: no URL because No URL format for Journal Graefes Arch Clin Exp Ophthalmol
+#EBioMedicine
 
 # HARDER CASES:
 #
@@ -90,7 +91,10 @@ format_templates = {
     'liebert': 'http://online.liebertpub.com/doi/pdf/{a.doi}',
     'plos': 'http://www.plosbiology.org/article/fetchObjectAttachment.action?url=info:doi/{a.doi}&representation=PDF',
     'wiley': 'http://onlinelibrary.wiley.com/doi/{a.doi}/pdf',
+    'jci': 'http://www.jci.org/articles/view/{a.pii}/pdf',
     }
+
+jci_journals = [ 'J Clin Invest' ]
 
 lancet_journals = {
     'Lancet': { 'ja': 'lancet' },
@@ -104,8 +108,6 @@ lancet_journals = {
     'Lancet Psychiatry': { 'ja': 'lanpsy' },
     'Lancet Respir Med': { 'ja': 'lanres' },
     }
-
-#EBioMedicine
 
 
 # the SD journals are also represented in simple_formats_pii
