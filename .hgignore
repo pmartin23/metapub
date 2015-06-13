@@ -1,0 +1,14 @@
+syntax: glob
+
+*.pyc
+*.pyo
+*.swp
+.DS_Store
+*.egg-info
+tmp
+ve/
+dist/
+*.egg-info
+build/
+sandbox/
+findit/
