@@ -70,6 +70,25 @@ def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
         return pma.doi
     return PubMedArticle2doi(pma, use_best_guess, min_score=2.0)
 
+def pmid2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
+    '''Starting with a pubmed ID, lookup article in pubmed. 
+        
+        If DOI found in PubMedArticle object, that doi and 10.0 for the doi_score, 
+        i.e. the tuple (doi, 10.0).
+    
+        Otherwise, use CrossRef to find the DOI for given article and return (doi, crossref_doi_score).
+
+        :param: pmid (string or int)
+        :param: use_best_guess (bool) [default: False]
+        :param: min_score (float) [default: 2.0]
+        :return: tuple (doi, doi_score)
+    '''
+    _start_engines()
+    pma = pm_fetch.article_by_pmid(pmid)
+    if pma.doi:
+        return (pma.doi, 10.0)
+    return PubMedArticle2doi_with_score(pma, use_best_guess, min_score=2.0)
+
 def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     '''uses CrossRef and PubMed eutils to lookup a PMID given a known doi.
         Warning: does NO validation (use in combo with metapub.text_mining).
