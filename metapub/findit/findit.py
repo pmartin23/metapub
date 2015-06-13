@@ -174,12 +174,6 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
         except Exception, e:
             reason = str(e)
 
-    elif jrnl in jci_journals:
-        try:
-            url = the_jci_polka(pma)
-        except Exception, e:
-            reason = str(e)
-
     elif jrnl in spandidos_journals.keys():
         pma = square_voliss_data_for_pma(pma)
         if pma.volume and pma.issue:
@@ -187,6 +181,12 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
         else:
             # TODO: try the_doi_2step
             reason = 'volume and maybe also issue data missing from PubMedArticle'
+
+    elif jrnl in jci_journals:
+        try:
+            url = the_jci_polka(pma)
+        except Exception, e:
+            reason = str(e)
 
     elif jrnl in nature_journals.keys():
         try:

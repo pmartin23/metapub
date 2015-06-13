@@ -14,6 +14,10 @@ from ..utils import asciify
 
 from .journal_formats import *
 
+#TODO: make configurable (somehow...)
+AAAS_USERNAME = 'nthmost'
+AAAS_PASSWORD = '434264'
+
 
 DX_DOI_URL = 'http://dx.doi.org/%s'
 def the_doi_2step(doi):
@@ -55,20 +59,8 @@ def the_jci_polka(pma):
     else:
         raise NoPDFLink('No pii or doi in PubMedArticle, needed for JCI link.')
 
-    # Iter 1: do this until we see it stop working.
+    # Iter 1: do this until we see it stop working. (Iter 2: scrape download link from page.)
     return starturl.replace('/pdf', '/version/1/pdf/render')
-
-    # Iter 2: load pdf page. Look for "Download" link like this: 
-    #   <a href="/articles/view/78031/version/1/pdf/render">Download</a>
-    #
-    #pdfpage = requests.get(starturl)
-    #if not pdfpage.ok or pdfpage.content.find('Download') == -1:
-    #    raise NoPDFLink('JCI pdf page load did not return a Download link.')
-
-    #tree = etree.fromstring(pdfpage.text, HTMLParser())
-    #a = tree.cssselect('//*[@id="assets_controller"]/div/div/div[2]/div/div/div/div/h3/a')
-    #url = a.get('href')
-    #return url
 
 sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
 def the_sciencedirect_disco(pma):
@@ -122,10 +114,10 @@ def the_aaas_tango(pma):
         raise NoPDFLink('DOI lookup failed and not enough info in PubMedArticle for AAAS journal.')
 
     response = requests.get(pdfurl)
-    if response.status_code==200:
+    if response.status_code==200 and response.headers['content-type'].find('pdf') > -1:
         return response.url
-    elif response.status_code==403:
-        #try to navigate the login form
+
+    if response.status_code==200 and response.headers['content-type'].find('html') > -1:
         tree = etree.fromstring(response.content, HTMLParser())
         form = tree.cssselect('form')[1]
         fbi = form.fields.get('form_build_id')
@@ -133,15 +125,16 @@ def the_aaas_tango(pma):
         baseurl = urlsplit(response.url)
         post_url = baseurl.scheme + '://' + baseurl.hostname + form.action
 
-        payload = { 'pass': '434264', 'name': 'nthmost', 'form_build_id': fbi, 'remember_me': 1 }
+        payload = { 'pass': AAAS_PASSWORD, 'name': AAAS_USERNAME, 'form_build_id': fbi, 'remember_me': 1 }
         response = requests.post(post_url, data=payload)
         if response.status_code==403:
             return AccessDenied('AAAS subscription-only paper')
         elif response.headers['content-type'].find('pdf') > -1:
             return response.url
+        elif response.headers['content-type'].find('html') > -1:
+            raise NoPDFLink('AAAS pdf download requires form navigation. URL: %s' % pdfurl)
     else:
-        return NoPDFLink('AAAS returned %s for url %s' % (response.status_code, pdfurl))
-    return pdfurl
+        raise NoPDFLink('AAAS returned %s for url %s' % (response.status_code, pdfurl))
 
 
 def the_jama_dance(pma):
