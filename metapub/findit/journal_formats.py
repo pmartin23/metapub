@@ -79,6 +79,7 @@ todo_journals = {
     'Anesthesiology': {'example': '18212565: http://dx.doi.org/10.1097/01.anes.0000299431.81267.3e --> html w/ <a id="pdfLink" data-article-url="THE_URL">' },
     'Nat Prod Commun': {'example': '19634325 (no direct link found yet) -- http://www.naturalproduct.us/' },
     'Oncotarget': {'example': '26008984 (pii = 3900) --> http://www.impactjournals.com/oncotarget/index.php?journal=oncotarget&page=article&op=view&path=3900' },
+    'Clin Ter': {'example': '25756258 --> dx.doi.org/10.7417/CT.2015.1799 --> parse page to get PDF' },
     }
 
 
@@ -170,6 +171,7 @@ doiserbia_journals = ['Genetika']
 # J Biochem: https://www.jstage.jst.go.jp/article/biochemistry1922/125/4/125_4_803/_pdf
 # Drug Metab Pharmacokinet: https://www.jstage.jst.go.jp/article/dmpk/20/2/20_2_144/_article --> https://www.jstage.jst.go.jp/article/dmpk/20/2/20_2_144/_pdf
 jstage_journals = [
+    'Intern Med',
     'J Periodontol',
     'J Biochem',
     'Drug Metab Pharmacokinet',
@@ -384,7 +386,7 @@ vip_journals = {
         'Invest Ophthalmol Vis Sci': { 'host': 'www.iovs.org' },
         'IOVS' : {'host' : 'iovs.org'},
         'J Am Soc Nephrol' : {'host' : 'jasn.asnjournals.org'},
-        'J Biol Chem': { 'host': 'www.jbc.org' },
+        'J Biol Chem': { 'host': 'www.jbc.org' },   #TODO switch to pmid lookup strategy, e.g. http://www.jbc.org/cgi/pmidlookup?view=long&pmid=14722075
         'J Cell Biol' : {'host' : 'jcb.rupress.org'},
         'J Cell Sci' : {'host' : 'jcs.biologists.org'},
         'J Child Neurol': { 'host': 'jcn.sagepub.com'},
@@ -479,11 +481,13 @@ wiley_journals = (
     'J Eur Acad Dermatol Venereol',
     'J Gastroenterol Hepatol',
     'J Intern Med',
+    'J Med Virol',
     'J Orthop Res',
     'J Thromb Haemost',
     'J Pathol',
     'J Viral Hepat',
     'Mol Carcinog',
+    'Mol Microbiol',
     'Mov Disord',
     'Muscle Nerve',
     'Neuropathol Appl Neurobiol',
@@ -559,12 +563,14 @@ springer_journals = [
     'J Endocrinol Invest',
     'J Inherit Metab Dis',
     'J Neurol',
+    'J Mol Evol',
     'J Mol Med',
     'J Mol Med (Berl)',
     'J Mol Neurosci',
     'Mod Rheumatol',
     'Neurogenetics',
     'Ophthalmologe',
+    'Osteoporos Int',
     'Pediatr Nephrol',
     'Physiol Genomics',
     'Rheumatol Int',
