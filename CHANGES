@@ -70,4 +70,7 @@
 6/5/2015, 0.3.12.1, convert: bugfix to PubMedArticle2doi_with_score (typo in variable name)
 6/8/2015, 0.3.12.2, PubMedFetcher: improvement to pmids_for_citation call to eutils. change all 'n/a' parameter values for eutils to ''
 6/12/2015, 0.3.13, Refactored findit into its own submodule. Added FindIt formats for JCI and AAAS journals.
+6/12/2015, 0.3.13.1, Whitespace corrections (ugh).
 6/14/2015, 0.3.13.2, Protect against CrossRefConnectionError in FindIt. Added a few more journal names to formats.
+6/15/2015, 0.3.13.3, Moved CrossRefConnectionError protection into metapub.convert where it can do the most good.
+6/15/2015, 0.3.13.4, FindIt: added Biochemical Society journals.

@@ -305,11 +305,7 @@ class FindIt(object):
         
         if self.pma.doi==None:
             if self.use_crossref:
-                try:
-                    self.pma.doi, self.doi_score = PubMedArticle2doi_with_score(self.pma, min_score=self.doi_min_score)
-                except CrossRefConnectionError:
-                    pass
-
+                self.pma.doi, self.doi_score = PubMedArticle2doi_with_score(self.pma, min_score=self.doi_min_score)
                 if self.pma.doi == None:
                     self.reason = 'DOI missing from PubMedArticle and CrossRef lookup failed.'
                 else:

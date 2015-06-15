@@ -5,6 +5,7 @@ __doc__='mildly-experimental mashups of various services to get needed IDs.'
 from .pubmedfetcher import PubMedFetcher
 from .crossref import CrossRef
 from .text_mining import re_doi
+from .exceptions import *
 
 crossref = None   #CrossRef()
 pm_fetch = None   #PubMedFetcher()
@@ -18,6 +19,19 @@ def _start_engines():
         crossref = CrossRef()
         pm_fetch = PubMedFetcher()
 
+def _protected_crossref_query(**kwargs):
+    pma = kwargs.get('pma', None)
+    pmid = kwargs.get('pmid', None)
+    use_best_guess = kwargs.get('use_best_guess', False)
+    min_score = kwargs.get('min_score', 2.0)
+    if pmid and not pma:
+        pma = pm_fetch.article_by_pmid(pmid)
+    try:
+        results = crossref.query_from_PubMedArticle(pma)
+    except CrossRefConnectionError:
+        return None
+    return crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
+
 def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
     '''starting with a PubMedArticle object, use CrossRef to find a DOI for given article.
 
@@ -25,14 +39,13 @@ def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
         :param: use_best_guess (bool) [default: False]
         :param: min_score (float) [default: 2.0]
     '''
-
     _start_engines()
-    results = crossref.query_from_PubMedArticle(pma)
-    top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
-    if top_result:
-        return top_result['doi']
+    result = _protected_crossref_query(pma=pma, use_best_guess=use_best_guess, min_score=min_score)
+    if result:
+        return result['doi']
     else:
         return None
+
 
 def PubMedArticle2doi_with_score(pma, use_best_guess=False, min_score=2.0):
     '''Starting with a PubMedArticle object, use CrossRef to find a DOI for given article.
@@ -48,10 +61,9 @@ def PubMedArticle2doi_with_score(pma, use_best_guess=False, min_score=2.0):
     '''
 
     _start_engines()
-    results = crossref.query_from_PubMedArticle(pma)
-    top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
-    if top_result:
-        return (top_result['doi'], top_result['score'])
+    result = _protected_crossref_query(pma=pma, use_best_guess=use_best_guess, min_score=min_score)
+    if result:
+        return (result['doi'], result['score'])
     else:
         return (None, 0.0)
 
@@ -105,7 +117,11 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     except:
         pass
 
-    results = crossref.query(doi)
+    try:
+        results = crossref.query(doi)
+    except CrossRefConnectionError:
+        return None
+
     if results:
         top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
         pmids = pm_fetch.pmids_for_citation(**top_result['slugs'])
