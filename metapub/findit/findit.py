@@ -51,7 +51,7 @@ import requests
 from ..pubmedfetcher import PubMedFetcher
 from ..pubmedarticle import square_voliss_data_for_pma
 from ..convert import PubMedArticle2doi_with_score, doi2pmid
-from ..exceptions import MetaPubError, AccessDenied, NoPDFLink
+from ..exceptions import *
 from ..text_mining import re_numbers
 from ..utils import asciify
 
@@ -296,7 +296,11 @@ class FindIt(object):
         
         if self.pma.doi==None:
             if self.use_crossref:
-                self.pma.doi, self.doi_score = PubMedArticle2doi_with_score(self.pma, min_score=self.doi_min_score)
+                try:
+                    self.pma.doi, self.doi_score = PubMedArticle2doi_with_score(self.pma, min_score=self.doi_min_score)
+                except CrossRefConnectionError:
+                    pass
+
                 if self.pma.doi == None:
                     self.reason = 'DOI missing from PubMedArticle and CrossRef lookup failed.'
                 else:

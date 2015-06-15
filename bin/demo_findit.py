@@ -1,5 +1,9 @@
 from metapub.findit import FindIt
 
+jstage_pmids = ['11446670'] 
+
+wiley_pmids = ['14981756']
+
 JAMA_pmids = ['25742465', '23754022', '25739104']
 
 JCI_pmids = ['26011642', '25985270', '26030226']
@@ -46,6 +50,14 @@ def print_urls_and_reasons_from_pmid_list(pmids):
 print ""
 print "PMC (or should be):"
 print_urls_and_reasons_from_pmid_list(PMC_pmids)
+
+print ""
+print "Wiley E. Publisher:"
+print_urls_and_reasons_from_pmid_list(wiley_pmids)
+
+print ""
+print "jstage:"
+print_urls_and_reasons_from_pmid_list(jstage_pmids)
 
 print ""
 print "J Clin Invest (JCI):"
