@@ -119,13 +119,17 @@ lancet_journals = {
 
 
 # the SD journals are also represented in simple_formats_pii
+# "piit" means pii-translated (i.e. punctuation removed)
+sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
 sciencedirect_journals = (
     'Ann Genet',
+    'Am J Pathol',
     'Arch Pediatr',
     'Blood Cells Mol Dis',
     'Biochem Biophys Res Commun' ,
     'Biochem Pharmacol',
     'Biochim Biophys Acta',
+    'Br J Oral Maxillofac Surg',
     'Clin Chim Acta',
     'Clin Immunol',
     'FEBS Lett',
@@ -137,6 +141,8 @@ sciencedirect_journals = (
     'Hepatol Res',
     'Hum Immunol',
     'J Am Coll Cardiol',
+    'J Autoimmun',
+    'J Environ Sci (China)',
     'J Mol Biol',
     'J Neurol Sci',
     'Life Sci',
@@ -185,6 +191,8 @@ jstage_journals = [
     'Drug Metab Pharmacokinet',
     'Endocr J',
     ]
+#22222243  'Nihon Shokakibyo Gakkai Zasshi',
+    
 
 # cell journals
 #cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
@@ -501,6 +509,8 @@ wiley_journals = (
     'Mov Disord',
     'Muscle Nerve',
     'Neuropathol Appl Neurobiol',
+    'Nihon Shokakibyo Gakkai Zasshi',
+    'Pain Med',
     'Pediatr Blood Cancer',
     'Pediatr Int',
     'Prenat Diagn',
@@ -528,6 +538,7 @@ wolterskluwer_journals = [
     'Curr Opin Hematol',
     'Eur J Gastroenterol Hepatol',
     'J Hypertens',
+    'J Investig Med',
     'J Glaucoma',
     'J Pediatr Hematol Oncol',
     'J Pediatr Gastroenterol Nutr',
@@ -552,6 +563,8 @@ karger_journals = [
     'Nephron Physiol',
     ]
 
+# springer is mostly paywalled, but sometimes...
+# http://link.springer.com/content/pdf/10.1007%2Fs13238-015-0153-5.pdf
 springer_journals = [
     'Acta Neuropathol',
     'Ann Hematol',
@@ -583,6 +596,7 @@ springer_journals = [
     'Osteoporos Int',
     'Pediatr Nephrol',
     'Physiol Genomics',
+    'Protein Cell',
     'Rheumatol Int',
     'World J Surg',
     ]

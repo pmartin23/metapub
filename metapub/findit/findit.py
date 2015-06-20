@@ -63,9 +63,7 @@ from .journal_cantdo_list import JOURNAL_CANTDO_LIST
 
 fetch = PubMedFetcher()
 
-paywall_reason_template = '%s behind %s paywall'  # % (journal, publisher)
-
-def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
+def find_article_from_pma(pma, use_crossref=True):
     '''The real workhorse of FindIt.
 
         Based on the contents of the supplied PubMedArticle object, this function
@@ -83,7 +81,6 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
 
         :param: (pma PubMedArticle object) 
         :param: use_crossref (bool) default: True
-        :param: use_paywalls (bool) default: False [not yet implemented]
         :return: (url, reason)
     '''
     reason = None
@@ -125,14 +122,13 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
             url = simple_formats_doi[jrnl].format(a=pma)
             reason = ''
 
-    #elif jrnl in doi2step_journals:
-    #    if pma.doi:
-    #        try:
-    #            baseurl = the_doi_2step(pma.doi)
-    #            url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
-    #            reason = ''
-    #        except Exception, e:
-    #            reason = '%s' % e
+    elif jrnl in vip_journals.keys(): 
+        pma = square_voliss_data_for_pma(pma)
+        if pma.volume and pma.issue:
+            url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
+        else:
+            # TODO: try the_doi_2step
+            reason = 'volume and maybe also issue data missing from PubMedArticle'
 
     elif jrnl in jstage_journals:
         if pma.doi:
@@ -148,6 +144,13 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
         except Exception, e:
             reason = str(e)
             
+    elif jrnl in springer_journals:
+        if pma.doi:
+            try:
+                url = the_springer_shag(pma)
+            except Exception, e:
+                reason = str(e)
+
     elif jrnl in wiley_journals:
         if pma.doi:
             try:
@@ -160,14 +163,6 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
             url = the_jama_dance(pma)
         except Exception, e:
             reason = str(e)
-
-    elif jrnl in vip_journals.keys(): 
-        pma = square_voliss_data_for_pma(pma)
-        if pma.volume and pma.issue:
-            url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
-        else:
-            # TODO: try the_doi_2step
-            reason = 'volume and maybe also issue data missing from PubMedArticle'
 
     elif jrnl in aaas_journals.keys():
         pma = square_voliss_data_for_pma(pma)
@@ -227,10 +222,7 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
             reason = str(e)
 
     elif jrnl in paywall_journals:
-        if use_paywalls:
-            reason = '%s behind paywall; not yet smart enough to navigate paywalls, sorry!' % jrnl
-        else:
-            reason = '%s behind paywall' % jrnl
+        reason = 'PAYWALL: this journal has been marked as "never free" (see metapub/findit/journal_formats.py)'
 
     elif jrnl in todo_journals:
         reason = 'TODO format -- example: %s' % todo_journals[jrnl]['example']
@@ -274,7 +266,6 @@ class FindIt(object):
         self.url = kwargs.get('url', None)
         self.reason = None
         self.use_crossref = kwargs.get('use_crossref', True)
-        self.use_paywalls = kwargs.get('use_paywalls', False)
         self.doi_min_score = kwargs.get('doi_min_score', 2.3)
         self.tmpdir = kwargs.get('tmpdir', '/tmp')
         self.doi_score = None
@@ -289,7 +280,7 @@ class FindIt(object):
             raise MetaPubError('Supply either a pmid or a doi to instantiate. e.g. FindIt(pmid=1234567)')
 
         try:
-            self.url, self.reason = find_article_from_pma(self.pma, use_paywalls=self.use_paywalls) 
+            self.url, self.reason = find_article_from_pma(self.pma)
         except requests.exceptions.ConnectionError, e:
             self.url = None
             self.reason = 'tx_error: %r' % e
@@ -307,15 +298,29 @@ class FindIt(object):
 
         urlp = urlparse(baseurl)
 
-        if urlp.path.find('.') > -1:
+        # maybe it's sciencedirect or elsevier?
+        if urlp.hostname.find('sciencedirect') > -1 or urlp.hostname.find('elsevier') > -1:
+            if self.pma.pii:
+                try:
+                    self._backup_url = the_sciencedirect_disco(self.pma)
+                except Exception, e:
+                    print(e)
+                    pass
+
+        if self._backup_url is None and urlp.path.find('.') > -1:
             extension = urlp.path.split('.')[-1]
             if extension == 'long':
                 self._backup_url = baseurl.replace('long', 'full.pdf')
             elif extension == 'html':
                 self._backup_url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
-        else:
+
+        if self._backup_url is None:
             # a shot in the dark...
-            self._backup_url = baseurl + '.full.pdf'
+            if urlp.path.endswith('/'):
+                self._backup_url = baseurl + 'pdf'
+            else:
+                self._backup_url = baseurl + '.full.pdf'
+                
         return self._backup_url
 
     def _load_pma_from_pmid(self):

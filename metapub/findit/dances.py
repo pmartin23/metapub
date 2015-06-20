@@ -62,7 +62,6 @@ def the_jci_polka(pma):
     # Iter 1: do this until we see it stop working. (Iter 2: scrape download link from page.)
     return starturl.replace('/pdf', '/version/1/pdf/render')
 
-sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
 def the_sciencedirect_disco(pma):
     '''  :param: pma (PubMedArticle object)
          :return: url (string)
@@ -109,7 +108,7 @@ def the_aaas_tango(pma):
     if pma.volume and pma.issue and pma.pages:
         pdfurl = aaas_format.format(ja=ja, a=pma)
     elif pma.doi:
-        pdfurl = the_doi2step(pma.doi) + '.full.pdf'
+        pdfurl = the_doi_2step(pma.doi) + '.full.pdf'
     else:
         raise NoPDFLink('doi lookup failed and not enough info in PubMedArticle for AAAS journal.')
 
@@ -254,4 +253,24 @@ def the_pmc_twist(pma):
 
     raise NoPDFLink('PMC download returned weird content-type %s' % r.headers['content-type'])
 
+
+def the_springer_shag(pma):
+    '''  :param: pma (PubMedArticle object)
+         :return: url
+         :raises: NoPDFLink
+    '''
+    # start: http://link.springer.com/article/10.1007%2Fs13238-015-0153-5
+    # return: http://link.springer.com/content/pdf/10.1007%2Fs13238-015-0153-5.pdf
+    if pma.doi:
+        baseurl = the_doi_2step(pma.doi)
+    else:
+        raise NoPDFLink('not enough information to compose a link for Springer (no doi)')
+    url = baseurl.replace('article', 'content/pdf') + '.pdf'
+    r = requests.get(url)
+    if not r.ok:
+        raise NoPDFLink('%i status returned from Springer url (%s)' % (r.status_code, url))
+    if r.headers['content-type'].find('pdf') > -1:
+        return url
+    else:
+        raise AccessDenied('Springer url (%s) resulted in HTTP %i' % (url, r.status_code))
 

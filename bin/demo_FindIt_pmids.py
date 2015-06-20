@@ -30,10 +30,6 @@ def get_filename(base_fpath):
     return check_and_bump(0)
 
 def requests_write_file(url, filename):
-    # skip currently problematic URLs
-    if url.find('jcem.endojournals.org') > -1:
-        return 'tx_error'
-
     # verify=False means it ignores bad SSL certs
     response = requests.get(url, stream=True, timeout=CURL_TIMEOUT, verify=False)
 

@@ -3,6 +3,9 @@ from metapub.findit import FindIt
 vip_pmids = ['1255861',     # J Virol
             ]
 
+pii_pmids = ['26061871',    # Clin Trans Med
+            ]
+
 jstage_pmids = ['11446670'] 
 
 wiley_pmids = ['14981756']
@@ -33,7 +36,7 @@ Lancet_pmids = ['25529582',     # marked Free Article
                 '25456370',     #Lancet Oncol, not marked Free
                ]
 
-SD_pmids = [
+SD_pmids = ['20000000',    # J Environ Sci (China)
             '25735572', 
             '25543539', 
             '25666562', 
@@ -57,6 +60,10 @@ def print_urls_and_reasons_from_pmid_list(pmids):
 print ""
 print "vip journals:"
 print_urls_and_reasons_from_pmid_list(vip_pmids)
+
+print ""
+print "pii based journals:"
+print_urls_and_reasons_from_pmid_list(pii_pmids)
 
 print ""
 print "PMC (or should be):"
