@@ -1,5 +1,8 @@
 from metapub.findit import FindIt
 
+vip_pmids = ['1255861',     # J Virol
+            ]
+
 jstage_pmids = ['11446670'] 
 
 wiley_pmids = ['14981756']
@@ -46,6 +49,11 @@ def print_urls_and_reasons_from_pmid_list(pmids):
             print "Got: ", pmid, source.url, source.pma.journal
         else:
             print "Nope: ", pmid, source.reason, source.pma.journal
+            print "Backup URL: ", pmid, source.backup_url
+
+print ""
+print "vip journals:"
+print_urls_and_reasons_from_pmid_list(vip_pmids)
 
 print ""
 print "PMC (or should be):"
