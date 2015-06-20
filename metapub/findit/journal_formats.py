@@ -403,6 +403,7 @@ vip_journals = {
         'J Mol Endocrinol': { 'host': 'jme.endocrinology-journals.org' },
         'J Lipid Res': { 'host': 'www.jlr.org' },
         'J Pharmacol Exp Ther': { 'host': 'jpet.aspetjournals.org' },
+        'J Virol': { 'host': 'jvi.asm.org' },
         'Mol Biol Cell' : {'host' : 'molbiolcell.org'},
         'Mol Cell Biol' : {'host': 'mcb.asm.org'},
         'Mol Canc Therapeut' : {'host' : 'mct.aacrjournals.org'},
