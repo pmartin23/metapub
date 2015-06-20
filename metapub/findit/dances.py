@@ -19,10 +19,10 @@ AAAS_USERNAME = 'nthmost'
 AAAS_PASSWORD = '434264'
 
 
-DX_DOI_URL = 'http://dx.doi.org/%s'
+DX_doi_URL = 'http://dx.doi.org/%s'
 def the_doi_2step(doi):
-    'takes a DOI (string), returns a url to a paper'
-    response = requests.get(DX_DOI_URL % doi)
+    'takes a doi (string), returns a url to a paper'
+    response = requests.get(DX_doi_URL % doi)
     if response.status_code in [200, 401, 301, 302, 307, 308]:
         return response.url
     else:
@@ -100,7 +100,7 @@ def the_biomed_calypso(pma):
     if baseid:
         article_id = baseid.split('/')[1]
     else:
-        raise NoPDFLink('BMC article requires DOI (none extant)')
+        raise NoPDFLink('BMC article requires doi (none extant)')
     return BMC_format.format(aid=article_id)
 
 
@@ -111,7 +111,7 @@ def the_aaas_tango(pma):
     elif pma.doi:
         pdfurl = the_doi2step(pma.doi) + '.full.pdf'
     else:
-        raise NoPDFLink('DOI lookup failed and not enough info in PubMedArticle for AAAS journal.')
+        raise NoPDFLink('doi lookup failed and not enough info in PubMedArticle for AAAS journal.')
 
     response = requests.get(pdfurl)
     if response.status_code==200 and response.headers['content-type'].find('pdf') > -1:
@@ -194,7 +194,7 @@ def the_lancet_tango(pma):
     if pma.doi:
         return the_doi_2step(pma.doi).replace('abstract', 'pdf').replace('article', 'pdfs')
     else:
-        raise NoPDFLink('pii missing from PubMedArticle XML and DOI lookup failed. Harsh!')
+        raise NoPDFLink('pii missing from PubMedArticle XML and doi lookup failed. Harsh!')
 
 def the_nature_ballet(pma):
     '''  :param: pma (PubMedArticle object)
@@ -212,15 +212,12 @@ def the_nature_ballet(pma):
 
     if url=='':
         if pma.pii:
-            #print('URL: ', url)
             url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
         else:
             if pma.doi:
-            #    print('DOI: ', pma.doi)
-                raise NoPDFLink('the_doi2step failed and no PII in metadata')
+                raise NoPDFLink('dx.doi.org resolution failed for doi %s and no pii in metadata' % pma.doi)
             else:
-            #    print('pii: ', pma.pii)
-                raise NoPDFLink('not enough information to compose a link for Nature (no DOI or PII)')
+                raise NoPDFLink('not enough information to compose a link for Nature (no doi or pii)')
 
     r = requests.get(url)
     if r.headers['content-type'].find('pdf') > -1:

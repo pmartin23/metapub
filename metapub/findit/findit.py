@@ -46,6 +46,8 @@ __doc__='''find_it: provides FindIt object, providing a tidy object layer
 
 __author__='nthmost'
 
+from urlparse import urlparse
+
 import requests
 
 from ..pubmedfetcher import PubMedFetcher
@@ -208,14 +210,6 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
             # the front door
             url = cell_format.format( a=pma, ja=cell_journals[jrnl]['ja'],
                     pii=pma.pii.translate(None,'-()') )
-        #elif pma.doi:
-            # the side door
-        #    try:
-        #        baseurl = the_doi_2step(pma.doi)
-        #        url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
-        #        reason = ''
-        #    except Exception, e:
-        #        reason = '%s' % e
         else:
             #reason = 'pii missing from PubMedArticle XML (%s in Cell format) and no DOI either (harsh!)' % jrnl
             reason = 'pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
@@ -244,6 +238,7 @@ def find_article_from_pma(pma, use_crossref=True, use_paywalls=False):
     elif jrnl in JOURNAL_CANTDO_LIST:
         reason = 'CANTDO: this journal is in the "can\'t do" list (see metapub/findit/journal_cantdo_list.py)'
 
+    # aka if url is STILL None...
     else:
         reason = 'No URL format for Journal %s' % jrnl
 
@@ -284,6 +279,7 @@ class FindIt(object):
         self.tmpdir = kwargs.get('tmpdir', '/tmp')
         self.doi_score = None
         self.pma = None
+        self._backup_url = None
 
         if self.pmid:
             self._load_pma_from_pmid()
@@ -298,9 +294,34 @@ class FindIt(object):
             self.url = None
             self.reason = 'tx_error: %r' % e
 
+    @property
+    def backup_url(self):
+        '''A backup url to try if the first url doesn't pan out.'''
+        if not self.doi:
+            return None
+
+        if self._backup_url is not None:
+            return self._backup_url
+
+        baseurl = the_doi_2step(self.doi)
+
+        urlp = urlparse(baseurl)
+
+        if urlp.path.find('.') > -1:
+            extension = urlp.path.split('.')[-1]
+            if extension == 'long':
+                self._backup_url = baseurl.replace('long', 'full.pdf')
+            elif extension == 'html':
+                self._backup_url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
+        else:
+            # a shot in the dark...
+            self._backup_url = baseurl + '.full.pdf'
+        return self._backup_url
+
     def _load_pma_from_pmid(self):
         self.pma = fetch.article_by_pmid(self.pmid)
         if self.pma.doi:
+            self.doi = self.pma.doi
             self.doi_score==10.0
         
         if self.pma.doi==None:
