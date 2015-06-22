@@ -1,5 +1,8 @@
 import unittest
-from metapub import PubMedArticle
+from metapub.exceptions import *
+from metapub import PubMedArticle, PubMedFetcher
+
+import random
 
 xml_str1 = '''<?xml version="1.0"?>
 <!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle, 1st January 2015//EN" "http://www.ncbi.nlm.nih.gov/corehtml/query/DTD/pubmed_150101.dtd">
@@ -292,10 +295,20 @@ xml_str2 = '''
 class TestPubMedArticle(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.fetch = PubMedFetcher()
 
     def tearDown(self):
         pass
+
+    def test_random_efetch(self):
+        pmid = str(random.randint(22222222, 23333333))
+        try:
+            article = self.fetch.article_by_pmid(pmid)
+            assert article.pmid == pmid
+            assert article.title is not None
+        except InvalidPMID, e:
+            print "PMID %i returned InvalidPMID response (which is totally OK). Run test again!" % pmid
+        
 
     def test_init1(self):
         '''
