@@ -1,0 +1,224 @@
+=======
+Metapub
+=======
+
+Metapub is a Python library that provides python objects fetched via eutils 
+that represent papers and concepts found within the NLM.
+
+These objects abstract some interactions with pubmed, and intends to 
+encompass as many types of database lookups and summaries as can be 
+provided via Eutils / Entrez.
+
+PubMedArticle / PubMedFetcher
+-----------------------------
+
+Basic usage::
+
+  fetch = PubMedFetcher()
+  article = fetch.article_by_pmid('123456')
+  print article.title
+  print article.journal, article.year, article.volume, article.issue
+  print article.authors
+
+
+PubMedFetcher also includes the following special methods.
+
+*article_by_doi* 
+
+      (Attempt to) fetch an article by looking up the DOI first.
+
+
+*article_by_pmcid* 
+    
+      Fetch an article by looking up the PMCID first.
+
+
+*pmids_from_citation*
+
+      Produces a list of possible PMIDs for the submitted
+      citation, where the citation is submitted as a collection of keyword
+      arguments.  At least 3 of the 5, preferably 4 or 5 for best results,
+      must be included::
+
+        aulast or author_last_fm1
+        year
+        volume
+        first_page or spage
+        journal or jtitle
+
+      Use NLM Title Abbreviation (aka ISO Abbreviation) journal strings whenever possible.
+
+
+*pmids_for_query*
+
+      Returns list of pmids for given freeform query string plus keyword arguments.
+            
+      All Pubmed Advanced Query tokens are supported.  
+
+      See [NCBI Search Field Descriptions and Tags](http://www.ncbi.nlm.nih.gov/books/NBK3827/)
+
+
+*pmids_for_clinical_query*
+
+      Composes a "Clinical Query" as on this page: (http://www.ncbi.nlm.nih.gov/pubmed/clinical/)
+
+      Supply a "category" (required) and an optimization ("broad" or "narrow") for this function.
+      Available categories:
+
+      * therapy
+      * diagnosis
+      * etiology
+      * prognosis
+      * prediction
+
+
+      All keyword arguments for PubMedFetcher.pmids_for_query available.
+
+
+*pmids_for_medical_genetics_query*
+
+      Composes a "Medical Genetics Query" as described here: (http://www.ncbi.nlm.nih.gov/books/NBK3827/#pubmedhelp.Medical_Genetics_Search_Filte)
+
+      Supply a "category" (required) and an optimization ("broad" or "narrow") for this function.
+      Available categories:
+
+      * therapy
+      * diagnosis
+      * etiology
+      * prognosis
+      * prediction
+
+
+      All keyword arguments for PubMedFetcher.pmids_for_query available.
+
+
+metapub.pubmedcentral.* 
+-----------------------
+
+The PubMedCentral functions are a loose collection of conversion 
+methods for academic publishing IDs, allowing conversion (where possible)
+between the following ID types::
+
+    doi (Digital object identifier)
+    pmid (PubMed ID)
+    pmcid (Pubmed Central ID (including versioned document ID)
+
+The following methods are supplied, returning a string (if found) or None::
+
+    get_pmid_for_otherid(string)
+    get_doi_for_otherid(string)
+    get_pmcid_for_otherid(string)
+
+As implied by the function names, you can supply any valid ID type ("otherid")
+to acquire the desired ID type.
+
+
+
+MedGenConcept / MedGenFetcher
+-----------------------------
+
+Basic usage::
+
+  fetch = MedGenFetcher()
+  concept = fetch.concept_by_uid('336867')
+  print concept.name
+  print concept.description
+  print concept.associated_genes
+  print concept.modes_of_inheritance
+
+
+CrossRef
+--------
+
+The CrossRef object provides an object layer into search.crossref.org's API.
+See http://search.crossref.org
+
+CrossRef excels at resolving DOIs into article citation details. 
+
+CrossRef can also be used to resolve a DOI /from/ article citation details, with
+a bit of finagling.  The "get_top_result" function was built to do some light
+interpretation of the json-based results of a CrossRef lookup.
+
+Result scores under 2.0 are usually False matches.
+Result scores over 3.0 are always (?) True.  
+Between 2.0 and 3.0 is a grey area: be wary and check results against any known info you may have.
+
+Current testing (as of 1/23/2015) indicates that a cleverly-formed CrossRef 
+query can return results 99% correct about 90% of the time.  
+
+The more *params* submitted with the query, the more accurate the results may be. 
+
+
+Basic usage::
+
+  CR = CrossRef()       # starts the query cache engine
+  results = CR(search_string, params)
+  top_result = CR.get_top_result(results)
+
+Example starting from a known pubmed ID::
+
+  pma = PubMedFetcher().article_by_pmid(known_pmid)
+  results = CR.query_from_PubMedArticle(pma)
+  top_result = CR.get_top_result(results, CR.last_params, use_best_guess=True)
+
+NOTE: if you don't supply "CR.last_params", you can't use the "use_best_guess"
+operator. In cases where all results have scores under 2, no results will 
+be returned unless use_best_guess=True.  That's often desired behavior, 
+since results with scores under 2 are usually pretty bad.
+
+
+Miscellaneous Utilities
+-----------------------
+
+Currently underdocumented utilities that you might find useful.
+
+In metapub.utils:
+
+  * *asciify* (nuke all the unicode from orbit; it's the only way to be sure)
+  * *parameterize* (make strings suitable for submission to GET-based query service)
+  * *deparameterize* (somewhat-undo parameterization in string)
+  * *remove_html_markup* (remove html and xml tags from text. preserves HTML entities like &amp;)
+
+
+In metapub.text_mining:
+
+  * *find_doi_in_string* (returns the first seen DOI in the input string)
+  * *findall_dois_in_text* (returns all seen DOIs in input string)
+  * *pick_pmid* (return longest numerical string from text (string) as the pmid)
+
+
+In metapub.convert:
+
+  * *PubMedArticle2doi* (uses CrossRef to find a DOI for given PubMedArticle object.)
+  * *pmid2doi* (returns first found doi for pubmed ID "by any means necessary.)
+  * *doi2pmid* (uses CrossRef and eutils to return a PMID for given DOI if possible.)
+
+
+More Information
+----------------
+
+Digital Identifiers of Scientific Literature: what they are, when they're 
+used, and what they look like.
+
+http://www.biosciencewriters.com/Digital-identifiers-of-scientific-literature-PMID-PMCID-NIHMS-DOI-and-how-to-use-them.aspx
+
+
+About, and a Disclaimer
+-----------------------
+
+Metapub relies on the very neat eutils package created by Reece
+Hart, which you can check out here:
+
+http://bitbucket.org/biocommons/eutils
+
+This library is in its very early stages and there's a lot that may
+change, and quite a bit planned for implementation in 2015.
+
+Feel free to use the library with confidence that each released version 
+is well tested -- and in a couple of cases, some of its code is already
+in production -- but until (say) version 0.5, don't expect consistency
+between versions.
+
+YMMV, At your own risk, etc.
+
+--Naomi Most (@nthmost)
