@@ -296,7 +296,7 @@ simple_formats_doi = {
 
 simple_formats_pii = {
     'Am Heart J': 'http://www.ahjonline.com/article/{a.pii}/pdf', #ScienceDirect
-    'Am J Cardiol': 'http://www.ajconline.org/article/{a.pii}/pdf',
+    'Am J Cardiol': 'http://www.ajconline.org/article/{a.pii}/pdf', #ScienceDirect
     'Am J Ophthalmol': 'http://www.ajo.com/article/{a.pii}/pdf', #ScienceDirect
     'Am J Med': 'http://www.amjmed.com/article/{a.pii}/pdf', #ScienceDirect
     'Atherosclerosis': 'http://www.atherosclerosis-journal.com/article/{a.pii}/pdf', #ScienceDirect
@@ -309,7 +309,6 @@ simple_formats_pii = {
     'Cancer Lett': 'http://www.cancerletters.info/article/{a.pii}/pdf', #ScienceDirect
     'Clin Neurol Neurosurg': 'http://www.clineu-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Diabetes Res Clin Pract': 'http://www.diabetesresearchclinicalpractice.com/article/{a.pii}/pdf', #ScienceDirect
-    'Diagn Pathol': 'http://www.diagnosticpathology.org/content/pdf/{a.pii}.pdf', # Biomed Central
     'Epilepsy Res': 'http://www.epires-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Eur J Paediatr Neurol': 'http://www.ejpn-journal.com/article/{a.pii}/pdf', #ScienceDirect
     'Exp Hematol': 'http://www.exphem.org/article/{a.pii}/pdf', #ScienceDirect
@@ -504,6 +503,7 @@ wiley_journals = (
     'J Thromb Haemost',
     'J Pathol',
     'J Viral Hepat',
+    'Med Educ',
     'Mol Carcinog',
     'Mol Microbiol',
     'Mov Disord',

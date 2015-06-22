@@ -90,6 +90,12 @@ def find_article_from_pma(pma, use_crossref=True):
     # (did you know that unicode.translate takes ONE argument whilst str.translate takes TWO?! true story)
     jrnl = asciify(pma.journal).translate(None, '.')
 
+    ##### Pubmed Central: ideally we get the article from PMC if it has a PMC id.
+    #
+    #   If we can't get it this way, it may be that the paper is temporarily 
+    #   embargoed.  In that case, we may be able to fall back on retrieval from
+    #   a publisher link.
+
     if pma.pmc:
         try:
             url = the_pmc_twist(pma)
@@ -98,18 +104,12 @@ def find_article_from_pma(pma, use_crossref=True):
             reason = str(e)
 
     if jrnl in simple_formats_pii.keys():
-        # TODO: find a smarter way to process these (maybe just break them out into publishers)
         if pma.pii:
             url = simple_formats_pii[jrnl].format(a=pma)
             reason = ''
-        elif pma.doi:
-            try:
-                url = the_doi_2step(pma.doi)
-            except MetaPubError, e:
-                reason = '%s' % e
         else:
             url = None
-            reason = 'pii missing from PubMedArticle XML and DOI lookup failed. Harsh!'
+            reason = 'pii missing from PubMedArticle XML (pii format)'
 
         if url:
             r = requests.get(url)
@@ -130,7 +130,9 @@ def find_article_from_pma(pma, use_crossref=True):
             # TODO: try the_doi_2step
             reason = 'volume and maybe also issue data missing from PubMedArticle'
 
-    elif jrnl in jstage_journals:
+    ##### PUBLISHER BASED LISTS #####
+
+    if jrnl in jstage_journals:
         if pma.doi:
             try:
                 url = the_jstage_dive(pma)

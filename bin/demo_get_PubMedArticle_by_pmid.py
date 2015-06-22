@@ -35,10 +35,10 @@ print ''
 print 'pii: '+str(article.pii)
 print 'doi: '+str(article.doi)
 print 'pmc: '+str(article.pmc)
-print 'volume: '+article.volume
-print 'issue: '+article.issue
-print 'pages: '+article.pages
-print 'year: '+article.year
+print 'volume: '+str(article.volume)
+print 'issue: '+str(article.issue)
+print 'pages: '+str(article.pages)
+print 'year: '+str(article.year)
 print ''
 print 'MeSH headings: '
 for DUI in article.mesh.keys():
@@ -58,6 +58,11 @@ if article.grants:
     print '\nGrant Information'
     for gr in grants:
         print '\t', gr
+
+if article.history:
+    print '\nArticle History'
+    for hist in article.history:
+        print '\t', hist, article.history[hist]
 
 #print article.xmlstr
 print ''

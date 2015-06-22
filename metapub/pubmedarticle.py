@@ -118,6 +118,8 @@ class PubMedArticle(MetaPubObject):
         self.abstract = self._get_abstract() if pmt=='article' else self._get_book_abstract()
         self.journal = self.book_title if pmt=='book' else self._get_journal()
         self.year = self._get_book_year() if pmt=='book' else self._get_year()
+    
+        self.history = self._get_article_history()
 
 
     def to_dict(self):
@@ -321,7 +323,15 @@ class PubMedArticle(MetaPubObject):
         return None
 
     def _get_pubdate(self):
-        return self._compose_datetime(self.content.find(self._root+'/Article/Journal/JournalIssue/PubDate'))
+        return self._construct_datetime(self.content.find(self._root+'/Article/Journal/JournalIssue/PubDate'))
+
+    def _get_article_history(self):
+        history = {}
+        pubdates = self.content.find('PubmedData/History')
+        if pubdates is not None:
+            for pubdate in pubdates.getchildren():
+                history[pubdate.get('PubStatus')] = self._construct_datetime(pubdate)
+        return history
 
     def _get_year(self):
         y = self._get(self._root+'/Article/Journal/JournalIssue/PubDate/Year')

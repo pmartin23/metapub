@@ -4,14 +4,35 @@ class MetaPubError(Exception):
     pass
 
 class InvalidPMID(MetaPubError):
-    pass
+    '''Raised when NCBI efetch of a pubmed ID results in "invalid" response.'''
 
 class CrossRefConnectionError(MetaPubError):
-    pass
+    '''Raised when a well-formed CrossRef query results in a server error.'''
 
 class NoPDFLink(MetaPubError):
-    pass
+    '''Raised when a FindIt url lookup fails for some specific reason that is
+    particular to the journal or publisher.
 
-class AccessDenied(MetaPubError):
-    pass
+    This Exception provides extended attributes:
+
+            reason      :    human-readable "reason" why URL lookup failed.
+            url         :    last url attempted 
+            status_code :    last HTTP code returned in attempt (if any)
+            missing     :    list of data items missing from last attempt (if any)
+
+    This Exception is mostly used internally in FindIt as flow control.
+    '''
+    def __init__(self, reason, *args, **kwargs):
+        self.message = reason
+        self.reason = reason
+        self.url = kwargs.get('url', None)
+        self.missing = kwargs.get('missing', [])
+        self.status_code = kwargs.get('status_code', None)
+
+        super(NoPDFLink, self).__init__(reason, url, *args, **kwargs) 
+
+class AccessDenied(NoPDFLink):
+    '''Raised when a FindIt url lookup fails for some specific reason that is
+    particular to the journal or publisher.'''
+
 
