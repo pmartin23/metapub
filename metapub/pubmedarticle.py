@@ -135,9 +135,9 @@ class PubMedArticle(MetaPubObject):
         for name in names:
             if d.find(name) is not None:
                 parts[name.lower()] = d.find(name).text
-        if 'day' in parts.keys() and 'month' in parts.keys():
+        if parts.get('day', None) and parts.get('month', None):
             return datetime.strptime('{year}/{month}/{day}'.format(**parts), '%Y/%m/%d').date()
-        elif 'month' in parts.keys() and 'year' in parts.keys():
+        elif parts.get('month', None) and parts.get('year', None):
             return datetime.strptime('{year}/{month}'.format(**parts), '%Y/%m').date()
         else:
             return datetime.strptime('{year}'.format(**parts), '%Y').date()
@@ -321,9 +321,6 @@ class PubMedArticle(MetaPubObject):
         # electronic pubs may not have volume or issue
         # e.g., http://www.ncbi.nlm.nih.gov/pubmed?term=20860988
         return None
-
-    def _get_pubdate(self):
-        return self._construct_datetime(self.content.find(self._root+'/Article/Journal/JournalIssue/PubDate'))
 
     def _get_article_history(self):
         history = {}
