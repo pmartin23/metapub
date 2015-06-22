@@ -19,7 +19,7 @@ class TestFindItDances(unittest.TestCase):
         pmid_needs_form = '18385036'    # Sci Signal requiring form negotiation
         pmid_needs_form_url = 'http://stke.sciencemag.org/content/1/13/eg3.full.pdf'
         pmid_no_form = '25678633'       # Science 
-        pmid_no_form_url = 'http://sciencemag.org/content/347/6223/695.full.pdf'
+        pmid_no_form_url = 'http://www.sciencemag.org/content/347/6223/695.full.pdf'
 
         source = FindIt(pmid=pmid_no_form)
         assert source.url == pmid_no_form_url

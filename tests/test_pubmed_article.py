@@ -311,6 +311,3 @@ class TestPubMedArticle(unittest.TestCase):
         article = PubMedArticle(xml_str2)
         assert str(article.pmid) == '23697015'
 
-
-
-
