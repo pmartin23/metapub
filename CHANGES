@@ -75,3 +75,4 @@
 6/15/2015, 0.3.13.3, Moved CrossRefConnectionError protection into metapub.convert where it can do the most good.
 6/15/2015, 0.3.13.4, FindIt: added Biochemical Society journals.
 6/20/2015, 0.3.14, FindIt now has backup_url lazy-loaded property. Souped up some exceptions. New PubMedArticle.history dict contains PubMedPubDate entries.
+6/22/2015, 0.3.14.1.1, PubMedArticle: fix for datetime breakages when month is a string. Oy.

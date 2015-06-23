@@ -136,9 +136,18 @@ class PubMedArticle(MetaPubObject):
             if d.find(name) is not None:
                 parts[name.lower()] = d.find(name).text
         if parts.get('day', None) and parts.get('month', None):
-            return datetime.strptime('{year}/{month}/{day}'.format(**parts), '%Y/%m/%d').date()
+            try:
+                month = int(parts['month'])
+                return datetime.strptime('{year}/{month}/{day}'.format(**parts), '%Y/%m/%d').date()
+            except ValueError:
+                # Assume three-letter month name
+                return datetime.strptime('{year}/{month}/{day}'.format(**parts), '%Y/%b/%d').date()
         elif parts.get('month', None) and parts.get('year', None):
-            return datetime.strptime('{year}/{month}'.format(**parts), '%Y/%m').date()
+            try:
+                month = int(parts['month'])
+                return datetime.strptime('{year}/{month}'.format(**parts), '%Y/%m').date()
+            except ValueError:
+                return datetime.strptime('{year}/{month}'.format(**parts), '%Y/%b').date()
         else:
             return datetime.strptime('{year}'.format(**parts), '%Y').date()
 
