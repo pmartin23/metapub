@@ -20,10 +20,12 @@ from .exceptions import *
 from .utils import asciify, parameterize, remove_html_markup, deparameterize
 from .base import Borg
 
-DEFAULT_CACHE_PATH = os.path.join(os.path.expanduser('~'),'.cache','crossref-cache.db')
+DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'),'.cache')
+CACHE_FILENAME = 'crossref-cache.db'
 
+#TODO implement usage of crossref V2 returns which are much nicer.
 
-# crossref return looks like:
+# crossref V1 API return looks like:
 """{
         doi: "http://dx.doi.org/10.2307/40250596",
         score: 2.0651011,
@@ -38,7 +40,6 @@ DEFAULT_CACHE_PATH = os.path.join(os.path.expanduser('~'),'.cache','crossref-cac
 class CrossRef(Borg):
     _logger = logging.getLogger('metapub.crossref')      #.setLevel(logging.INFO)
     _logger.setLevel(logging.INFO)
-    _cache = SQLiteCache(DEFAULT_CACHE_PATH)
 
     re_rfts = re.compile('rft\.(.*?)&amp;')
     re_rfrs = re.compile('rfr_id=.*?&amp;')
@@ -77,6 +78,18 @@ class CrossRef(Borg):
         self.last_search = ''
         self.last_params = {}
         self.last_query = ''
+
+        #TODO: allow cachedir=None (turn off cacheing)
+        cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
+        if cachedir.find('~') > -1:
+            cachedir = os.path.expanduser(cachedir)
+        #TODO: consolidate this boilerplate caching code into a class MixIn
+        try:
+            os.makedirs(cachedir)
+        except OSError:
+            pass
+        self._cache_path = os.path.join(cachedir, CACHE_FILENAME)
+        self._cache = SQLiteCache(self._cache_path)
 
     def _parse_coins(self, coins):
         # there are multiple 'au' items. pull them out, add them to the list of authors,

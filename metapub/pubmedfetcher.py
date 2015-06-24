@@ -3,6 +3,8 @@ from __future__ import absolute_import, print_function
 __doc__ = '''metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed'''
 __author__ = 'nthmost'
 
+import os
+
 from eutils.exceptions import EutilsBadRequestError
 from lxml import etree
 import requests
@@ -35,8 +37,8 @@ def parse_related_pmids_result(xmlstr):
             outd[heading].append(Id.text)
     return outd
 
-class PubMedFetcher(Borg):
-    '''PubMedFetcher (a Borg singleton object)
+class PubMedFetcher(Borg):      #, Cached):
+    '''PubMedFetcher (a Cached / Borg singleton object)
 
     An interaction layer for querying via specified method to return PubMedArticle objects.
     
@@ -66,13 +68,31 @@ class PubMedFetcher(Borg):
                 first_page='7', author_name='Grant')
     '''
 
-    def __init__(self, method='eutils', email=DEFAULT_EMAIL):
+    _cache_filename = 'eutils-cache.db'
+
+    def __init__(self, method='eutils', email=DEFAULT_EMAIL, cachedir='default'):
         Borg.__init__(self)
         self.method = method
+        self._cache_path = None
 
         if method=='eutils':
             import eutils.client as ec
-            self.qs = ec.QueryService(tool='metapub', email=email)
+            if cachedir is None:
+                self.qs = ec.QueryService(tool='metapub', email=email, cache_path=None)
+            elif cachedir=='default':
+                self._cache_path = os.path.expanduser('~/.cache/%s' % self._cache_filename)
+                self.qs = ec.QueryService(tool='metapub', email=email)
+            else:
+                if cachedir.find('~') > -1:
+                    cachedir = os.path.expanduser(cachedir)
+                try:
+                    os.makedirs(cachedir)
+                except OSError:
+                    pass
+                self._cache_path = os.path.join(cachedir, self._cache_filename)
+                self.qs = ec.QueryService(tool='metapub', email=email, 
+                            cache_path=os.path.join(cachedir, self._cache_filename))
+                
             self.article_by_pmid = self._eutils_article_by_pmid
             self.article_by_pmcid = self._eutils_article_by_pmcid
             self.article_by_doi = self._eutils_article_by_doi

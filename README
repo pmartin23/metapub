@@ -10,7 +10,7 @@ encompass as many types of database lookups and summaries as can be
 provided via Eutils / Entrez.
 
 PubMedArticle / PubMedFetcher
------------------------------
+=============================
 
 Basic usage::
 
@@ -21,17 +21,47 @@ Basic usage::
   print article.authors
 
 
-PubMedFetcher also includes the following special methods.
+PubMedFetcher uses an SQLite cacheing engine (provided through eutils), which by 
+default places a file in your user directory.  E.g. the author's cache directory
+path would be */home/nthmost/.cache/eutils-cache.db*
+
+This cache file can grow quite large over time. Deleting the cache file is safe
+and can also be regarded as the way to "reset" the cache.
+
+The *cachedir* keyword argument can be supplied to PubMedFetcher as a way to specify
+where the cache file will reside.  For example::
+
+  fetch = PubMedFetcher(cachedir='/path/to/cachedir')
+
+User directory expansion also works:
+
+  fetch = PubMedFetcher(cachedir='~/.othercachedir')
+
+The cachedir will be created for you if it doesn't already exist, assuming the user 
+account you're running metapub under has permissions to do so.
+
+PubMedArticle Lookup Methods
+----------------------------
+
+The following methods return a PubMedArticle object (or raise InvalidPMID if NCBI lookup fails).
+
+*article_by_pmid*
+
+      (Attempt to) fetch an article by supplying its pubmed ID (both integer and string accepted).
 
 *article_by_doi* 
 
       (Attempt to) fetch an article by looking up the DOI first.
 
-
 *article_by_pmcid* 
     
-      Fetch an article by looking up the PMCID first.
+      Fetch an article by looking up the PMCID first. Both integer and string accepted.
 
+
+Pubmed ID List Methods
+----------------------
+
+The following methods return a list of pubmed IDs (if found) or an empty list (if None).
 
 *pmids_from_citation*
 
@@ -115,7 +145,7 @@ to acquire the desired ID type.
 
 
 MedGenConcept / MedGenFetcher
------------------------------
+=============================
 
 Basic usage::
 
@@ -128,7 +158,7 @@ Basic usage::
 
 
 CrossRef
---------
+========
 
 The CrossRef object provides an object layer into search.crossref.org's API.
 See http://search.crossref.org
@@ -165,6 +195,9 @@ NOTE: if you don't supply "CR.last_params", you can't use the "use_best_guess"
 operator. In cases where all results have scores under 2, no results will 
 be returned unless use_best_guess=True.  That's often desired behavior, 
 since results with scores under 2 are usually pretty bad.
+
+As with the PubMedFetcher object, you can configure where the cache file ends up
+on the filesystem via the *cachedir* keyword argument.
 
 
 Miscellaneous Utilities

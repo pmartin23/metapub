@@ -140,13 +140,16 @@ class PubMedArticle(MetaPubObject):
                 month = int(parts['month'])
                 return datetime.strptime('{year}/{month}/{day}'.format(**parts), '%Y/%m/%d').date()
             except ValueError:
-                # Assume three-letter month name
+                # Force to three-letter month name
+                parts['month'] = parts['month'][:3]
                 return datetime.strptime('{year}/{month}/{day}'.format(**parts), '%Y/%b/%d').date()
         elif parts.get('month', None) and parts.get('year', None):
             try:
                 month = int(parts['month'])
                 return datetime.strptime('{year}/{month}'.format(**parts), '%Y/%m').date()
             except ValueError:
+                # Force to three-letter month name
+                parts['month'] = parts['month'][:3]
                 return datetime.strptime('{year}/{month}'.format(**parts), '%Y/%b').date()
         else:
             return datetime.strptime('{year}'.format(**parts), '%Y').date()
