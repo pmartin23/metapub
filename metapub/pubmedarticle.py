@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 
 """metapub.pubmedarticle -- PubMedArticle class instantiated by supplying ncbi XML string."""
 
-import logging
+import logging, time
 from datetime import datetime
 from collections import OrderedDict
 
@@ -135,15 +135,16 @@ class PubMedArticle(MetaPubObject):
         parts = { 'year': 1, 'month': 1, 'day': 1 }
         for name in names:
             if d.find(name) is not None:
+                item = d.find(name).text
                 try:
-                    parts[name.lower()] = int(d.find(name).text)
+                    parts[name.lower()] = int(item)
                 except ValueError:
                     if name.lower() == 'year':
                         # fixes spurious crap seen at least once: "2007 (details online)" (pmid 19659763)
-                        parts['year'] = int(parts['year'][:4])
+                        parts['year'] = int(item[:4])
                     elif name.lower() == 'month':
                         #Force to 3-letter month name (months can look like "December", "Dec", "1")
-                        parts['month'] = time.strptime(parts['month'][:3], '%b').tm_mon
+                        parts['month'] = time.strptime(item[:3], '%b').tm_mon
         return datetime(**parts)
 
     def _get_bookaccession_id(self):
