@@ -138,13 +138,16 @@ class PubMedArticle(MetaPubObject):
                 item = d.find(name).text
                 try:
                     parts[name.lower()] = int(item)
-                except ValueError, TypeError:
+                except ValueError:
                     if name.lower() == 'year':
                         # fixes spurious crap seen at least once: "2007 (details online)" (pmid 19659763)
                         parts['year'] = int(item[:4])
                     elif name.lower() == 'month':
                         #Force to 3-letter month name (months can look like "December", "Dec", "1")
                         parts['month'] = time.strptime(item[:3], '%b').tm_mon
+                except TypeError:
+                    #item is None
+                    pass
         return datetime(**parts)
 
     def _get_bookaccession_id(self):
