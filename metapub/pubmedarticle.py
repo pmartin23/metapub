@@ -138,7 +138,7 @@ class PubMedArticle(MetaPubObject):
                 item = d.find(name).text
                 try:
                     parts[name.lower()] = int(item)
-                except ValueError:
+                except ValueError, TypeError:
                     if name.lower() == 'year':
                         # fixes spurious crap seen at least once: "2007 (details online)" (pmid 19659763)
                         parts['year'] = int(item[:4])
