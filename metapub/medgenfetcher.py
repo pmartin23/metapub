@@ -37,13 +37,34 @@ class MedGenFetcher(Borg):
         uid = fetch.uid_for_cui(known_cui)
     '''
 
-    def __init__(self, method='eutils', email=DEFAULT_EMAIL):
+    _cache_filename = 'medgen-cache.db'
+
+    def __init__(self, method='eutils', email=DEFAULT_EMAIL, cachedir='default'):
         Borg.__init__(self)
         self.method = method
+        self._cache_path = None
 
         if method=='eutils':
             import eutils.client as ec
-            self.qs = ec.QueryService(email=email)
+            cachedir = check_and_return_cachedir(cachedir)
+
+            if cachedir is None:
+                self.qs = ec.QueryService(tool='metapub', email=email, cache_path=None)
+            else:
+                if cachedir=='default':
+                    self.cache_path = os.path.expanduser('~/.cache/%s' % self._cache_filename)
+                    self.qs = ec.QueryService(tool='metapub', email=email, cache_path=self.cache_path)
+                else:
+                    if cachedir.find('~') > -1:
+                        cachedir = os.path.expanduser(cachedir)
+                try:
+                    os.makedirs(cachedir)
+                except OSError:
+                    pass
+                self._cache_path = os.path.join(cachedir, self._cache_filename)
+                self.qs = ec.QueryService(tool='metapub', email=email,
+                        cache_path=os.path.join(cachedir, self._cache_filename))
+
             self.uids_by_term = self._eutils_uids_by_term
             self.concept_by_uid = self._eutils_concept_by_uid
             self.concept_by_cui = self._eutils_concept_by_cui

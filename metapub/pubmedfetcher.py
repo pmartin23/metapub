@@ -37,8 +37,8 @@ def parse_related_pmids_result(xmlstr):
             outd[heading].append(Id.text)
     return outd
 
-class PubMedFetcher(Borg):      #, Cached):
-    '''PubMedFetcher (a Cached / Borg singleton object)
+class PubMedFetcher(Borg): 
+    '''PubMedFetcher (a Borg singleton object backed by an optional SQLite cache)
 
     An interaction layer for querying via specified method to return PubMedArticle objects.
     
@@ -77,6 +77,9 @@ class PubMedFetcher(Borg):      #, Cached):
 
         if method=='eutils':
             import eutils.client as ec
+            self._cache_path = get_cachepath(cachedir, self._cache_filename)
+
+
             if cachedir is None:
                 self.qs = ec.QueryService(tool='metapub', email=email, cache_path=None)
             elif cachedir=='default':

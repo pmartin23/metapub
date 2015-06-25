@@ -131,28 +131,20 @@ class PubMedArticle(MetaPubObject):
 
     def _construct_datetime(self, d):
         names = ['Year', 'Month', 'Day']
-        parts = {}
+        # if any part is missing, python will default to setting it to 1 anyway.
+        parts = { 'year': 1, 'month': 1, 'day': 1 }
         for name in names:
             if d.find(name) is not None:
-                parts[name.lower()] = d.find(name).text
-        if parts.get('day', None) and parts.get('month', None):
-            try:
-                month = int(parts['month'])
-                return datetime.strptime('{year}/{month}/{day}'.format(**parts), '%Y/%m/%d').date()
-            except ValueError:
-                # Force to three-letter month name
-                parts['month'] = parts['month'][:3]
-                return datetime.strptime('{year}/{month}/{day}'.format(**parts), '%Y/%b/%d').date()
-        elif parts.get('month', None) and parts.get('year', None):
-            try:
-                month = int(parts['month'])
-                return datetime.strptime('{year}/{month}'.format(**parts), '%Y/%m').date()
-            except ValueError:
-                # Force to three-letter month name
-                parts['month'] = parts['month'][:3]
-                return datetime.strptime('{year}/{month}'.format(**parts), '%Y/%b').date()
-        else:
-            return datetime.strptime('{year}'.format(**parts), '%Y').date()
+                try:
+                    parts[name.lower()] = int(d.find(name).text)
+                except ValueError:
+                    if name.lower() == 'year':
+                        # fixes spurious crap seen at least once: "2007 (details online)" (pmid 19659763)
+                        parts['year'] = int(parts['year'][:4])
+                    elif name.lower() == 'month':
+                        #Force to 3-letter month name (months can look like "December", "Dec", "1")
+                        parts['month'] = time.strptime(parts['month'][:3], '%b').tm_mon
+        return datetime(**parts)
 
     def _get_bookaccession_id(self):
         for item in self.content.findall('BookDocument/ArticleIdList/ArticleId'):
