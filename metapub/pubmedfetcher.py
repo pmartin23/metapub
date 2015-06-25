@@ -9,6 +9,7 @@ from eutils.exceptions import EutilsBadRequestError
 from lxml import etree
 import requests
 
+from .eutils_common import get_cache_path, get_eutils_client
 from .pubmedarticle import PubMedArticle
 from .pubmedcentral import get_pmid_for_otherid
 from .pubmed_clinicalqueries import *
@@ -76,26 +77,8 @@ class PubMedFetcher(Borg):
         self._cache_path = None
 
         if method=='eutils':
-            import eutils.client as ec
-            self._cache_path = get_cachepath(cachedir, self._cache_filename)
-
-
-            if cachedir is None:
-                self.qs = ec.QueryService(tool='metapub', email=email, cache_path=None)
-            elif cachedir=='default':
-                self._cache_path = os.path.expanduser('~/.cache/%s' % self._cache_filename)
-                self.qs = ec.QueryService(tool='metapub', email=email)
-            else:
-                if cachedir.find('~') > -1:
-                    cachedir = os.path.expanduser(cachedir)
-                try:
-                    os.makedirs(cachedir)
-                except OSError:
-                    pass
-                self._cache_path = os.path.join(cachedir, self._cache_filename)
-                self.qs = ec.QueryService(tool='metapub', email=email, 
-                            cache_path=os.path.join(cachedir, self._cache_filename))
-                
+            self._cache_path = get_cache_path(cachedir, self._cache_filename)
+            self.qs = get_eutils_client(self._cache_path, email=email)
             self.article_by_pmid = self._eutils_article_by_pmid
             self.article_by_pmcid = self._eutils_article_by_pmcid
             self.article_by_doi = self._eutils_article_by_doi

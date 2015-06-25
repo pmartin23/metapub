@@ -11,9 +11,9 @@ import urllib
 
 import requests
 
-from eutils.sqlitecache import SQLiteCache
 from tabulate import tabulate
 
+from .eutils_common import SQLiteCache, get_cache_path
 from .pubmedfetcher import PubMedFetcher 
 from .exceptions import *
 
@@ -38,6 +38,8 @@ CACHE_FILENAME = 'crossref-cache.db'
 
 
 class CrossRef(Borg):
+    '''CrossRef: a Borg singleton object backed by an SQLite cache'''
+
     _logger = logging.getLogger('metapub.crossref')      #.setLevel(logging.INFO)
     _logger.setLevel(logging.INFO)
 
@@ -81,14 +83,8 @@ class CrossRef(Borg):
 
         #TODO: allow cachedir=None (turn off cacheing)
         cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
-        if cachedir.find('~') > -1:
-            cachedir = os.path.expanduser(cachedir)
-        #TODO: consolidate this boilerplate caching code into a class MixIn
-        try:
-            os.makedirs(cachedir)
-        except OSError:
-            pass
-        self._cache_path = os.path.join(cachedir, CACHE_FILENAME)
+        
+        self._cache_path = get_cache_path(cachedir, CACHE_FILENAME)
         self._cache = SQLiteCache(self._cache_path)
 
     def _parse_coins(self, coins):
