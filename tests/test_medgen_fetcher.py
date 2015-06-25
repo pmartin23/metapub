@@ -1,4 +1,4 @@
-import unittest
+import unittest, os
 
 from metapub import MedGenFetcher
 fetch = MedGenFetcher()

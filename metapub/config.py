@@ -11,11 +11,6 @@ TMPDIR = '/tmp'
 # email address submitted to eutils with requests (as required by their api).
 DEFAULT_EMAIL=os.getenv('EUTILS_EMAIL', 'naomi.most@invitae.com')
 
-#### keep eutils yammering down to a reasonable level.
-logging.getLogger("requests").setLevel(logging.WARNING)
-logging.getLogger("eutils").setLevel(logging.INFO)
-####
-
 def get_process_log(filepath, loglevel=logging.INFO, name=PKGNAME+'-process'):
     log = logging.getLogger(name)
     log.setLevel(loglevel)
