@@ -1,29 +1,28 @@
 import unittest, os
 
 from metapub import MedGenFetcher
-fetch = MedGenFetcher()
 
-hugos = ['ACVRL1']
+hugos = ['ACVRL1', 'FOXP3', 'ATM']
 
 TEST_CACHEDIR = 'tests/testcachedir'
 
-class TestPubmedSearch(unittest.TestCase):
+class TestMedGenFetcher(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.fetch = MedGenFetcher()
 
     def tearDown(self):
         pass
 
     def test_fetch_concepts_for_known_gene(self):
         hugo = 'ACVRL1'
-        result = fetch.uids_by_term(hugo+'[gene]')
+        result = self.fetch.uids_by_term(hugo+'[gene]')
         assert result is not None
         assert result[0]=='324960'
     
     def test_fetch_concepts_for_incorrect_term(self):
         term = 'AVCRL'
-        result = fetch.uids_by_term(term+'[gene]')
+        result = self.fetch.uids_by_term(term+'[gene]')
         assert result==[]
 
     def test_configurable_cachedir(self):
