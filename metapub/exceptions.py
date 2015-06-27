@@ -29,7 +29,7 @@ class NoPDFLink(MetaPubError):
         self.missing = kwargs.get('missing', [])
         self.status_code = kwargs.get('status_code', None)
 
-        super(NoPDFLink, self).__init__(reason, url, *args, **kwargs) 
+        super(NoPDFLink, self).__init__(reason, *args, **kwargs) 
 
 class AccessDenied(NoPDFLink):
     '''Raised when a FindIt url lookup fails for some specific reason that is
