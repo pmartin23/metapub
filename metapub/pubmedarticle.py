@@ -148,7 +148,12 @@ class PubMedArticle(MetaPubObject):
                 except TypeError:
                     #item is None
                     pass
-        return datetime(**parts)
+        try:
+            return datetime(**parts)
+        except ValueError:
+            # one of the values didn't parse, or maybe it was like pmid 17924334
+            # where the "accepted" year was "20007". at any rate, forget it.
+            return None
 
     def _get_bookaccession_id(self):
         for item in self.content.findall('BookDocument/ArticleIdList/ArticleId'):
