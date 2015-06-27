@@ -5,6 +5,8 @@ older_pmids = ['2655732', '320292', '7686069', '7689822', '1287655', '7683021', 
 vip_pmids = ['1255861',     # J Virol
             ]
 
+vip_nonstandard_pmids = [ '1586703' ]  #Blood
+
 pii_pmids = ['26061871',    # Clin Trans Med
             ]
 
@@ -66,6 +68,10 @@ print_urls_and_reasons_from_pmid_list(older_pmids)
 print ""
 print "vip journals:"
 print_urls_and_reasons_from_pmid_list(vip_pmids)
+
+print ""
+print "vip nonstandard journals:"
+print_urls_and_reasons_from_pmid_list(vip_nonstandard_pmids)
 
 print ""
 print "pii based journals:"
