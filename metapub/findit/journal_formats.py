@@ -1,5 +1,3 @@
-
-
 # TODO
 #
 #12035837: Can J Neurol Sci -- no URL because No URL format for Journal Can J Neurol Sci
@@ -366,10 +364,8 @@ vip_journals = {
         'Am J Clin Pathol': { 'host': 'ajcp.ascpjournals.org' },
         'Am J Hypertens': { 'host': 'ajh.oxfordjournals.org' },
         'Ann Oncol' : { 'host' : 'annonc.oxfordjournals.org' },
-        'Antimicrob Agents Chemother': { 'host': 'aac.asm.org' }, #TODO: pmid lookup strategy, e.g. http://aac.asm.org/cgi/pmidlookup?view=long&pmid=7689822
+        'Antimicrob Agents Chemother': { 'host': 'aac.asm.org' }, #TODO: backup_url: pmid lookup strategy, e.g. http://aac.asm.org/cgi/pmidlookup?view=long&pmid=7689822
         'Arterioscler Thromb Vasc Biol' : { 'host' : 'atvb.ahajournals.org' },
-        #TODO: real url is http://www.bloodjournal.org/content/bloodjournal/122/23/3844.full.pdf
-        'Blood': { 'host': 'bloodjournal.org' },
         'Brain': { 'host': 'brain.oxfordjournals.org' },
         'Breast Cancer Res' : { 'host': 'breast-cancer-research.com' },
         'Cancer Discov' : {'host': 'cancerdiscovery.aacrjournals.org' },
@@ -402,8 +398,8 @@ vip_journals = {
         'Invest Ophthalmol Vis Sci': { 'host': 'www.iovs.org' },
         'IOVS' : {'host' : 'iovs.org'},
         'J Am Soc Nephrol' : { 'host' : 'jasn.asnjournals.org' },
-        'J Bacteriol' : { 'host': 'jb.asm.org' },  #TODO: pmid lookup strategy, http://jb.asm.org/cgi/pmidlookup?view=long&pmid=7683021
-        'J Biol Chem': { 'host': 'www.jbc.org' },   #TODO pmid lookup strategy, e.g. http://www.jbc.org/cgi/pmidlookup?view=long&pmid=14722075
+        'J Bacteriol' : { 'host': 'jb.asm.org' },  #TODO: backup_url: pmid lookup strategy, http://jb.asm.org/cgi/pmidlookup?view=long&pmid=7683021
+        'J Biol Chem': { 'host': 'www.jbc.org' },   #TODO backup_url: pmid lookup strategy, e.g. http://www.jbc.org/cgi/pmidlookup?view=long&pmid=14722075
         'J Cell Biol' : {'host' : 'jcb.rupress.org'},
         'J Cell Sci' : {'host' : 'jcs.biologists.org'},
         'J Child Neurol': { 'host': 'jcn.sagepub.com'},
@@ -437,6 +433,16 @@ vip_journals = {
         'Science': { 'host': 'sciencemag.org' },
         'Thorax': { 'host': 'thorax.bmj.com' },
         }
+
+# volume-issue-page type URLs but with a nonstandard baseurl construction.
+# e.g. http://www.bloodjournal.org/content/bloodjournal/79/10/2507.full.pdf
+vip_nonstandard_format = '{baseurl}/{a.volume}/{a.issue}/{a.page}.full.pdf'
+
+# no trailing slash in baseurl (please)
+vip_journals_nonstandard = { 
+	#TODO: backup_url: pmid lookup strategy, e.g. http://www.bloodjournal.org/cgi/pmidlookup?view=long&pmid=1586703
+    'Blood': { 'baseurl': 'http://www.bloodjournal.org/content/bloodjournal' },
+    }
 
 # Science (AAAS) -- requires login "as a courtesy to the community".  Mkay.
 aaas_format = 'http://{ja}.sciencemag.org/content/{a.volume}/{a.issue}/{a.pages}.full.pdf'

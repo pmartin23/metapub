@@ -128,7 +128,15 @@ def find_article_from_pma(pma, use_crossref=True):
             url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
         else:
             # TODO: try the_doi_2step
-            reason = 'MISSING: volume and maybe also issue data missing from PubMedArticle'
+            reason = 'MISSING: vip (volume and maybe also issue data missing from PubMedArticle)'
+
+    elif jrnl in vip_journals_nonstandard.keys():
+        pma = square_voliss_data_for_pma(pma)
+        if pma.volume and pma.issue:
+            url = vip_nonstandard_format.format(baseurl=vip_journals[jrnl]['baseurl'], a=pma)
+        else:
+            # TODO: try the_doi_2step
+            reason = 'MISSING: vip (volume and maybe also issue data missing from PubMedArticle)'
 
     ##### PUBLISHER BASED LISTS #####
 
