@@ -436,7 +436,7 @@ vip_journals = {
 
 # volume-issue-page type URLs but with a nonstandard baseurl construction.
 # e.g. http://www.bloodjournal.org/content/bloodjournal/79/10/2507.full.pdf
-vip_nonstandard_format = '{baseurl}/{a.volume}/{a.issue}/{a.page}.full.pdf'
+vip_nonstandard_format = '{baseurl}/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
 
 # no trailing slash in baseurl (please)
 vip_journals_nonstandard = { 
