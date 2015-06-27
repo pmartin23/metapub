@@ -361,7 +361,6 @@ BMC_format = 'http://www.biomedcentral.com/content/pdf/{aid}.pdf'
 
 vip_format = 'http://{host}/content/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
 
-http://jb.asm.org/content/175/9/2754.full.pdf
 vip_journals = {
         'Ann Clin Biochem': { 'host': 'acb.sagepub.com' },
         'Am J Clin Pathol': { 'host': 'ajcp.ascpjournals.org' },
