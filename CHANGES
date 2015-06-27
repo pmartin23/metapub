@@ -79,3 +79,4 @@
 6/22/2015, 0.3.14.1.2, PubMedArticle: the continuing saga of datetime fixing. (Handle long month names like "December")
 6/23/2015, 0.3.14.2, Configurable "cachedir" keyword argument for CrossRef and PubMedFetcher, the latter of which also supports cachedir=None to turn off cacheing entirely.
 6/25/2015, 0.3.14.3, Consolidated cacheing and eutils client code into eutils_common. MedGenFetcher gets "cachedir" kwarg like PubMedFetcher. Improvements to PubMedArticle date parsing robustness.
+6/26/2015, 0.3.14.4, FindIt: added some high-citation-frequency journals to formats.

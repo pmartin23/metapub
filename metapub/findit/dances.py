@@ -57,7 +57,7 @@ def the_jci_polka(pma):
         starturl = the_doi_2step(pma.doi)
         starturl = starturl + '/pdf'
     else:
-        raise NoPDFLink('No pii or doi in PubMedArticle, needed for JCI link.')
+        raise NoPDFLink('MISSING: pii, doi (doi lookup failed)')
 
     # Iter 1: do this until we see it stop working. (Iter 2: scrape download link from page.)
     return starturl.replace('/pdf', '/version/1/pdf/render')
@@ -77,12 +77,12 @@ def the_sciencedirect_disco(pma):
         starturl = the_doi_2step(pma.doi)
 
     if starturl == None:
-        raise NoPDFLink('pii missing from PubMedArticle XML (needed for ScienceDirect link) AND doi lookup failed. Harsh!') 
+        raise NoPDFLink('MISSING: pii, doi (doi lookup failed)') 
 
     try:
         r = requests.get(starturl)
     except requests.exceptions.TooManyRedirects:
-        raise NoPDFLink('TooManyRedirects: cannot reach %s via %s' % (pma.journal, starturl))
+        raise NoPDFLink('TXERROR: TooManyRedirects: cannot reach %s via %s' % (pma.journal, starturl))
 
     tree = etree.fromstring(r.text, HTMLParser())
     div = tree.cssselect('div.icon_pdf')[0]
@@ -92,14 +92,14 @@ def the_sciencedirect_disco(pma):
     else:
         # give up, it's probably a "shopping cart" link.
         # TODO: parse return, raise more nuanced exceptions here.
-        raise NoPDFLink('cannot find pdf link (probably behind paywall)')
+        raise NoPDFLink('DENIED: cannot find pdf link (probably behind paywall)')
 
 def the_biomed_calypso(pma):
     baseid = pma.doi if pma.doi else pma.pii
     if baseid:
         article_id = baseid.split('/')[1]
     else:
-        raise NoPDFLink('BMC article requires doi (none extant)')
+        raise NoPDFLink('MISSING: doi needed for BMC article')
     return BMC_format.format(aid=article_id)
 
 
@@ -110,7 +110,7 @@ def the_aaas_tango(pma):
     elif pma.doi:
         pdfurl = the_doi_2step(pma.doi) + '.full.pdf'
     else:
-        raise NoPDFLink('doi lookup failed and not enough info in PubMedArticle for AAAS journal.')
+        raise NoPDFLink('MISSING: doi, vip (doi lookup failed)')
 
     response = requests.get(pdfurl)
     if response.status_code==200 and response.headers['content-type'].find('pdf') > -1:
@@ -127,13 +127,13 @@ def the_aaas_tango(pma):
         payload = { 'pass': AAAS_PASSWORD, 'name': AAAS_USERNAME, 'form_build_id': fbi, 'remember_me': 1 }
         response = requests.post(post_url, data=payload)
         if response.status_code==403:
-            return AccessDenied('AAAS subscription-only paper')
+            return AccessDenied('DENIED: AAAS subscription-only paper')
         elif response.headers['content-type'].find('pdf') > -1:
             return response.url
         elif response.headers['content-type'].find('html') > -1:
-            raise NoPDFLink('AAAS pdf download requires form navigation. URL: %s' % pdfurl)
+            raise NoPDFLink('DENIED: AAAS pdf download requires form navigation. URL: %s' % pdfurl)
     else:
-        raise NoPDFLink('AAAS returned %s for url %s' % (response.status_code, pdfurl))
+        raise NoPDFLink('TXERROR: AAAS returned %s for url %s' % (response.status_code, pdfurl))
 
 
 def the_jama_dance(pma):
@@ -150,7 +150,7 @@ def the_jama_dance(pma):
     for item in tree.findall('head/meta'):
         if item.get('name')=='citation_pdf_url':
             return item.get('content')
-    raise NoPDFLink('could not find PDF url in JAMA page (%s).' % url)
+    raise NoPDFLink('DENIED: could not find PDF url in JAMA page (%s).' % url)
 
 def the_jstage_dive(pma):
     '''  :param: pma (PubMedArticle object)
@@ -162,7 +162,7 @@ def the_jstage_dive(pma):
     if r.url.find('jstage') > -1:
         return r.url.replace('_article', '_pdf')
     else:
-        raise NoPDFLink('%s did not resolve to jstage article' % url)
+        raise NoPDFLink('TXERROR: %s did not resolve to jstage article' % url)
 
 def the_wiley_shuffle(pma):
     '''  :param: pma (PubMedArticle object)
@@ -172,11 +172,11 @@ def the_wiley_shuffle(pma):
     r = requests.get(format_templates['wiley'].format(a=pma))
     if r.headers['content-type'].find('html') > -1:
         if r.text.find('ACCESS DENIED') > -1:
-            raise AccessDenied('Wiley says ACCESS DENIED to %s' % r.url)
+            raise AccessDenied('DENIED: Wiley E Publisher says no to %s' % r.url)
 
         tree = etree.fromstring(r.text, HTMLParser())
         if tree.find('head/title').text.find('Not Found') > -1:
-            raise NoPDFLink('Wiley says File Not found (%s)' % r.url)
+            raise NoPDFLink('TXERROR: Wiley says File Not found (%s)' % r.url)
         iframe = tree.find('body/div/iframe')
         return iframe.get('src')
 
@@ -193,7 +193,7 @@ def the_lancet_tango(pma):
     if pma.doi:
         return the_doi_2step(pma.doi).replace('abstract', 'pdf').replace('article', 'pdfs')
     else:
-        raise NoPDFLink('pii missing from PubMedArticle XML and doi lookup failed. Harsh!')
+        raise NoPDFLink('MISSING: pii, doi (doi lookup failed)')
 
 def the_nature_ballet(pma):
     '''  :param: pma (PubMedArticle object)
@@ -214,16 +214,16 @@ def the_nature_ballet(pma):
             url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
         else:
             if pma.doi:
-                raise NoPDFLink('dx.doi.org resolution failed for doi %s and no pii in metadata' % pma.doi)
+                raise NoPDFLink('MISSING: pii, TXERROR: dx.doi.org resolution failed for doi %s' % pma.doi)
             else:
-                raise NoPDFLink('not enough information to compose a link for Nature (no doi or pii)')
+                raise NoPDFLink('MISSING: pii, doi')
 
     r = requests.get(url)
     if r.headers['content-type'].find('pdf') > -1:
         return r.url
     elif r.headers['content-type'].find('html') > -1:
-        raise AccessDenied('Nature denied access to %s' % r.url)
-    raise NoPDFLink('unknown problem retrieving from %s' % r.url)
+        raise AccessDenied('DENIED: Nature denied access to %s' % r.url)
+    raise NoPDFLink('TXERROR: unknown problem retrieving from %s' % r.url)
 
 paywall_reason_template = '%s behind %s paywall'  # % (journal, publisher)
 
@@ -246,12 +246,12 @@ def the_pmc_twist(pma):
         # try the other PMC.
         r = requests.get(url)
         if r.headers['content-type'].find('html') > -1:
-            raise NoPDFLink('could not get PDF url from either NIH or EuropePMC.org')
+            raise NoPDFLink('TXERROR: could not get PDF url from either NIH or EuropePMC.org')
 
     if r.headers['content-type'].find('pdf') > -1:
         return url
 
-    raise NoPDFLink('PMC download returned weird content-type %s' % r.headers['content-type'])
+    raise NoPDFLink('TXERROR: PMC download returned weird content-type %s' % r.headers['content-type'])
 
 
 def the_springer_shag(pma):
@@ -264,13 +264,13 @@ def the_springer_shag(pma):
     if pma.doi:
         baseurl = the_doi_2step(pma.doi)
     else:
-        raise NoPDFLink('not enough information to compose a link for Springer (no doi)')
+        raise NoPDFLink('MISSING: doi (doi lookup failed)')
     url = baseurl.replace('article', 'content/pdf') + '.pdf'
     r = requests.get(url)
     if not r.ok:
-        raise NoPDFLink('%i status returned from Springer url (%s)' % (r.status_code, url))
+        raise NoPDFLink('TXERROR: %i status returned from Springer url (%s)' % (r.status_code, url))
     if r.headers['content-type'].find('pdf') > -1:
         return url
     else:
-        raise AccessDenied('Springer url (%s) resulted in HTTP %i' % (url, r.status_code))
+        raise AccessDenied('DENIED: Springer url (%s) resulted in HTTP %i' % (url, r.status_code))
 

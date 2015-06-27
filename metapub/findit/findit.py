@@ -109,13 +109,13 @@ def find_article_from_pma(pma, use_crossref=True):
             reason = ''
         else:
             url = None
-            reason = 'pii missing from PubMedArticle XML (pii format)'
+            reason = 'MISSING: pii missing from PubMedArticle XML (pii format)'
 
         if url:
             r = requests.get(url)
             if r.text.find('Access Denial') > -1:
                 url = None
-                reason = 'Access Denied by ScienceDirect'
+                reason = 'DENIED: Access Denied by ScienceDirect'
 
     elif jrnl in simple_formats_doi.keys():
         if pma.doi:
@@ -128,7 +128,7 @@ def find_article_from_pma(pma, use_crossref=True):
             url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
         else:
             # TODO: try the_doi_2step
-            reason = 'volume and maybe also issue data missing from PubMedArticle'
+            reason = 'MISSING: volume and maybe also issue data missing from PubMedArticle'
 
     ##### PUBLISHER BASED LISTS #####
 
@@ -179,7 +179,7 @@ def find_article_from_pma(pma, use_crossref=True):
             url = spandidos_format.format(ja=spandidos_journals[jrnl]['ja'], a=pma)
         else:
             # TODO: try the_doi_2step
-            reason = 'volume and maybe also issue data missing from PubMedArticle'
+            reason = 'MISSING: vip - volume and maybe also issue data missing from PubMedArticle'
 
     elif jrnl in jci_journals:
         try:
@@ -194,7 +194,7 @@ def find_article_from_pma(pma, use_crossref=True):
             ja = biochemsoc_journals[jrnl]['ja']
             url = biochemsoc_format.format(a=pma, host=host, ja=ja)
         else:
-            reason = 'volume and maybe also issue data missing from PubMedArticle'
+            reason = 'MISSING: vip - volume and maybe also issue data missing from PubMedArticle'
 
     elif jrnl in nature_journals.keys():
         try:
@@ -208,8 +208,7 @@ def find_article_from_pma(pma, use_crossref=True):
             url = cell_format.format( a=pma, ja=cell_journals[jrnl]['ja'],
                     pii=pma.pii.translate(None,'-()') )
         else:
-            #reason = 'pii missing from PubMedArticle XML (%s in Cell format) and no DOI either (harsh!)' % jrnl
-            reason = 'pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
+            reason = 'MISSING: pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
 
     elif jrnl.find('Lancet') > -1:
         try:
@@ -227,14 +226,14 @@ def find_article_from_pma(pma, use_crossref=True):
         reason = 'PAYWALL: this journal has been marked as "never free" (see metapub/findit/journal_formats.py)'
 
     elif jrnl in todo_journals:
-        reason = 'TODO format -- example: %s' % todo_journals[jrnl]['example']
+        reason = 'TODO: format example: %s' % todo_journals[jrnl]['example']
 
     elif jrnl in JOURNAL_CANTDO_LIST:
         reason = 'CANTDO: this journal is in the "can\'t do" list (see metapub/findit/journal_cantdo_list.py)'
 
     # aka if url is STILL None...
     else:
-        reason = 'No URL format for Journal %s' % jrnl
+        reason = 'NOFORMAT: No URL format for Journal %s' % jrnl
 
     return (url, reason)
 
@@ -285,7 +284,7 @@ class FindIt(object):
             self.url, self.reason = find_article_from_pma(self.pma)
         except requests.exceptions.ConnectionError, e:
             self.url = None
-            self.reason = 'tx_error: %r' % e
+            self.reason = 'TXERROR: %r' % e
 
     @property
     def backup_url(self):
@@ -335,7 +334,7 @@ class FindIt(object):
             if self.use_crossref:
                 self.pma.doi, self.doi_score = PubMedArticle2doi_with_score(self.pma, min_score=self.doi_min_score)
                 if self.pma.doi == None:
-                    self.reason = 'DOI missing from PubMedArticle and CrossRef lookup failed.'
+                    self.reason = 'MISSING: DOI missing from PubMedArticle and CrossRef lookup failed.'
                 else:
                     self.doi = self.pma.doi
 
@@ -354,5 +353,4 @@ class FindIt(object):
                  'url': self.url,
                  'doi_score': self.doi_score,
                }
-
 

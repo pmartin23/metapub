@@ -124,6 +124,7 @@ sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
 sciencedirect_journals = (
     'Ann Genet',
     'Am J Pathol',
+    'Arch Biochem Biophys',
     'Arch Pediatr',
     'Blood Cells Mol Dis',
     'Biochem Biophys Res Commun' ,
@@ -191,14 +192,13 @@ jstage_journals = [
     'Drug Metab Pharmacokinet',
     'Endocr J',
     ]
-#22222243  'Nihon Shokakibyo Gakkai Zasshi',
-    
 
 # cell journals
 #cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
 cell_format = 'http://www.cell.com{ja}/pdf/{pii}.pdf'
 cell_journals = {
     'Am J Hum Genet': { 'ja': '/AJHG' },
+    'Biophys J': { 'ja': '/biophysj' },
     'Cancer Cell': { 'ja': '/cancer-cell' },
     'Cell': { 'ja': '' },
     'Cell Host Microbe': {'ja': '/cell-host-microbe' },
@@ -361,17 +361,19 @@ BMC_format = 'http://www.biomedcentral.com/content/pdf/{aid}.pdf'
 
 vip_format = 'http://{host}/content/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
 
+http://jb.asm.org/content/175/9/2754.full.pdf
 vip_journals = {
         'Ann Clin Biochem': { 'host': 'acb.sagepub.com' },
         'Am J Clin Pathol': { 'host': 'ajcp.ascpjournals.org' },
         'Am J Hypertens': { 'host': 'ajh.oxfordjournals.org' },
-        'Ann Oncol' : {'host' : 'annonc.oxfordjournals.org'},
-        'Arterioscler Thromb Vasc Biol' : {'host' : 'atvb.ahajournals.org'},
+        'Ann Oncol' : { 'host' : 'annonc.oxfordjournals.org' },
+        'Antimicrob Agents Chemother': { 'host': 'aac.asm.org' }, #TODO: pmid lookup strategy, e.g. http://aac.asm.org/cgi/pmidlookup?view=long&pmid=7689822
+        'Arterioscler Thromb Vasc Biol' : { 'host' : 'atvb.ahajournals.org' },
         #TODO: real url is http://www.bloodjournal.org/content/bloodjournal/122/23/3844.full.pdf
         'Blood': { 'host': 'bloodjournal.org' },
         'Brain': { 'host': 'brain.oxfordjournals.org' },
         'Breast Cancer Res' : { 'host': 'breast-cancer-research.com' },
-        'Cancer Discov' : {'host': 'cancerdiscovery.aacrjournals.org'},
+        'Cancer Discov' : {'host': 'cancerdiscovery.aacrjournals.org' },
         'Cancer Epidemiol Biomarkers Prev': { 'host': 'cebp.aacrjournals.org' },
         'Cancer Res': { 'host': 'cancerres.aacrjournals.org' },
         'Carcinogenesis': { 'host': 'carcin.oxfordjournals.org' } ,
@@ -400,8 +402,9 @@ vip_journals = {
         'Hypertension': { 'host': 'hyper.ahajournals.org' },
         'Invest Ophthalmol Vis Sci': { 'host': 'www.iovs.org' },
         'IOVS' : {'host' : 'iovs.org'},
-        'J Am Soc Nephrol' : {'host' : 'jasn.asnjournals.org'},
-        'J Biol Chem': { 'host': 'www.jbc.org' },   #TODO switch to pmid lookup strategy, e.g. http://www.jbc.org/cgi/pmidlookup?view=long&pmid=14722075
+        'J Am Soc Nephrol' : { 'host' : 'jasn.asnjournals.org' },
+        'J Bacteriol' : { 'host': 'jb.asm.org' },  #TODO: pmid lookup strategy, http://jb.asm.org/cgi/pmidlookup?view=long&pmid=7683021
+        'J Biol Chem': { 'host': 'www.jbc.org' },   #TODO pmid lookup strategy, e.g. http://www.jbc.org/cgi/pmidlookup?view=long&pmid=14722075
         'J Cell Biol' : {'host' : 'jcb.rupress.org'},
         'J Cell Sci' : {'host' : 'jcs.biologists.org'},
         'J Child Neurol': { 'host': 'jcn.sagepub.com'},
@@ -430,6 +433,7 @@ vip_journals = {
         'Orphanet J Rare Dis' : {'host' : 'ojrd.com'},
         'Pediatrics': {'host': 'pediatrics.aappublications.org'},
         'Proc Natl Acad Sci USA': { 'host': 'pnas.org'},
+        'Protein Eng': { 'host': 'peds.oxfordjournals.org' },
         'QJM': { 'host': 'qjmed.oxfordjournals.org'},
         'Science': { 'host': 'sciencemag.org' },
         'Thorax': { 'host': 'thorax.bmj.com' },
@@ -499,6 +503,7 @@ wiley_journals = (
     'J Gastroenterol Hepatol',
     'J Intern Med',
     'J Med Virol',
+    'J Neurochem',
     'J Orthop Res',
     'J Thromb Haemost',
     'J Pathol',
@@ -514,6 +519,7 @@ wiley_journals = (
     'Pediatr Blood Cancer',
     'Pediatr Int',
     'Prenat Diagn',
+    'Protein Sci',
     'Proteins',
     'Scand J Immunol',
     'Tissue Antigens',

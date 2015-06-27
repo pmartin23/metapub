@@ -8,5 +8,6 @@ JOURNAL_CANTDO_LIST = [
     'Nat Resour Forum',
     'Nat Law Forum',
     'Nat Resour J',
+    'Zhonghua Yi Xue Yi Chuan Xue Za Zhi',
 ]
 
