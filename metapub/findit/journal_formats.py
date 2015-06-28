@@ -162,6 +162,7 @@ sciencedirect_journals = (
     'Neurosci Res',
     'Neuroscience',
     'Neurotoxicology',
+    'Nitric Oxide',
     'Nutr Metab Cardiovasc Dis',
     'Pediatr Pulmonol',
     'Toxicol In Vitro',
