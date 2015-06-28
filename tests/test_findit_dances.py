@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import unittest
 import logging
 from metapub import FindIt
@@ -14,6 +16,23 @@ class TestFindItDances(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def test_pmc_twist(self):
+        embargoed = '25554792'      # Science / pmc-release = Jan 2, 2016 / PMC4380271
+        embargoed_url = 'http://www.sciencemag.org/content/347/6217/1258522.full.pdf'
+
+        nonembargoed = '26106273'   # Saudi Pharm / pmc-release = None / PMC4475813
+
+        source = FindIt(pmid=embargoed)
+        assert source.pma.pmc == '4380271'
+        assert source.pma.history['pmc-release'] is not None
+        assert source.url == embargoed_url
+
+        source = FindIt(pmid=nonembargoed)
+        assert source.pma.pmc == '4475813'
+        assert source.pma.history.get('pmc-release', None) is None
+        print(source.url)
+
 
     def test_aaas_tango(self):
         pmid_needs_form = '18385036'    # Sci Signal requiring form negotiation
