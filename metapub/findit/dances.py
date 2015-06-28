@@ -235,8 +235,11 @@ def the_pmc_twist(pma):
          :return: url
          :raises: NoPDFLink
     '''
+    if pma.history.get('pmc-release', None):
+        raise NoPDFLink('DENIED: pmc article in embargo until %s' % pma.history['pmc-release'].strftime('%Y-%m-%d'))
+
     url = EUROPEPMC_PDF_URL.format(a=pma)
-    # TODO: differentiate between paper embargo and URL block.
+    # TODO: check for IP based block.
     #       URL block might be discerned by grepping for this:
     #
     #   <div class="el-exception-reason">Bulk downloading of content by IP address [162.217...,</div>

@@ -81,3 +81,4 @@
 6/25/2015, 0.3.14.3, Consolidated cacheing and eutils client code into eutils_common. MedGenFetcher gets "cachedir" kwarg like PubMedFetcher. Improvements to PubMedArticle date parsing robustness.
 6/26/2015, 0.3.14.4, FindIt: standardized "reason" messages. Added some high-citation-frequency journals to formats.
 6/27/2015, 0.3.14.5, FindIt: added vip_nonstandard_format and vip_journals_nonstandard.
+6/28/2015, 0.3.14.6, FindIt: check PubMedArticle for pmc embargo date; skip the_pmc_twist if embargoed.
