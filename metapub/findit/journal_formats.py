@@ -134,6 +134,7 @@ sciencedirect_journals = (
     'FEBS Lett',
     'Eur J Cancer',
     'Eur J Med Genet',
+    'Exp Parasitol',
     'Gene',
     'Genomics',
     'Gynecol Obstet Fertil',
@@ -153,6 +154,7 @@ sciencedirect_journals = (
     'Neuromuscul Disord',
     'Neurosci Lett',
     'Pediatr Pulmonol',
+    'Trends Biochem Sci',
     'Virology',
     )
 
@@ -429,6 +431,7 @@ vip_journals = {
         'Orphanet J Rare Dis': { 'host' : 'ojrd.com' },
         'Pediatrics': { 'host': 'pediatrics.aappublications.org'},
         'Plant Cell': { 'host': 'www.plantcell.org' }, #TODO:  backup_url: pmid lookup strategy, e.g. http://www.plantcell.org/cgi/pmidlookup?view=long&pmid=9501112
+        'Plant Cell Physiol': { 'host': 'pcp.oxfordjournals.org' },
         'Proc Natl Acad Sci USA': { 'host': 'pnas.org'},
         'Protein Eng': { 'host': 'peds.oxfordjournals.org' },
         'QJM': { 'host': 'qjmed.oxfordjournals.org'},
@@ -500,6 +503,7 @@ wiley_journals = (
     'Genet Epidemiol',
     'Haemophilia',
     'Head Neck',
+    'Hepatology',
     'Hum Mutat',
     'Immunol Rev',
     'Int J Cancer',
@@ -534,6 +538,11 @@ wiley_journals = (
     'Transfusion',
     'Vox Sang',
     )
+
+#TODO: De Gruyter (publisher)
+#
+# examples:
+# 26110471 Arh Hig Rada Toksikol http://www.degruyter.com/view/j/aiht.2015.66.issue-2/aiht-2015-66-2582/aiht-2015-66-2582.xml
 
 
 # Below: Journals with really annoying paywalls guarding their precious secrets.
