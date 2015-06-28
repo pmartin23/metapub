@@ -235,6 +235,7 @@ def the_pmc_twist(pma):
          :return: url
          :raises: NoPDFLink
     '''
+    #TODO: reevaluate when FindIt has a cache function
     if pma.history.get('pmc-release', None):
         raise NoPDFLink('DENIED: pmc article in embargo until %s' % pma.history['pmc-release'].strftime('%Y-%m-%d'))
 
