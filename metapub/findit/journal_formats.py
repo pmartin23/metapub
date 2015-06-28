@@ -124,6 +124,7 @@ sciencedirect_journals = (
     'Am J Pathol',
     'Arch Biochem Biophys',
     'Arch Pediatr',
+    'Atherosclerosis',
     'Blood Cells Mol Dis',
     'Biochem Biophys Res Commun' ,
     'Biochem Pharmacol',
@@ -140,11 +141,16 @@ sciencedirect_journals = (
     'Gynecol Obstet Fertil',
     'Hepatol Res',
     'Hum Immunol',
+    'Infect Genet Evol',
     'J Am Coll Cardiol',
     'J Autoimmun',
     'J Environ Sci (China)',
     'J Mol Biol',
     'J Neurol Sci',
+    'J Reprod Immunol',
+    'J Steroid Biochem Mol Biol',
+    'J Struct Biol',
+    'Leuk Res',
     'Life Sci',
     'Mol Cell Endocrinol',
     'Mol Cell Probes',
@@ -153,9 +159,15 @@ sciencedirect_journals = (
     'Mutat Res',
     'Neuromuscul Disord',
     'Neurosci Lett',
+    'Neurosci Res',
+    'Neuroscience',
+    'Neurotoxicology',
+    'Nutr Metab Cardiovasc Dis',
     'Pediatr Pulmonol',
+    'Toxicol In Vitro',
     'Trends Biochem Sci',
     'Virology',
+    'Virus Res',
     )
 
 
@@ -486,6 +498,7 @@ wiley_journals = (
     'Br J Dermatol',
     'Br J Haematol',
     'Cancer',
+    'Cancer Sci',
     'Clin Endocrinol (Oxf)',
     'Clin Exp Dermatol',
     'Clin Genet',
@@ -503,10 +516,12 @@ wiley_journals = (
     'Genet Epidemiol',
     'Haemophilia',
     'Head Neck',
+    'Headache',
     'Hepatology',
     'Hum Mutat',
     'Immunol Rev',
     'Int J Cancer',
+    'Int J Immunogenet',
     'Int J Lab Hematol',
     'J Bone Miner Res',
     'J Dermatol',
@@ -530,6 +545,7 @@ wiley_journals = (
     'Pediatr Blood Cancer',
     'Pediatr Int',
     'Prenat Diagn',
+    'Prostate',
     'Protein Sci',
     'Proteins',
     'Scand J Immunol',
@@ -605,8 +621,10 @@ springer_journals = [
     'Immunogenetics',
     'Int J Colorectal Dis',
     'J Bone Miner Metab',
+    'J Clin Immunol',
     'J Endocrinol Invest',
     'J Inherit Metab Dis',
+    'J Neural Transm',
     'J Neurol',
     'J Mol Evol',
     'J Mol Med',
@@ -617,6 +635,7 @@ springer_journals = [
     'Ophthalmologe',
     'Osteoporos Int',
     'Pediatr Nephrol',
+    'Pharm Res',
     'Physiol Genomics',
     'Protein Cell',
     'Rheumatol Int',
@@ -626,7 +645,8 @@ springer_journals = [
 # thieme journals so far don't seem to have any open access content.
 # example links to article page: https://www.thieme-connect.com/DOI/DOI?10.1055/s-0028-1085467
 #           https://www.thieme-connect.com/DOI/DOI?10.1055/s-2007-1004566
-thieme_journals = ['Neuropediatrics', 'Semin Vasc Med', 'Exp Clin Endocrinol Diabetes']
+thieme_journals = ['Neuropediatrics', 'Semin Vasc Med', 'Exp Clin Endocrinol Diabetes',
+                    'Int J Sports Med']
 
 paywall_journals = schattauer_journals + wolterskluwer_journals + springer_journals + thieme_journals + karger_journals
 
