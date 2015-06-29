@@ -281,3 +281,24 @@ def the_springer_shag(pma):
     else:
         raise AccessDenied('DENIED: Springer url (%s) resulted in HTTP %i' % (url, r.status_code))
 
+def the_karger_conga(pma):
+    '''  :param: pma (PubMedArticle object)
+         :return: url
+         :raises: AccessDenied, NoPDFLink
+    '''
+    # example: 23970213.  doi = 10.1159/000351538
+    #       http://www.karger.com/Article/FullText/351538
+    #       http://www.karger.com/Article/Pdf/351538
+    if pma.doi:
+        baseurl = the_doi_2step(pma.doi)
+    else:
+        raise NoPDFLink('MISSING: doi (doi lookup failed)')
+    url = baseurl.replace('FullText', 'Pdf')
+    r = requests.get(url)
+    if not r.ok:
+        raise NoPDFLink('TXERROR: %i status returned from Karger url (%s)' % (r.status_code, url))
+    if r.headers['content-type'].find('pdf') > -1:
+        return url
+    else:
+        raise AccessDenied('DENIED: Karger url (%s) resulted in HTTP %i' % (url, r.status_code))
+

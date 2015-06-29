@@ -12,6 +12,9 @@ doi_pmids = ['15727972']        # Am J Public Health
 pii_pmids = ['26061871',    # Clin Trans Med
             ]
 
+karger_pmids = ['23970213'  #Ann Nutr Metab
+            ]
+
 jstage_pmids = ['11446670'] 
 
 wiley_pmids = ['14981756']
@@ -90,6 +93,10 @@ print_urls_and_reasons_from_pmid_list(biochemsoc_pmids)
 print ""
 print "Wiley E. Publisher:"
 print_urls_and_reasons_from_pmid_list(wiley_pmids)
+
+print ""
+print "karger:"
+print_urls_and_reasons_from_pmid_list(jstage_pmids)
 
 print ""
 print "jstage:"

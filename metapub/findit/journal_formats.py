@@ -433,6 +433,7 @@ vip_journals = {
         'Clin Chem': { 'host' : 'clinchem.org' },
         'Clin Infect Dis': { 'host': 'cid.oxfordjournals.org' },
         'Clin Pediatr': { 'host': 'cpj.sagepub.com' },
+        'Clin Pediatr (Phila)': { 'host': 'cpj.sagepub.com' },
         'Diabetes': { 'host': 'diabetes.diabetesjournals.org' },
         'Diabetes Care': { 'host': 'care.diabetesjournals.org' },
         'Drug Metab Dispos': { 'host': 'dmd.aspetjournals.org' },
@@ -464,12 +465,13 @@ vip_journals = {
         'J Gerontol A Biol Sci Med Sci': { 'host': 'biomedgerontology.oxfordjournals.org' },
         'J Immunol': { 'host' : 'jimmunol.org' },
         'J Infect Dis': { 'host': 'jid.oxfordjournals.org' },
-        'J Natl Cancer Inst': { 'host': 'jnci.oxfordjournals.org' },
-        'J Neurol Neurosurg Psychiatry': { 'host': 'jnnp.bmj.com' },
-        'J Neurosci': { 'host' : 'jneurosci.org'},
+        'J Lipid Res': { 'host': 'www.jlr.org' },
         'J Med Genet': { 'host': 'jmg.bmj.com' },
         'J Mol Endocrinol': { 'host': 'jme.endocrinology-journals.org' },
-        'J Lipid Res': { 'host': 'www.jlr.org' },
+        'J Natl Cancer Inst': { 'host': 'jnci.oxfordjournals.org' },
+        'J Neurol Neurosurg Psychiatry': { 'host': 'jnnp.bmj.com' },
+        'J Neurosci': { 'host' : 'jneurosci.org' },
+        'J Nutr': { 'host': 'jn.nutrition.org' }, #TODO:  backup_url: pmid lookup strategy, http://jn.nutrition.org/cgi/pmidlookup?view=long&pmid=10736367
         'J Pharmacol Exp Ther': { 'host': 'jpet.aspetjournals.org' },
         'J Virol': { 'host': 'jvi.asm.org' },
         'Mol Biol Cell': { 'host' : 'molbiolcell.org' },
@@ -484,7 +486,7 @@ vip_journals = {
         'Pediatrics': { 'host': 'pediatrics.aappublications.org'},
         'Plant Cell': { 'host': 'www.plantcell.org' }, #TODO:  backup_url: pmid lookup strategy, e.g. http://www.plantcell.org/cgi/pmidlookup?view=long&pmid=9501112
         'Plant Cell Physiol': { 'host': 'pcp.oxfordjournals.org' },
-        'Proc Natl Acad Sci USA': { 'host': 'pnas.org'},
+        'Proc Natl Acad Sci USA': { 'host': 'pnas.org' },
         'Protein Eng': { 'host': 'peds.oxfordjournals.org' },
         'QJM': { 'host': 'qjmed.oxfordjournals.org'},
         'Science': { 'host': 'sciencemag.org' },
@@ -627,6 +629,7 @@ wolterskluwer_journals = [
     'Clin Dysmorphol',
     'Curr Opin Hematol',
     'Eur J Gastroenterol Hepatol',
+    'Fam Community Health',
     'J Dev Behav Pediatr',
     'J Glaucoma',
     'J Hypertens',
@@ -645,8 +648,12 @@ wolterskluwer_journals = [
     'Psychiatr Genet',
     ]
 
+# karger: mostly paywalled, but sometimes...
+# http://www.karger.com/Article/Pdf/351538
+
 karger_journals = [
     'Acta Haematol',
+    'Ann Nutr Metab',
     'Cell Physiol Biochem',
     'Cytogenet Genome Res',
     'Dermatology (Basel)',
