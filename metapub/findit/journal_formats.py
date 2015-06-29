@@ -100,7 +100,12 @@ format_templates = {
     'jci': 'http://www.jci.org/articles/view/{a.pii}/pdf',
     }
 
+# JCI == Journal of Clinical Investigation
 jci_journals = [ 'J Clin Invest' ]
+
+# TODO: Dustri Dance
+# Dustri: see http://www.dustri.com/journals-in-english.html
+dustri_journals = ( 'Clin Nephrol', 'Int J Clin Pharmacol Ther', 'Clin Neuropathol' )
 
 # Portlan Press Biochemical Society journals: mostly VIP.
 #TODO: detect and redo urls for "early" releases, e.g.:
