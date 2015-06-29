@@ -12,6 +12,9 @@ doi_pmids = ['15727972']        # Am J Public Health
 pii_pmids = ['26061871',    # Clin Trans Med
             ]
 
+#TODO when Dustri dance is complete
+dustri_pmids = ['26042486']
+
 karger_pmids = ['23970213'  #Ann Nutr Metab
             ]
 

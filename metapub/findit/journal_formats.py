@@ -314,11 +314,17 @@ simple_formats_pmid = {
 
 
 # simple formats are used for URLs that can be deduced from PubMedArticle XML
+#       
+#       !ACHTUNG!  informa has been known to block IPs for the capital offense of 
+#                  having "More than 25 sessions created in 5 minutes"
+#
 simple_formats_doi = {
     'Acta Oncol': format_templates['informa'],
     'Ann Hum Biol': format_templates['informa'],
     'Hemoglobin': format_templates['informa'],
+    'J Matern Fetal Neonatal Med': format_templates['informa'],
     'Platelets': format_templates['informa'],
+    'Ren Fail': format_templates['informa'],
     'Xenobiotica': format_templates['informa'],
 
     'Am J Public Health': 'http://ajph.aphapublications.org/doi/pdf/{a.doi}',
@@ -328,6 +334,7 @@ simple_formats_doi = {
 
     'Anal Chem': format_templates['acs'],
     'Biochemistry': format_templates['acs'],
+    'J Am Chem Soc': format_templates['acs'],
 
     'Child Obes': format_templates['liebert'],
     'Genet Test': format_templates['liebert'],
@@ -568,6 +575,7 @@ wiley_journals = (
     'Head Neck',
     'Headache',
     'Hepatology',
+    'Hum Brain Mapp',
     'Hum Mutat',
     'Immunol Rev',
     'Int J Cancer',
@@ -719,6 +727,8 @@ springer_journals = [
     'Physiol Genomics',
     'Protein Cell',
     'Rheumatol Int',
+    'Tumour Biol',
+    'Virchows Arch',
     'World J Surg',
     ]
 

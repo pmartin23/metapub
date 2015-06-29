@@ -10,7 +10,7 @@ SAMPLE_PMIDS = { 'embargoed': [ '25575644', '25700512', '25554792', '25146281', 
 def print_url_and_reasons_from_pmid_list(pmids, listname='LIST'):
     print('@@@', listname)
     for pmid in pmids:
-        source = FindIt(pmid=pmid)
+        source = FindIt(pmid=pmid, use_nih=True)
         embdate = source.pma.history.get('pmc-release', None)
         print('\t', source.pmid, source.pma.journal, 'PMC id = ', source.pma.pmc, ' pmc-release = %r' % embdate) 
 
