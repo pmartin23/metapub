@@ -1,7 +1,11 @@
 # TODO
 #
 #12035837: Can J Neurol Sci -- no URL because No URL format for Journal Can J Neurol Sci
+#       ???
+
 #12036192: Clin. Nephrol. -- no URL because No URL format for Journal Clin Nephrol
+#       http://www.dustri.com/uploads/repository/21/1239843263_CN83_suppl_01_090.pdf
+
 #12037434: Eur. Neurol. -- no URL because No URL format for Journal Eur Neurol
 #12055472: Retina (Philadelphia, Pa.) -- no URL because No URL format for Journal Retina (Philadelphia, Pa)
 #12063046: Jpn. J. Ophthalmol. -- no URL because No URL format for Journal Jpn J Ophthalmol
@@ -20,10 +24,7 @@
 #12173465: Mol. Biol. (Mosk.) -- no URL because No URL format for Journal Mol Biol (Mosk)
 #12173720: Mayo Clin. Proc. -- no URL because No URL format for Journal Mayo Clin Proc
 #12202459: Endocr. Rev. -- no URL because No URL format for Journal Endocr Rev
-#12199334: J. Pediatr. Endocrinol. Metab. -- no URL because No URL format for Journal J Pediatr Endocrinol Metab
-#12199344: J. Pediatr. Endocrinol. Metab. -- no URL because No URL format for Journal J Pediatr Endocrinol Metab
 #12087194: Genes Genet. Syst. -- no URL because No URL format for Journal Genes Genet Syst
-#12064832: J. Rheumatol. -- no URL because No URL format for Journal J Rheumatol
 #12049533: Arch Surg -- no URL because No URL format for Journal Arch Surg
 #10458450: J. Urol. -- no URL because No URL format for Journal J Urol
 #10458483: Tohoku J. Exp. Med. -- no URL because No URL format for Journal Tohoku J Exp Med
@@ -473,6 +474,7 @@ vip_journals = {
         'J Neurosci': { 'host' : 'jneurosci.org' },
         'J Nutr': { 'host': 'jn.nutrition.org' }, #TODO:  backup_url: pmid lookup strategy, http://jn.nutrition.org/cgi/pmidlookup?view=long&pmid=10736367
         'J Pharmacol Exp Ther': { 'host': 'jpet.aspetjournals.org' },
+        'J Rheumatol': { 'host': 'www.jrheum.org' },
         'J Virol': { 'host': 'jvi.asm.org' },
         'Mol Biol Cell': { 'host' : 'molbiolcell.org' },
         'Mol Cell Biol': { 'host': 'mcb.asm.org' },
@@ -583,6 +585,7 @@ wiley_journals = (
     'Med Educ',
     'Mol Carcinog',
     'Mol Microbiol',
+    'Mol Plant Pathol',
     'Mov Disord',
     'Muscle Nerve',
     'Neuropathol Appl Neurobiol',
@@ -607,6 +610,14 @@ wiley_journals = (
 #
 # examples:
 # 26110471 Arh Hig Rada Toksikol http://www.degruyter.com/view/j/aiht.2015.66.issue-2/aiht-2015-66-2582/aiht-2015-66-2582.xml
+#12199334: J. Pediatr. Endocrinol. Metab. -- no URL because No URL format for Journal J Pediatr Endocrinol Metab
+#12199344: J. Pediatr. Endocrinol. Metab. -- no URL because No URL format for Journal J Pediatr Endocrinol Metab
+#
+# load by dx.doi.org: http://dx.doi.org/10.2478/cdth-2014-0001
+#       --> http://www.degruyter.com/view/j/cdth.2014.1.issue-1/cdth-2014-0001/cdth-2014-0001.xml
+#   PDF --> http://www.degruyter.com/dg/viewarticle.fullcontentlink:pdfeventlink/$002fj$002fcdth.2014.1.issue-1$002fcdth-2014-0001$002fcdth-2014-0001.pdf?t:ac=j$002fcdth.2014.1.issue-1$002fcdth-2014-0001$002fcdth-2014-0001.xml
+#
+#
 
 #TODO: Taylor & Francis (publisher)
 #

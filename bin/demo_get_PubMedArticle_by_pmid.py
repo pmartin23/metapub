@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys
 
 from metapub import PubMedFetcher
@@ -17,59 +19,59 @@ logging.getLogger("eutils").setLevel(logging.WARNING)
 try:
     pmid = sys.argv[1]
 except IndexError:
-    print "Supply a pubmed ID as the argument to this script."
-    print ""
-    print "Example: python demo_pubmed.py 123456"
+    print('Supply a pubmed ID as the argument to this script.')
+    print('')
+    print('Example: python demo_pubmed.py 123456')
     sys.exit()
 
-fetch = PubMedFetcher()
+article = PubMedFetcher().article_by_pmid(pmid)
 
-article = fetch.article_by_pmid(pmid)
-print ''
-print article.pmid, article.title
-print ''
-print 'authors: %s' % ','.join(article.authors)
-print 'journal: %s' % article.journal
-print ''
+print('')
+print(article.pmid, article.title)
+print('')
+print('authors: %s' % ','.join(article.authors))
+print('journal: %s' % article.journal)
+print('')
 excerpt = '(empty)' if article.abstract is None else article.abstract[:100] + '[...]'
-print 'abstract: %s' % excerpt
-print ''
-print 'pii: '+str(article.pii)
-print 'doi: '+str(article.doi)
-print 'pmc: '+str(article.pmc)
-print 'volume: '+str(article.volume)
-print 'issue: '+str(article.issue)
-print 'pages: '+str(article.pages)
-print 'year: '+str(article.year)
-print ''
-print 'MeSH headings: '
+print('abstract: %s' % excerpt)
+print('')
+print('pii:',str(article.pii))
+print('doi:',str(article.doi))
+print('pmc:',str(article.pmc))
+print('volume:',str(article.volume))
+print('issue:',str(article.issue))
+print('pages:',str(article.pages))
+print('year:',str(article.year))
+print('')
+print('MeSH headings: ')
 for DUI in article.mesh.keys():
-    print '\t', DUI, article.mesh[DUI]['descriptor_name'], article.mesh.get('qualifier_name', '')
+    print('\t', DUI, article.mesh[DUI]['descriptor_name'], article.mesh.get('qualifier_name', ''))
 
 if article.publication_types:
-    print '\nPublication Type Information'
+    print('\nPublication Type Information')
     for pt in article.publication_types.keys():
-        print '\t', pt, article.publication_types[pt]
+        print('\t', pt, article.publication_types[pt])
 
 if article.chemicals:
-    print '\nChemical List'
+    print('\nChemical List')
     for DUI in article.chemicals.keys():
-        print '\t', DUI, article.chemicals[DUI]['substance_name']
+        print('\t', DUI, article.chemicals[DUI]['substance_name'])
 
 if article.grants:
-    print '\nGrant Information'
+    print('\nGrant Information')
     for gr in grants:
-        print '\t', gr
+        print('\t', gr)
 
 if article.history:
-    print '\nArticle History'
+    print('\nArticle History')
     for hist in article.history:
-        print '\t', hist, article.history[hist]
+        print('\t', hist, article.history[hist])
 
-#print article.xmlstr
-print ''
+print('')
 
+print('FindIt results:')
 source = FindIt(pmid=pmid)
-print source.url
-print source.backup_url
-
+print('\tdoi:', source.doi)
+print('\turl:', source.url)
+print('\tbackup:', source.backup_url)
+print('\treason:', source.reason)

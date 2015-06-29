@@ -96,7 +96,7 @@ print_urls_and_reasons_from_pmid_list(wiley_pmids)
 
 print ""
 print "karger:"
-print_urls_and_reasons_from_pmid_list(jstage_pmids)
+print_urls_and_reasons_from_pmid_list(karger_pmids)
 
 print ""
 print "jstage:"
