@@ -244,6 +244,12 @@ def find_article_from_pma(pma, use_crossref=True, use_nih=False):
         except Exception, e:
             reason = str(e)
 
+    elif jrnl in karger_journals:
+        try:
+            url = the_karger_conga(pma)
+        except Exception, e:
+            reason = str(e)
+
     elif jrnl in paywall_journals:
         reason = 'PAYWALL: this journal has been marked as "never free" (see metapub/findit/journal_formats.py)'
 

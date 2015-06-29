@@ -714,7 +714,7 @@ thieme_journals = ['Neuropediatrics', 'Semin Vasc Med', 'Exp Clin Endocrinol Dia
 
 weird_paywall_publishers = ['J Ment Health Policy Econ' ]
 
-paywall_journals = schattauer_journals + wolterskluwer_journals + thieme_journals + karger_journals + weird_paywall_publishers
+paywall_journals = schattauer_journals + wolterskluwer_journals + thieme_journals + weird_paywall_publishers
 
 
 #All in PMC (no need to write formats for):
