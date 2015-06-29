@@ -160,7 +160,7 @@ class PubMedFetcher(Borg):
         if query.find('[') == -1 and not kwargs.get('clinical_query', False):
             # if this query is surrounded in quotation marks, consider it an "exact match" 
             # search against "ALL" fields. Otherwise, leave it untouched.
-            if query[0] in ['"', "'"]:
+            if query and query[0] in ['"', "'"]:
                 q['ALL'] = query.replace('"', '').replace("'", '')
 
         # Search within date range (since / until)
