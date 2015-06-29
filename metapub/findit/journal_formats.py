@@ -510,6 +510,7 @@ vip_journals = {
 # volume-issue-page type URLs but with a nonstandard baseurl construction.
 # e.g. Blood: http://www.bloodjournal.org/content/bloodjournal/79/10/2507.full.pdf
 #      BMJ:   http://www.bmj.com/content/bmj/350/bmj.h3317.full.pdf
+#      Thorax: http://thorax.bmj.com/content/early/2015/06/23/thoraxjnl-2015-207199.full.pdf+html
 
 # no trailing slash in baseurl (please)
 vip_journals_nonstandard = { 
