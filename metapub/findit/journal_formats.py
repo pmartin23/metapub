@@ -54,7 +54,11 @@
 #12032748: Int. J. Obes. Relat. Metab. Disord. -- no URL because No URL format for Journal Int J Obes Relat Metab Disord
 
 
-doi2step_journals = [ 'Nat Nanotechnol' ]
+#TODO: journals whose articles can best be accessed by loading up via dx.doi.org
+#       and then doing some text replacement on the URL.
+doi2step_journals = [ 
+                      'J Public Health Policy'  # ex. http://www.palgrave-journals.com/jphp/journal/v36/n2/pdf/jphp201453a.pdf
+                    ]
 
 
 todo_journals = {
@@ -69,6 +73,7 @@ todo_journals = {
     'Rev Port Cardiol': { 'example': '16335287: http://www.spc.pt/DL/RPC/artigos/74.pdf' },
     'World J Gastroenterol': { 'example': 'http://www.wjgnet.com/1007-9327/full/v11/i48/7690.htm --> http://www.wjgnet.com/1007-9327/pdf/v11/i48/7690.pdf' },
     'Genet Mol Res': { 'example': '24668667: http://www.geneticsmr.com/articles/2992 --> http://www.geneticsmr.com//year2014/vol13-1/pdf/gmr2764.pdf' },
+    'Arq Bras Cardiol': { 'example': '20944894: http://www.scielo.br/pdf/abc/v95n5/en_aop13210.pdf' },
     'Arq Bras Endocrinol Metabol': { 'example': '15611820: http://www.scielo.br/pdf/abem/v48n1/19521.pdf' },
     'Neoplasma': { 'example': '17319787: http://www.elis.sk/download_file.php?product_id=1006&session_id=skl2f3grcd19ebnie17u15a571' },
     'Clinics (Sao Paulo)': { 'example': '17823699: http://www.scielo.br/scielo.php?script=sci_arttext&pid=S1807-59322007000400003' },
@@ -77,6 +82,8 @@ todo_journals = {
     'Nat Prod Commun': {'example': '19634325 (no direct link found yet) -- http://www.naturalproduct.us/' },
     'Oncotarget': {'example': '26008984 (pii = 3900) --> http://www.impactjournals.com/oncotarget/index.php?journal=oncotarget&page=article&op=view&path=3900' },
     'Clin Ter': {'example': '25756258 --> dx.doi.org/10.7417/CT.2015.1799 --> parse page to get PDF' },
+    'J Pediatr (Rio J)': { 'example': '17102902 --> dx.doi.org/10.2223/JPED.1550 --> http://www.jped.com.br/conteudo/06-82-06-437/port.pdf' },
+    'Teach Learn Med': { 'example': '17144842 --> dx.doi.org/10.1207/s15328015tlm1804_13 --> pdf link?' },
     }
 
 
@@ -122,6 +129,9 @@ sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
 sciencedirect_journals = (
     'Ann Genet',
     'Am J Pathol',
+    'Am J Prev Med',
+    'Ambul Pediatr',
+    'Appetite',
     'Arch Biochem Biophys',
     'Arch Pediatr',
     'Atherosclerosis',
@@ -130,8 +140,12 @@ sciencedirect_journals = (
     'Biochem Pharmacol',
     'Biochim Biophys Acta',
     'Br J Oral Maxillofac Surg',
+    'Child Abuse Negl',
     'Clin Chim Acta',
     'Clin Immunol',
+    'Contemp Clin Trials',
+    'Crit Care Clin',
+    'Fam Pract',
     'FEBS Lett',
     'Eur J Cancer',
     'Eur J Med Genet',
@@ -142,14 +156,21 @@ sciencedirect_journals = (
     'Hepatol Res',
     'Hum Immunol',
     'Infect Genet Evol',
+    'J Acad Nutr Diet',
     'J Am Coll Cardiol',
+    'J Am Diet Assoc',
+    'J Adolesc Health',
     'J Autoimmun',
     'J Environ Sci (China)',
+    'J Health Econ',
     'J Mol Biol',
     'J Neurol Sci',
+    'J Pediatr',
+    'J Pediatr Health Care',
     'J Reprod Immunol',
     'J Steroid Biochem Mol Biol',
     'J Struct Biol',
+    'J Urol',
     'Leuk Res',
     'Life Sci',
     'Mol Cell Endocrinol',
@@ -164,7 +185,11 @@ sciencedirect_journals = (
     'Neurotoxicology',
     'Nitric Oxide',
     'Nutr Metab Cardiovasc Dis',
+    'Patient Educ Couns',
+    'Pediatr Nurs',
     'Pediatr Pulmonol',
+    'Sci Total Environ',
+    'Soc Sci Med',
     'Toxicol In Vitro',
     'Trends Biochem Sci',
     'Virology',
@@ -230,6 +255,7 @@ cell_journals = {
 # nature journals -- COMPLETE
 nature_format = 'http://www.nature.com/{ja}/journal/v{a.volume}/n{a.issue}/pdf/{a.pii}.pdf'
 nature_journals = {
+    'Eur J Clin Nutr': { 'ja': 'ejcn' },
     'Eur J Hum Genet': { 'ja': 'ejhg' },
     'Eye (Lond)': { 'ja': 'eye' },
     'Genes Immun': { 'ja': 'gene' },
@@ -252,6 +278,7 @@ nature_journals = {
     'Nat Clin Pract Rheumatol': { 'ja': 'nrrheum' },
     'Nat Genet': { 'ja': 'ng' },
     'Nat Commun': {'ja': 'ncomms' },
+    'Nat Nanotechnol': { 'ja': 'nnano' },
     'Nat Neurosci': { 'ja': 'neuro' },
     'Nat Mater': { 'ja': 'nmat' },
     'Nat Med': { 'ja': 'nm' },
@@ -267,20 +294,28 @@ nature_journals = {
     'Nat Rev Neurol': { 'ja': 'nrneurol' },
     'Nat Rev Rheumatol': { 'ja': 'nrrheum' },
     'Nat Rev Urol': { 'ja': 'nrurol' },
-    'Nature reviews Immunology': { 'ja': 'nri' },
+    'Nat Rev Immunol': { 'ja': 'nri' },
     'Neuropsychopharmacology': { 'ja': 'npp' },
     'Oncogene': { 'ja': 'onc' },
     'Pediatr Res': { 'ja': 'pr' },
     }
 
 
+# simple_formats_pmid: links to PDFs that can be constructed using the pubmed ID
+simple_formats_pmid = {
+    'Medicina (B Aires)': 'http://www.medicinabuenosaires.com/PMID/{pmid}.pdf',
+    }
+
 
 # simple formats are used for URLs that can be deduced from PubMedArticle XML
 simple_formats_doi = {
     'Acta Oncol': format_templates['informa'],
+    'Ann Hum Biol': format_templates['informa'],
     'Hemoglobin': format_templates['informa'],
     'Platelets': format_templates['informa'],
     'Xenobiotica': format_templates['informa'],
+
+    'Am J Public Health': 'http://ajph.aphapublications.org/doi/pdf/{a.doi}',
 
     'Am J Respir Cell Mol Biol': format_templates['ats'],
     'Am J Respir Crit Care Med': format_templates['ats'],
@@ -288,6 +323,7 @@ simple_formats_doi = {
     'Anal Chem': format_templates['acs'],
     'Biochemistry': format_templates['acs'],
 
+    'Child Obes': format_templates['liebert'],
     'Genet Test': format_templates['liebert'],
     'Genet Test Mol Biomarkers': format_templates['liebert'],
     'Thyroid': format_templates['liebert'],
@@ -386,6 +422,7 @@ vip_journals = {
         'Cancer Discov': { 'host': 'cancerdiscovery.aacrjournals.org' },
         'Cancer Epidemiol Biomarkers Prev': { 'host': 'cebp.aacrjournals.org' },
         'Cancer Res': { 'host': 'cancerres.aacrjournals.org' },
+        'Can Fam Physician': { 'host': 'www.cfp.ca' }, #TODO: backup_url: pmid lookup strategy, e.g. http://www.cfp.ca/cgi/pmidlookup?view=long&pmid=19282532
         'Carcinogenesis': { 'host': 'carcin.oxfordjournals.org' } ,
         'Cardiovasc Res': { 'host' : 'cardiovascres.oxfordjournals.org' },
         'Circulation': { 'host': 'circ.ahajournals.org' },
@@ -395,6 +432,7 @@ vip_journals = {
         'Clin Cancer Res': { 'host' : 'clincancerres.aacrjournals.org' },
         'Clin Chem': { 'host' : 'clinchem.org' },
         'Clin Infect Dis': { 'host': 'cid.oxfordjournals.org' },
+        'Clin Pediatr': { 'host': 'cpj.sagepub.com' },
         'Diabetes': { 'host': 'diabetes.diabetesjournals.org' },
         'Diabetes Care': { 'host': 'care.diabetesjournals.org' },
         'Drug Metab Dispos': { 'host': 'dmd.aspetjournals.org' },
@@ -413,6 +451,7 @@ vip_journals = {
         'Hypertension': { 'host': 'hyper.ahajournals.org' },
         'Invest Ophthalmol Vis Sci': { 'host': 'www.iovs.org' },
         'IOVS': { 'host' : 'iovs.org' },
+        'J Aging Health': { 'host': 'jah.sagepub.com' }, ##TODO: backup_url: pmid lookup strategy, http://jah.sagepub.com/cgi/pmidlookup?view=long&pmid=20056814
         'J Am Soc Nephrol': { 'host' : 'jasn.asnjournals.org' },
         'J Bacteriol': { 'host': 'jb.asm.org' },  #TODO: backup_url: pmid lookup strategy, http://jb.asm.org/cgi/pmidlookup?view=long&pmid=7683021
         'J Biol Chem': { 'host': 'www.jbc.org' },   #TODO backup_url: pmid lookup strategy, e.g. http://www.jbc.org/cgi/pmidlookup?view=long&pmid=14722075
@@ -453,13 +492,14 @@ vip_journals = {
         }
 
 # volume-issue-page type URLs but with a nonstandard baseurl construction.
-# e.g. http://www.bloodjournal.org/content/bloodjournal/79/10/2507.full.pdf
-vip_nonstandard_format = '{baseurl}/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
+# e.g. Blood: http://www.bloodjournal.org/content/bloodjournal/79/10/2507.full.pdf
+#      BMJ:   http://www.bmj.com/content/bmj/350/bmj.h3317.full.pdf
 
 # no trailing slash in baseurl (please)
 vip_journals_nonstandard = { 
 	#TODO: backup_url: pmid lookup strategy, e.g. http://www.bloodjournal.org/cgi/pmidlookup?view=long&pmid=1586703
-    'Blood': { 'baseurl': 'http://www.bloodjournal.org/content/bloodjournal' },
+    'Blood': 'http://www.bloodjournal.org/content/bloodjournal/{a.volume}/{a.issue}/{a.first_page}.full.pdf',
+    'BMJ':   'http://www.bmj.com/content/bmj/{a.volume}/bmj.{a.first_page}.full.pdf', 
     }
 
 # Science (AAAS) -- requires login "as a courtesy to the community".  Mkay.
@@ -524,6 +564,7 @@ wiley_journals = (
     'Int J Cancer',
     'Int J Immunogenet',
     'Int J Lab Hematol',
+    'J Am Assoc Nurse Pract',
     'J Bone Miner Res',
     'J Dermatol',
     'J Eur Acad Dermatol Venereol',
@@ -532,8 +573,10 @@ wiley_journals = (
     'J Med Virol',
     'J Neurochem',
     'J Orthop Res',
-    'J Thromb Haemost',
     'J Pathol',
+    'J Rural Health',
+    'J Sch Health',
+    'J Thromb Haemost',
     'J Viral Hepat',
     'Med Educ',
     'Mol Carcinog',
@@ -542,8 +585,10 @@ wiley_journals = (
     'Muscle Nerve',
     'Neuropathol Appl Neurobiol',
     'Nihon Shokakibyo Gakkai Zasshi',
+    'Obesity (Silver Spring)',
     'Pain Med',
     'Pediatr Blood Cancer',
+    'Pediatr Diabetes',
     'Pediatr Int',
     'Prenat Diagn',
     'Prostate',
@@ -561,6 +606,12 @@ wiley_journals = (
 # examples:
 # 26110471 Arh Hig Rada Toksikol http://www.degruyter.com/view/j/aiht.2015.66.issue-2/aiht-2015-66-2582/aiht-2015-66-2582.xml
 
+#TODO: Taylor & Francis (publisher)
+#
+# e.g. 25121990: http://www.tandfonline.com/doi/pdf/10.1080/10410236.2014.943634
+taylorfrancis_journals = ( 
+        'Health Commun',
+        )
 
 # Below: Journals with really annoying paywalls guarding their precious secrets.
 schattauer_journals = [
@@ -576,14 +627,17 @@ wolterskluwer_journals = [
     'Clin Dysmorphol',
     'Curr Opin Hematol',
     'Eur J Gastroenterol Hepatol',
+    'J Dev Behav Pediatr',
+    'J Glaucoma',
     'J Hypertens',
     'J Investig Med',
-    'J Glaucoma',
     'J Pediatr Hematol Oncol',
     'J Pediatr Gastroenterol Nutr',
+    'J Trauma',
     'Medicine (Baltimore)',
     'Neuroreport',
     'Obstet Gynecol',
+    'Pediatr Emerg Care',
     'Pediatr Infect Dis J',
     'Pharmacogenet Genomics',
     'Pharmacogenetics',
@@ -615,6 +669,7 @@ springer_journals = [
     'Cell Mol Neurobiol',
     'Diabetologia',
     'Eur J Pediatr',
+    'Eur J Nutr',
     'Fam Cancer',
     'Graefes Arch Clin Exp Ophthalmol',
     'HNO',
@@ -631,6 +686,7 @@ springer_journals = [
     'J Mol Med',
     'J Mol Med (Berl)',
     'J Mol Neurosci',
+    'Matern Child Health J',
     'Mod Rheumatol',
     'Neurogenetics',
     'Ophthalmologe',
@@ -649,7 +705,9 @@ springer_journals = [
 thieme_journals = ['Neuropediatrics', 'Semin Vasc Med', 'Exp Clin Endocrinol Diabetes',
                     'Int J Sports Med']
 
-paywall_journals = schattauer_journals + wolterskluwer_journals + springer_journals + thieme_journals + karger_journals
+weird_paywall_publishers = ['J Ment Health Policy Econ' ]
+
+paywall_journals = schattauer_journals + wolterskluwer_journals + thieme_journals + karger_journals + weird_paywall_publishers
 
 
 #All in PMC (no need to write formats for):

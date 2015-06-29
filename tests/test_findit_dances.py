@@ -19,7 +19,7 @@ class TestFindItDances(unittest.TestCase):
 
     def test_pmc_twist(self):
         embargoed = '25554792'      # Science / pmc-release = Jan 2, 2016 / PMC4380271
-        embargoed_url = 'http://www.sciencemag.org/content/347/6217/1258522.full.pdf'
+        embargoed_url = 'http://sciencemag.org/content/347/6217/1258522.full.pdf'
 
         nonembargoed = '26106273'   # Saudi Pharm / pmc-release = None / PMC4475813
 
@@ -38,7 +38,7 @@ class TestFindItDances(unittest.TestCase):
         pmid_needs_form = '18385036'    # Sci Signal requiring form negotiation
         pmid_needs_form_url = 'http://stke.sciencemag.org/content/1/13/eg3.full.pdf'
         pmid_no_form = '25678633'       # Science 
-        pmid_no_form_url = 'http://www.sciencemag.org/content/347/6223/695.full.pdf'
+        pmid_no_form_url = 'http://sciencemag.org/content/347/6223/695.full.pdf'
 
         source = FindIt(pmid=pmid_no_form)
         assert source.url == pmid_no_form_url

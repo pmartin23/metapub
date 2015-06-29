@@ -63,7 +63,7 @@ from .journal_cantdo_list import JOURNAL_CANTDO_LIST
 
 fetch = PubMedFetcher()
 
-def find_article_from_pma(pma, use_crossref=True):
+def find_article_from_pma(pma, use_crossref=True, use_nih=False):
     '''The real workhorse of FindIt.
 
         Based on the contents of the supplied PubMedArticle object, this function
@@ -79,8 +79,13 @@ def find_article_from_pma(pma, use_crossref=True):
             "No URL format for Journal %s"
             "TODO format"
 
+        Optional params:
+            use_crossref -- look up DOIs using CrossRef (recommended)
+            use_nih      -- source PubmedCentral articles from nih.gov (NOT recommended)
+
         :param: (pma PubMedArticle object) 
         :param: use_crossref (bool) default: True
+        :param: use_nih (bool) default: False
         :return: (url, reason)
     '''
     reason = None
@@ -92,9 +97,11 @@ def find_article_from_pma(pma, use_crossref=True):
 
     ##### Pubmed Central: ideally we get the article from PMC if it has a PMC id.
     #
-    #   If we can't get it this way, it may be that the paper is temporarily 
-    #   embargoed.  In that case, we may be able to fall back on retrieval from
-    #   a publisher link.
+    #   Note: we're using europepmc.org rather than nih.gov (see the_pmc_twist function).
+    #
+    #   If we can't get the article from a PMC site, it may be that the paper is 
+    #   temporarily embargoed.  In that case, we may be able to fall back on retrieval 
+    #   from a publisher link.
 
     if pma.pmc:
         try:
@@ -117,6 +124,10 @@ def find_article_from_pma(pma, use_crossref=True):
                 url = None
                 reason = 'DENIED: Access Denied by ScienceDirect'
 
+    elif jrnl in simple_formats_pmid.keys():
+        url = simple_formats_pmid[jrnl].format(pmid=pmid)
+        return (url, None)
+
     elif jrnl in simple_formats_doi.keys():
         if pma.doi:
             url = simple_formats_doi[jrnl].format(a=pma)
@@ -132,11 +143,14 @@ def find_article_from_pma(pma, use_crossref=True):
 
     elif jrnl in vip_journals_nonstandard.keys():
         pma = square_voliss_data_for_pma(pma)
-        if pma.volume and pma.issue:
-            url = vip_nonstandard_format.format(baseurl=vip_journals_nonstandard[jrnl]['baseurl'], a=pma)
-        else:
+        url = vip_journals_nonstandard[jrnl].format(a=pma)
+        if url.find('None') > -1:
             # TODO: try the_doi_2step
-            reason = 'MISSING: vip (volume and maybe also issue data missing from PubMedArticle)'
+            reason = 'MISSING: vip (volume or issue or page data missing from PubMedArticle)'
+            url = None
+
+    if url:
+        return (url, reason)
 
     ##### PUBLISHER BASED LISTS #####
 
@@ -246,7 +260,7 @@ def find_article_from_pma(pma, use_crossref=True):
     return (url, reason)
 
 
-def find_article_from_doi(doi):
+def find_article_from_doi(doi, use_nih=False):
     '''pull a PubMedArticle based on CrossRef lookup (using doi2pmid),
     then run it through find_article_from_pma.
 
@@ -254,7 +268,7 @@ def find_article_from_doi(doi):
         :return: (url, reason)
     '''
     pma = fetch.article_by_pmid(doi2pmid(doi))
-    return find_article_from_pma(pma)
+    return find_article_from_pma(pma, use_nih=use_nih)
 
 
 class FindIt(object):
@@ -274,6 +288,7 @@ class FindIt(object):
         self.doi = kwargs.get('doi', None)
         self.url = kwargs.get('url', None)
         self.reason = None
+        self.use_nih = kwargs.get('use_nih', False)
         self.use_crossref = kwargs.get('use_crossref', True)
         self.doi_min_score = kwargs.get('doi_min_score', 2.3)
         self.tmpdir = kwargs.get('tmpdir', '/tmp')
@@ -289,7 +304,7 @@ class FindIt(object):
             raise MetaPubError('Supply either a pmid or a doi to instantiate. e.g. FindIt(pmid=1234567)')
 
         try:
-            self.url, self.reason = find_article_from_pma(self.pma)
+            self.url, self.reason = find_article_from_pma(self.pma, use_nih=self.use_nih)
         except requests.exceptions.ConnectionError, e:
             self.url = None
             self.reason = 'TXERROR: %r' % e

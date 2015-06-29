@@ -7,6 +7,8 @@ vip_pmids = ['1255861',     # J Virol
 
 vip_nonstandard_pmids = [ '1586703' ]  #Blood
 
+doi_pmids = ['15727972']        # Am J Public Health
+
 pii_pmids = ['26061871',    # Clin Trans Med
             ]
 
@@ -62,8 +64,8 @@ def print_urls_and_reasons_from_pmid_list(pmids):
             print "Backup URL: ", pmid, source.backup_url
 
 print ""
-print "older articles:"
-print_urls_and_reasons_from_pmid_list(older_pmids)
+print "doi journals:"
+print_urls_and_reasons_from_pmid_list(doi_pmids)
 
 print ""
 print "vip journals:"
@@ -112,4 +114,8 @@ print_urls_and_reasons_from_pmid_list(JAMA_pmids)
 print ""
 print "Lancet:"
 print_urls_and_reasons_from_pmid_list(Lancet_pmids)
+
+print ""
+print "older articles:"
+print_urls_and_reasons_from_pmid_list(older_pmids)
 

@@ -230,7 +230,7 @@ paywall_reason_template = '%s behind %s paywall'  # % (journal, publisher)
 
 PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 EUROPEPMC_PDF_URL = 'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC{a.pmc}&blobtype=pdf'
-def the_pmc_twist(pma):
+def the_pmc_twist(pma, USE_NIH=True):
     '''  :param: pma (PubMedArticle object)
          :return: url
          :raises: NoPDFLink
@@ -247,10 +247,13 @@ def the_pmc_twist(pma):
     r = requests.get(url)
     if r.headers['content-type'].find('html') > -1:
         url = PMC_PDF_URL.format(a=pma)
-        # try the other PMC.
-        r = requests.get(url)
-        if r.headers['content-type'].find('html') > -1:
-            raise NoPDFLink('TXERROR: could not get PDF url from either NIH or EuropePMC.org')
+        if use_nlm:
+            # try the other PMC.
+            r = requests.get(url)
+            if r.headers['content-type'].find('html') > -1:
+                raise NoPDFLink('TXERROR: could not get PDF url from either NIH or EuropePMC.org')
+        else:
+            raise NoPDFLink('TXERROR: could not get PDF from EuropePMC.org and USE_NIH set to False')
 
     if r.headers['content-type'].find('pdf') > -1:
         return url

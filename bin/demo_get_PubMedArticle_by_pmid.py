@@ -1,6 +1,7 @@
 import sys
 
 from metapub import PubMedFetcher
+from metapub import FindIt
 
 # examples of different formats:
 # 18612690: PubMedArticle with multiple AbstractText sections
@@ -28,6 +29,7 @@ print ''
 print article.pmid, article.title
 print ''
 print 'authors: %s' % ','.join(article.authors)
+print 'journal: %s' % article.journal
 print ''
 excerpt = '(empty)' if article.abstract is None else article.abstract[:100] + '[...]'
 print 'abstract: %s' % excerpt
@@ -66,3 +68,8 @@ if article.history:
 
 #print article.xmlstr
 print ''
+
+source = FindIt(pmid=pmid)
+print source.url
+print source.backup_url
+
