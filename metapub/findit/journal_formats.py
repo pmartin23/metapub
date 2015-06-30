@@ -476,6 +476,7 @@ vip_journals = {
         'J Clin Oncol': { 'host': 'jco.ascopubs.org' },
         'J Dent Res': { 'host': 'jdr.sagepub.com' },
         'J Gerontol A Biol Sci Med Sci': { 'host': 'biomedgerontology.oxfordjournals.org' },
+        'J Hum Lact': { 'host': 'jhl.sagepub.com' },
         'J Immunol': { 'host' : 'jimmunol.org' },
         'J Infect Dis': { 'host': 'jid.oxfordjournals.org' },
         'J Lipid Res': { 'host': 'www.jlr.org' },
