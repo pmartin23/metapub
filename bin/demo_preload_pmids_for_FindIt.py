@@ -53,7 +53,7 @@ if __name__=='__main__':
         sys.exit()
 
     pmids = open(filename, 'r').readlines()
-    for pmid in pmids:
+    for pmid in [item.strip() for item in pmids if item.strip() != '']:
         doi = get_doi(pmid)
         print('DOI: %s' % doi)
         print('')

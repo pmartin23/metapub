@@ -15,7 +15,7 @@ from metapub.pubmedcentral import get_pmcid_for_otherid
 from metapub.utils import asciify
 
 # configurables (edit as you like):
-RESULTS_DIR = 'sandbox/results/'
+RESULTS_DIR = 'bin/doigen/'
 DEBUG = False
 CONNECTION_ERROR_LIMIT = 10
 

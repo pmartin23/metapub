@@ -24,8 +24,7 @@ def try_backup_url(pmid):
     else:
         print pmid, source.pma.journal, source.reason
         try:
-            print pmid, source.pma.journal, source.backup_url, try_url(source.backup_url)
-            print 
+            print pmid, source.pma.journal, source.backup_url, try_request(source.backup_url)
         except Exception, e:
             print pmid, '%r' % e
 

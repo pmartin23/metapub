@@ -283,12 +283,13 @@ def the_karger_conga(pma):
         baseurl = the_doi_2step(pma.doi)
     else:
         raise NoPDFLink('MISSING: doi (doi lookup failed)')
-    url = baseurl.replace('FullText', 'Pdf')
+    # if it directs to an "Abstract", we prolly can't get the PDF. Try anyway.
+    url = baseurl.replace('FullText', 'Pdf').replace('Abstract', 'Pdf')
     res = requests.get(url)
     if not res.ok:
         raise NoPDFLink('TXERROR: %i status returned from Karger url (%s)' % (res.status_code, url))
     if res.headers['content-type'].find('pdf') > -1:
         return url
     else:
-        raise AccessDenied('DENIED: Karger url (%s) resulted in HTTP %i' % (url, res.status_code))
+        raise AccessDenied('DENIED: Karger url (%s) ' % (url, res.status_code))
 
