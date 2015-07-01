@@ -112,7 +112,7 @@ class FindIt(object):
                 'Supply either a pmid or a doi to instantiate. e.g. FindIt(pmid=1234567)')
 
         try:
-            if self._cache():
+            if self._cache:
                 self.url, self.reason = self.load_from_cache()
             else:
                 self.url, self.reason = self.load()
