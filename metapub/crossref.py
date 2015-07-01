@@ -40,7 +40,7 @@ CACHE_FILENAME = 'crossref-cache.db'
 class CrossRef(Borg):
     '''CrossRef: a Borg singleton object backed by an SQLite cache'''
 
-    _log = logging.getLogger('metapub.crossref')      #.setLevel(logging.INFO)
+    _log = logging.getLogger('metapub.CrossRef')      #.setLevel(logging.INFO)
     _log.setLevel(logging.INFO)
 
     re_rfts = re.compile('rft\.(.*?)&amp;')

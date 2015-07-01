@@ -102,6 +102,7 @@ class FindIt(object):
             self._cache_path)
 
         self._log = logging.getLogger('metapub.FindIt')
+        self._log.setLevel(logging.INFO)
 
         if self.pmid:
             self._load_pma_from_pmid()

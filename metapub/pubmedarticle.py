@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 
 """metapub.pubmedarticle -- PubMedArticle class instantiated by supplying ncbi XML string."""
 
-import logging, time
+import time
 from datetime import datetime
 from collections import OrderedDict
 
