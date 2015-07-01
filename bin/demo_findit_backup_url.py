@@ -19,8 +19,10 @@ def try_request(url):
 
 def try_backup_url(pmid):
     source = FindIt(pmid=pmid)
+    if not source.pma:
+        return
     if source.url:
-        print pmid, source.pma.journal, source.url
+        print pmid, source.pma.journal, source.url, try_request(source.url)
     else:
         print pmid, source.pma.journal, source.reason
         try:
