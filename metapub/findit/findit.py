@@ -48,7 +48,8 @@ __author__='nthmost'
 
 from urlparse import urlparse
 
-import requests
+        
+import requests, os, logging
 
 from ..pubmedfetcher import PubMedFetcher
 from ..pubmedarticle import square_voliss_data_for_pma
@@ -56,6 +57,7 @@ from ..convert import PubMedArticle2doi_with_score, doi2pmid
 from ..exceptions import *
 from ..text_mining import re_numbers
 from ..utils import asciify
+from ..eutils_common import SQLiteCache, get_cache_path
 
 from .journal_formats import *
 from .dances import *
@@ -63,219 +65,8 @@ from .journal_cantdo_list import JOURNAL_CANTDO_LIST
 
 fetch = PubMedFetcher()
 
-def find_article_from_pma(pma, use_crossref=True, use_nih=False):
-    '''The real workhorse of FindIt.
-
-        Based on the contents of the supplied PubMedArticle object, this function
-        returns the best possible download link for a Pubmed PDF.
-
-        Returns (url, reason) -- url being self-explanatory, and "reason" containing
-        any qualifying message about why the url came back the way it did.
-
-        Reasons may include (but are not limited to):
-
-            "DOI missing from PubMedArticle and CrossRef lookup failed."
-            "pii missing from PubMedArticle XML"
-            "No URL format for Journal %s"
-            "TODO format"
-
-        Optional params:
-            use_crossref -- look up DOIs using CrossRef (recommended)
-            use_nih      -- source PubmedCentral articles from nih.gov (NOT recommended)
-
-        :param: (pma PubMedArticle object) 
-        :param: use_crossref (bool) default: True
-        :param: use_nih (bool) default: False
-        :return: (url, reason)
-    '''
-    reason = None
-    url = None
-
-    # protect against unicode character mishaps in journal names.
-    # (did you know that unicode.translate takes ONE argument whilst str.translate takes TWO?! true story)
-    jrnl = asciify(pma.journal).translate(None, '.')
-
-    ##### Pubmed Central: ideally we get the article from PMC if it has a PMC id.
-    #
-    #   Note: we're using europepmc.org rather than nih.gov (see the_pmc_twist function).
-    #
-    #   If we can't get the article from a PMC site, it may be that the paper is 
-    #   temporarily embargoed.  In that case, we may be able to fall back on retrieval 
-    #   from a publisher link.
-
-    if pma.pmc:
-        try:
-            url = the_pmc_twist(pma)
-            return (url, None)
-        except Exception, e:
-            reason = str(e)
-
-    if jrnl in simple_formats_pii.keys():
-        if pma.pii:
-            url = simple_formats_pii[jrnl].format(a=pma)
-            reason = ''
-        else:
-            url = None
-            reason = 'MISSING: pii missing from PubMedArticle XML (pii format)'
-
-        if url:
-            r = requests.get(url)
-            if r.text.find('Access Denial') > -1:
-                url = None
-                reason = 'DENIED: Access Denied by ScienceDirect'
-
-    elif jrnl in simple_formats_pmid.keys():
-        url = simple_formats_pmid[jrnl].format(pmid=pmid)
-        return (url, None)
-
-    elif jrnl in simple_formats_doi.keys():
-        if pma.doi:
-            url = simple_formats_doi[jrnl].format(a=pma)
-            reason = ''
-
-    elif jrnl in vip_journals.keys(): 
-        pma = square_voliss_data_for_pma(pma)
-        if pma.volume and pma.issue:
-            url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
-        else:
-            # TODO: try the_doi_2step
-            reason = 'MISSING: vip (volume and maybe also issue data missing from PubMedArticle)'
-
-    elif jrnl in vip_journals_nonstandard.keys():
-        pma = square_voliss_data_for_pma(pma)
-        url = vip_journals_nonstandard[jrnl].format(a=pma)
-        if url.find('None') > -1:
-            # TODO: try the_doi_2step
-            reason = 'MISSING: vip (volume or issue or page data missing from PubMedArticle)'
-            url = None
-
-    if url:
-        return (url, reason)
-
-    ##### PUBLISHER BASED LISTS #####
-
-    if jrnl in jstage_journals:
-        if pma.doi:
-            try:
-                url = the_jstage_dive(pma)
-            except Exception, e:
-                reason = str(e)
-
-    elif jrnl.find('BMC')==0 or jrnl in BMC_journals:
-        # Many Biomed Central journals start with "BMC", but many more don't.
-        try:
-            url = the_biomed_calypso(pma)
-        except Exception, e:
-            reason = str(e)
-            
-    elif jrnl in springer_journals:
-        if pma.doi:
-            try:
-                url = the_springer_shag(pma)
-            except Exception, e:
-                reason = str(e)
-
-    elif jrnl in wiley_journals:
-        if pma.doi:
-            try:
-                url = the_wiley_shuffle(pma)
-            except Exception, e:
-                reason = str(e)
-
-    elif jrnl in jama_journals:
-        try:
-            url = the_jama_dance(pma)
-        except Exception, e:
-            reason = str(e)
-
-    elif jrnl in aaas_journals.keys():
-        pma = square_voliss_data_for_pma(pma)
-        try:
-            url = the_aaas_tango(pma)
-        except Exception, e:
-            reason = str(e)
-
-    elif jrnl in spandidos_journals.keys():
-        pma = square_voliss_data_for_pma(pma)
-        if pma.volume and pma.issue:
-            url = spandidos_format.format(ja=spandidos_journals[jrnl]['ja'], a=pma)
-        else:
-            # TODO: try the_doi_2step
-            reason = 'MISSING: vip - volume and maybe also issue data missing from PubMedArticle'
-
-    elif jrnl in jci_journals:
-        try:
-            url = the_jci_polka(pma)
-        except Exception, e:
-            reason = str(e)
-
-    elif jrnl in biochemsoc_journals.keys():
-        pma = square_voliss_data_for_pma(pma)
-        if pma.volume and pma.issue:
-            host = biochemsoc_journals[jrnl]['host']
-            ja = biochemsoc_journals[jrnl]['ja']
-            url = biochemsoc_format.format(a=pma, host=host, ja=ja)
-        else:
-            reason = 'MISSING: vip - volume and maybe also issue data missing from PubMedArticle'
-
-    elif jrnl in nature_journals.keys():
-        try:
-            url = the_nature_ballet(pma)
-        except Exception, e:
-            reason = str(e)
-
-    elif jrnl in cell_journals.keys():
-        if pma.pii:
-            # the front door
-            url = cell_format.format( a=pma, ja=cell_journals[jrnl]['ja'],
-                    pii=pma.pii.translate(None,'-()') )
-        else:
-            reason = 'MISSING: pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
-
-    elif jrnl.find('Lancet') > -1:
-        try:
-            url = the_lancet_tango(pma)
-        except Exception, e:
-            reason = str(e)
-
-    elif jrnl in sciencedirect_journals:
-        try:
-            url = the_sciencedirect_disco(pma)
-        except Exception, e:
-            reason = str(e)
-
-    elif jrnl in karger_journals:
-        try:
-            url = the_karger_conga(pma)
-        except Exception, e:
-            reason = str(e)
-
-    elif jrnl in paywall_journals:
-        reason = 'PAYWALL: this journal has been marked as "never free" (see metapub/findit/journal_formats.py)'
-
-    elif jrnl in todo_journals:
-        reason = 'TODO: format example: %s' % todo_journals[jrnl]['example']
-
-    elif jrnl in JOURNAL_CANTDO_LIST:
-        reason = 'CANTDO: this journal is in the "can\'t do" list (see metapub/findit/journal_cantdo_list.py)'
-
-    # aka if url is STILL None...
-    else:
-        reason = 'NOFORMAT: No URL format for Journal %s' % jrnl
-
-    return (url, reason)
-
-
-def find_article_from_doi(doi, use_nih=False):
-    '''pull a PubMedArticle based on CrossRef lookup (using doi2pmid),
-    then run it through find_article_from_pma.
-
-        :param: doi (string)
-        :return: (url, reason)
-    '''
-    pma = fetch.article_by_pmid(doi2pmid(doi))
-    return find_article_from_pma(pma, use_nih=use_nih)
-
+DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'),'.cache')
+CACHE_FILENAME = 'findit-cache.db'
 
 class FindIt(object):
 
@@ -302,12 +93,24 @@ class FindIt(object):
         self.pma = None
         self._backup_url = None
 
+        cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
+        self._cache_path = get_cache_path(cachedir, CACHE_FILENAME)
+        self._cache = None if self._cache_path is None else SQLiteCache(self._cache_path)
+
+        self._logger = logging.getLogger('metapub.FindIt')
+
         if self.pmid:
             self._load_pma_from_pmid()
         elif self.doi:
             self._load_pma_from_doi()
         else:
             raise MetaPubError('Supply either a pmid or a doi to instantiate. e.g. FindIt(pmid=1234567)')
+
+        if self._cache:
+            #cache_key = self._make_cache_key()
+            cache_key = self.pmid
+            self._cache[self.pmid] = res_text
+            self._logger.info('cached results for PMID {cache_key}'.format(cache_key=cache_key))
 
         try:
             self.url, self.reason = find_article_from_pma(self.pma, use_nih=self.use_nih)
@@ -337,6 +140,11 @@ class FindIt(object):
                     print(e)
                     pass
 
+        # maybe it's an "early" print? if so it might look like this:
+        #   
+        #if urlp.path.find('early'):
+        #    return None
+
         if self._backup_url is None and urlp.path.find('.') > -1:
             extension = urlp.path.split('.')[-1]
             if extension == 'long':
@@ -357,7 +165,7 @@ class FindIt(object):
         self.pma = fetch.article_by_pmid(self.pmid)
         if self.pma.doi:
             self.doi = self.pma.doi
-            self.doi_score==10.0
+            self.doi_score = 10.0
         
         if self.pma.doi==None:
             if self.use_crossref:
