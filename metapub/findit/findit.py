@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function
     that what's being sent back is in fact a PDF.
 
     If you would like these requests to go through a proxy (e.g. if you would
-    like to prevent making multiple requests of the same pages, which may have
+    like to prevent making multiple requests of the same servers, which may have
     effects like getting your IP shut off from PubMedCentral), set the
     HTTP_PROXY environment variable in your code or on the command line before
     using any FindIt functionality.
@@ -156,7 +156,7 @@ class FindIt(object):
 
     @property
     def backup_url(self):
-        '''A backup url to try if the first url doesn't pan out.'''
+        '''Returns a backup url to try if the first url doesn't pan out.'''
         if not self.doi:
             return None
 
@@ -248,10 +248,8 @@ class FindIt(object):
 
         A time.time() timestamp will be added to the value dictionary when stored.
 
-        There is no return from this function.
-
-        Possible Exceptions raised here:
-            #TODO
+        There is no return from this function. Exceptions from the SQLiteCache 
+        object may be raised.
         '''
         cache_value = kwargs.copy()
         cache_value['timestamp'] = time.time()
@@ -263,11 +261,13 @@ class FindIt(object):
 
         Cache results are stored with a time.time() timestamp.
 
-        Future: when expiry_date is supplied, results from the cache past their
+        When expiry_date is supplied, results from the cache past their
         sell-by date will be expunged from the cache and return will be None.
 
+        expiry_date can be either a python datetime or a timestamp. 
+
         :param: cache_key: (required)
-        :param: expiry_date (optional, default None) (not yet implemented)
+        :param: expiry_date (optional, default None)
         :rtype: (url, reason) or None
         '''
 

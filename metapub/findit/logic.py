@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function
         are made within 5 minutes).
 
         If you would like these requests to go through a proxy (e.g. if you would
-        like to prevent making multiple requests of the same pages, which may have
+        like to prevent making multiple requests of the same servers, which may have
         effects like getting your IP shut off from PubMedCentral), set the 
         HTTP_PROXY environment variable in your code or on the command line before
         using any FindIt functionality.
