@@ -40,8 +40,8 @@ CACHE_FILENAME = 'crossref-cache.db'
 class CrossRef(Borg):
     '''CrossRef: a Borg singleton object backed by an SQLite cache'''
 
-    _logger = logging.getLogger('metapub.crossref')      #.setLevel(logging.INFO)
-    _logger.setLevel(logging.INFO)
+    _log = logging.getLogger('metapub.crossref')      #.setLevel(logging.INFO)
+    _log.setLevel(logging.INFO)
 
     re_rfts = re.compile('rft\.(.*?)&amp;')
     re_rfrs = re.compile('rfr_id=.*?&amp;')
@@ -84,8 +84,12 @@ class CrossRef(Borg):
         #TODO: allow cachedir=None (turn off cacheing)
         cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
         
-        self._cache_path = get_cache_path(cachedir, CACHE_FILENAME)
-        self._cache = SQLiteCache(self._cache_path)
+        if cachedir:
+            self._cache_path = get_cache_path(cachedir, CACHE_FILENAME)
+            self._cache = SQLiteCache(self._cache_path)
+        else:
+            self._cache_path = None
+            self._cache = None
 
     def _parse_coins(self, coins):
         # there are multiple 'au' items. pull them out, add them to the list of authors,
@@ -197,7 +201,7 @@ class CrossRef(Borg):
             if self._cache:
                 cache_key = self._make_cache_key(q)
                 self._cache[cache_key] = res_text
-                self._logger.info('cached results for key {cache_key} ({q}) '.format(
+                self._log.info('cached results for key {cache_key} ({q}) '.format(
                         cache_key=cache_key, q=q))
 
         if res_text:
@@ -258,23 +262,22 @@ class CrossRef(Borg):
             cache_key = self._make_cache_key(q)
             try:
                 v = self._cache[cache_key]
-                self._logger.debug('cache hit for key {cache_key} ({q}) '.format(
+                self._log.debug('cache hit for key {cache_key} ({q}) '.format(
                     cache_key=cache_key, q=q))
                 return v
             except KeyError:
-                self._logger.debug('cache miss for key {cache_key} ({q}) '.format(
+                self._log.debug('cache miss for key {cache_key} ({q}) '.format(
                         cache_key=cache_key, q=q))
                 return None
         else:
-            self._logger.debug('cache disabled (self._cache is None)')
+            self._log.debug('cache disabled (self._cache is None)')
             return None
 
-        # TODO if it seems necessary: cache throttling 
+        # FUTURE: if it seems necessary: cache throttling 
         #if not skip_sleep:
         #    req_int = self.request_interval() if callable(self.request_interval) else self.request_interval
         #    sleep_time = req_int - (time.clock()-self._last_request_clock)
         #    if sleep_time > 0:
         #        self._logger.debug('sleeping {sleep_time:.3f}'.format(sleep_time=sleep_time))
         #        time.sleep(sleep_time)
-
 

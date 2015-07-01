@@ -84,4 +84,4 @@
 6/28/2015, 0.3.14.6, FindIt: check PubMedArticle for pmc embargo date; skip the_pmc_twist if embargoed.
 6/28/2015, 0.3.14.7, PubMedFetcher: minor improvements to query parsing and composition for pmids_for_query tool.
 6/29/2015, 0.3.14.8, FindIt: added use_nih kwarg (default: False) for controlling whether we use nih.gov's PubmedCentral. Added the_karger_conga to findit.dances.
-6/30/2015, 0.3.15, Debut of FindIt cacheing engine.
+6/30/2015, 0.3.15, Debut of FindIt cacheing engine. Allow disabling of CrossRef cache (cachedir=None).
