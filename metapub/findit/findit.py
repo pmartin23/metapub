@@ -1,19 +1,70 @@
 from __future__ import absolute_import, print_function
 
-__doc__='''find_it: provides FindIt object, providing a tidy object layer
-            into the get_pdf_from_pma function.
+'''findit/findit.py
 
-        The get_pdf_from_pma function selects possible PDF links for the 
-        given article represented in a PubMedArticle object.
+    Provides FindIt object, providing a tidy object layer
+        into the logic.get_pdf_from_pma function. (see logic.py)
 
-        The FindIt class allows lookups of the PDF starting from only a 
-        DOI or a PMID, using the following classmethods:
+    The FindIt class allows lookups of the PDF starting from only a
+    DOI or a PMID, using the following instantiation approaches:
 
-        FindIt.from_pmid(pmid, **kwargs)
+    source = FindIt('1234567')   # assumes argument is a pubmed ID
 
-        FindIt.from_doi(doi, **kwargs)
+    source = FindIt(pmid=1234567)  # pmid can be an int or a string
 
-        The machinery in this code performs all necessary data lookups 
+    source = FindIt(doi="10.xxxx/xxx.xxx")   # doi instead of pmid.
+
+    See the FindIt docstring for more information.
+
+    *** IMPORTANT NOTE ***
+
+    In many cases, this code performs intermediary HTTP requests in order to
+    scrape a PDF url out of a page, and sometimes tests the url to make sure
+    that what's being sent back is in fact a PDF.
+
+    If you would like these requests to go through a proxy (e.g. if you would
+    like to prevent making multiple requests of the same pages, which may have
+    effects like getting your IP shut off from PubMedCentral), set the
+    HTTP_PROXY environment variable in your code or on the command line before
+    using any FindIt functionality.
+'''
+
+__author__ = 'nthmost'
+
+from urlparse import urlparse
+
+import requests
+import os, time
+import logging
+
+from ..exceptions import MetaPubError
+from ..pubmedfetcher import PubMedFetcher
+from ..convert import PubMedArticle2doi_with_score, doi2pmid
+from ..eutils_common import SQLiteCache, get_cache_path
+
+#from .journal_formats import *
+from .logic import find_article_from_pma
+from .dances import the_sciencedirect_disco, the_doi_2step
+from .cache_utils import datetime_to_timestamp
+
+FETCH = PubMedFetcher()
+
+DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'), '.cache')
+CACHE_FILENAME = 'findit-cache.db'
+
+class FindIt(object):
+    ''' FindIt
+
+        FindIt helps locate an article's fulltext PDF based on its pubmed ID
+        or doi, using the following instantiation approaches:
+
+        source = FindIt('1234567')   # assumes argument is a pubmed ID
+
+        source = FindIt(pmid=1234567)  # pmid can be an int or a string
+
+        source = FindIt(doi="10.xxxx/xxx.xxx")   # doi instead of pmid.
+
+        The machinery in the FindIt object performs all necessary data lookups
         (e.g. looking up a missing DOI, or using a DOI to get a PubMedArticle)
         to end up with a url and reason, which attaches to the FindIt object
         in the following attributes:
@@ -30,58 +81,10 @@ __doc__='''find_it: provides FindIt object, providing a tidy object layer
         If CrossRef came into play during the process to find a DOI that was missing
         for the PubMedArticle object, the doi_score will come from the CrossRef "top
         result".
+    '''
 
-        *** IMPORTANT NOTE ***
-
-        In many cases, this code performs intermediary HTTP requests in order to 
-        scrape a PDF url out of a page, and sometimes tests the url to make sure
-        that what's being sent back is in fact a PDF.
-
-        If you would like these requests to go through a proxy (e.g. if you would
-        like to prevent making multiple requests of the same pages, which may have
-        effects like getting your IP shut off from PubMedCentral), set the 
-        HTTP_PROXY environment variable in your code or on the command line before
-        using any FindIt functionality.
-'''
-
-__author__='nthmost'
-
-from urlparse import urlparse
-
-        
-import requests, os, logging
-
-from ..pubmedfetcher import PubMedFetcher
-from ..pubmedarticle import square_voliss_data_for_pma
-from ..convert import PubMedArticle2doi_with_score, doi2pmid
-from ..exceptions import *
-from ..text_mining import re_numbers
-from ..utils import asciify
-from ..eutils_common import SQLiteCache, get_cache_path
-
-from .journal_formats import *
-from .dances import *
-from .journal_cantdo_list import JOURNAL_CANTDO_LIST
-
-fetch = PubMedFetcher()
-
-DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'),'.cache')
-CACHE_FILENAME = 'findit-cache.db'
-
-class FindIt(object):
-
-    @classmethod
-    def by_pmid(cls, pmid, *args, **kwargs):
-        kwargs['pmid'] = pmid
-        return cls(args, kwargs)
-
-    @classmethod
-    def by_doi(cls, doi, *args, **kwargs):
-        kwargs['doi'] = doi
-        return cls(args, kwargs)
-    
-    def __init__(self, *args, **kwargs):    
-        self.pmid = kwargs.get('pmid', None)
+    def __init__(self, pmid=None, **kwargs):
+        self.pmid = pmid if pmid else kwargs.get('pmid', None)
         self.doi = kwargs.get('doi', None)
         self.url = kwargs.get('url', None)
         self.reason = None
@@ -95,28 +98,61 @@ class FindIt(object):
 
         cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
         self._cache_path = get_cache_path(cachedir, CACHE_FILENAME)
-        self._cache = None if self._cache_path is None else SQLiteCache(self._cache_path)
+        self._cache = None if self._cache_path is None else SQLiteCache(
+            self._cache_path)
 
-        self._logger = logging.getLogger('metapub.FindIt')
+        self._log = logging.getLogger('metapub.FindIt')
 
         if self.pmid:
             self._load_pma_from_pmid()
         elif self.doi:
             self._load_pma_from_doi()
         else:
-            raise MetaPubError('Supply either a pmid or a doi to instantiate. e.g. FindIt(pmid=1234567)')
-
-        if self._cache:
-            #cache_key = self._make_cache_key()
-            cache_key = self.pmid
-            self._cache[self.pmid] = res_text
-            self._logger.info('cached results for PMID {cache_key}'.format(cache_key=cache_key))
+            raise MetaPubError(
+                'Supply either a pmid or a doi to instantiate. e.g. FindIt(pmid=1234567)')
 
         try:
-            self.url, self.reason = find_article_from_pma(self.pma, use_nih=self.use_nih)
-        except requests.exceptions.ConnectionError, e:
+            if self._cache():
+                self.url, self.reason = self.load_from_cache()
+            else:
+                self.url, self.reason = self.load()
+        except requests.exceptions.ConnectionError as error:
             self.url = None
-            self.reason = 'TXERROR: %r' % e
+            self.reason = 'TXERROR: %r' % error
+
+    def load(self):
+        '''interface to logic.find_article_from_pma; uses self.pma to return
+        a (url, reason) tuple.
+
+        If url is None, reason should have a string.  If url is not None, there may
+        or may not be a reason string (usually not).
+
+        If a ConnectionError prevented lookup, returns (None, "TXERROR: <info>")
+
+        :return: (url, reason) (string or None, string or None)
+        '''
+        return find_article_from_pma(self.pma, use_nih=self.use_nih)
+
+    def load_from_cache(self):
+        '''Using preloaded identifiers (self.pmid, self.doi, etc), check cache
+        for article lookup results. If it's not in the cache, call self.load()
+        and store the results in the cache.
+
+        If url is None, reason should have a string.  If url is not None, there may
+        or may not be a reason string (usually not).
+
+        If self.load() comes up as a ConnectionError (usually indicating a problem
+        with the internet connection), no result will be cached.
+
+        :return: (url, reason) (string or None, string or None)
+        '''
+        cache_result = self._query_cache(self.pmid)
+        if cache_result:
+            return (cache_result['url'], cache_result['reason'])
+        else:
+            url, reason = self.load()
+            self._store_cache(self.pmid, url=url, reason=reason)
+            return (url, reason)
 
     @property
     def backup_url(self):
@@ -136,13 +172,12 @@ class FindIt(object):
             if self.pma.pii:
                 try:
                     self._backup_url = the_sciencedirect_disco(self.pma)
-                except Exception, e:
-                    print(e)
-                    pass
+                except Exception as error:
+                    self._log.debug('%r', error)
 
         # maybe it's an "early" print? if so it might look like this:
-        #   
-        #if urlp.path.find('early'):
+        #
+        # if urlp.path.find('early'):
         #    return None
 
         if self._backup_url is None and urlp.path.find('.') > -1:
@@ -150,7 +185,8 @@ class FindIt(object):
             if extension == 'long':
                 self._backup_url = baseurl.replace('long', 'full.pdf')
             elif extension == 'html':
-                self._backup_url = baseurl.replace('full', 'pdf').replace('html', 'pdf')
+                self._backup_url = baseurl.replace(
+                    'full', 'pdf').replace('html', 'pdf')
 
         if self._backup_url is None:
             # a shot in the dark...
@@ -158,36 +194,104 @@ class FindIt(object):
                 self._backup_url = baseurl + 'pdf'
             else:
                 self._backup_url = baseurl + '.full.pdf'
-                
+
         return self._backup_url
 
     def _load_pma_from_pmid(self):
-        self.pma = fetch.article_by_pmid(self.pmid)
+        '''loads self.pma if self.pmid is present.
+
+        Mutates:
+            self.doi (using crossref to look this information up if necessary)
+            self.doi_score (10.0 if doi found in self.pma, else crossref score)
+        '''
+
+        self.pma = FETCH.article_by_pmid(self.pmid)
         if self.pma.doi:
             self.doi = self.pma.doi
             self.doi_score = 10.0
-        
-        if self.pma.doi==None:
+
+        if self.pma.doi == None:
             if self.use_crossref:
-                self.pma.doi, self.doi_score = PubMedArticle2doi_with_score(self.pma, min_score=self.doi_min_score)
+                self.pma.doi, self.doi_score = PubMedArticle2doi_with_score(
+                    self.pma, min_score=self.doi_min_score)
                 if self.pma.doi == None:
-                    self.reason = 'MISSING: DOI missing from PubMedArticle and CrossRef lookup failed.'
+                    self.reason = 'MISSING: doi (CrossRef lookup failed)'
                 else:
                     self.doi = self.pma.doi
 
     def _load_pma_from_doi(self):
+        '''loads self.pma if self.doi is present.
+
+        Mutates:
+            self.pmid (using metapub.convert.doi2pmid)
+            self.pma  (if pmid was found)
+            self.doi_score (10.0 if doi found in self.pma, else crossref score)
+        '''
         self.pmid = doi2pmid(self.doi)
         if self.pmid:
-            self.pma = fetch.article_by_pmid(self.pmid)
+            self.pma = FETCH.article_by_pmid(self.pmid)
             self.doi_score = 10.0
         else:
-            raise MetaPubError('Could not get a PMID for DOI %s' % self.doi)
+            raise MetaPubError('Could not get a pmid for doi %s' % self.doi)
 
     def to_dict(self):
-        return { 'pmid': self.pmid,
-                 'doi': self.doi,
-                 'reason': self.reason,
-                 'url': self.url,
-                 'doi_score': self.doi_score,
+        '''returns a dictionary containing the public attributes of this object'''
+        return {'pmid': self.pmid,
+                'doi': self.doi,
+                'reason': self.reason,
+                'url': self.url,
+                'doi_score': self.doi_score,
                }
+
+    def _store_cache(self, cache_key, **kwargs):
+        '''Store supplied cache_key pointing to values supplied in kwargs.
+
+        A time.time() timestamp will be added to the value dictionary when stored.
+
+        There is no return from this function.
+
+        Possible Exceptions raised here:
+            #TODO
+        '''
+        cache_value = kwargs.copy()
+        cache_value['timestamp'] = time.time()
+        self._cache[cache_key] = cache_value
+
+    def _query_cache(self, pmid, expiry_date=None):
+        '''Return results of a lookup from the cache, if available.
+        Return None if not available.
+
+        Cache results are stored with a time.time() timestamp.
+
+        Future: when expiry_date is supplied, results from the cache past their
+        sell-by date will be expunged from the cache and return will be None.
+
+        :param: cache_key: (required)
+        :param: expiry_date (optional, default None) (not yet implemented)
+        :rtype: (url, reason) or None
+        '''
+
+        if hasattr(expiry_date, 'strftime'):
+            # convert to timestamp
+            sellby = datetime_to_timestamp(expiry_date)
+        else:
+            sellby = expiry_date
+
+        if self._cache:
+            cache_key = pmid
+            try:
+                res = self._cache[cache_key]
+                timestamp = res['timestamp']
+                if timestamp < sellby:
+                    self._log.debug('Cache: expunging result for %s (%i)', cache_key, timestamp)
+                else:
+                    self._log.debug('Cache: returning result for %s (%i)', cache_key, timestamp)
+                return res
+
+            except KeyError:
+                self._log.debug('Cache: no result for key %s', cache_key)
+                return None
+        else:
+            self._log.debug('Cache disabled (self._cache is None)')
+            return None
 

@@ -1,41 +1,29 @@
 from __future__ import absolute_import, print_function
 
-__doc__='''find_it: provides FindIt object, providing a tidy object layer
-            into the get_pdf_from_pma function.
+'''findit/logic.py 
 
         The get_pdf_from_pma function selects possible PDF links for the 
         given article represented in a PubMedArticle object.
 
-        The FindIt class allows lookups of the PDF starting from only a 
-        DOI or a PMID, using the following classmethods:
+        These links are built (not crawled) by selecting a likely-to-work URL
+        pattern based on the NLM journal name abbreviation taken from the 
+        PubMedArticle object.
 
-        FindIt.from_pmid(pmid, **kwargs)
+        It's recommended to use the FindIt object as the primary interface 
+        to this code.
 
-        FindIt.from_doi(doi, **kwargs)
-
-        The machinery in this code performs all necessary data lookups 
-        (e.g. looking up a missing DOI, or using a DOI to get a PubMedArticle)
-        to end up with a url and reason, which attaches to the FindIt object
-        in the following attributes:
-
-        source = FindIt(pmid=PMID)
-        source.url
-        source.reason
-        source.pmid
-        source.doi
-        source.doi_score
-
-        The "doi_score" is an indication of where the DOI for this PMID ended up
-        coming from. If it was supplied by the user or by PubMed, doi_score will be 10.
-        If CrossRef came into play during the process to find a DOI that was missing
-        for the PubMedArticle object, the doi_score will come from the CrossRef "top
-        result".
+        See the find_article_from_pma docstring for more info.
 
         *** IMPORTANT NOTE ***
 
         In many cases, this code performs intermediary HTTP requests in order to 
         scrape a PDF url out of a page, and sometimes tests the url to make sure
         that what's being sent back is in fact a PDF.
+
+        NO PDF DOWNLOAD IS PERFORMED; however some websites will block your IP 
+        address when you are performing several information lookups within a 
+        relatively short span of time (e.g. informa blocks if 25 HTTP connections
+        are made within 5 minutes).
 
         If you would like these requests to go through a proxy (e.g. if you would
         like to prevent making multiple requests of the same pages, which may have
@@ -44,28 +32,19 @@ __doc__='''find_it: provides FindIt object, providing a tidy object layer
         using any FindIt functionality.
 '''
 
-__author__='nthmost'
-
-from urlparse import urlparse
+__author__ = 'nthmost'
 
 import requests, os
 
 from ..pubmedfetcher import PubMedFetcher
 from ..pubmedarticle import square_voliss_data_for_pma
-from ..convert import PubMedArticle2doi_with_score, doi2pmid
+from ..convert import doi2pmid
 from ..exceptions import *
-from ..text_mining import re_numbers
 from ..utils import asciify
-from ..eutils_common import SQLiteCache, get_cache_path
 
 from .journal_formats import *
 from .dances import *
 from .journal_cantdo_list import JOURNAL_CANTDO_LIST
-
-fetch = PubMedFetcher()
-
-DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'),'.cache')
-CACHE_FILENAME = 'findit-cache.db'
 
 def find_article_from_pma(pma, use_crossref=True, use_nih=False):
     '''The real workhorse of FindIt.
@@ -277,6 +256,7 @@ def find_article_from_doi(doi, use_nih=False):
         :param: doi (string)
         :return: (url, reason)
     '''
+    fetch = PubMedFetcher()
     pma = fetch.article_by_pmid(doi2pmid(doi))
     return find_article_from_pma(pma, use_nih=use_nih)
 
