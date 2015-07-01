@@ -230,7 +230,7 @@ paywall_reason_template = '%s behind %s paywall'  # % (journal, publisher)
 
 PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 EUROPEPMC_PDF_URL = 'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC{a.pmc}&blobtype=pdf'
-def the_pmc_twist(pma, USE_NIH=True):
+def the_pmc_twist(pma, use_nih=True):
     '''  :param: pma (PubMedArticle object)
          :return: url
          :raises: NoPDFLink
@@ -247,7 +247,7 @@ def the_pmc_twist(pma, USE_NIH=True):
     r = requests.get(url)
     if r.headers['content-type'].find('html') > -1:
         url = PMC_PDF_URL.format(a=pma)
-        if use_nlm:
+        if use_nih:
             # try the other PMC.
             r = requests.get(url)
             if r.headers['content-type'].find('html') > -1:
