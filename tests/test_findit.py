@@ -18,14 +18,14 @@ class TestFindIt(unittest.TestCase):
     def test_skipping_cache(self):
         #use a known working, non-PMC pubmed ID
         src = FindIt(pmid=26111251, cachedir=None)
-        assert src._cache_path is None
+        assert src._cache is None
         assert src.url is not None
         assert not src.reason
 
     def test_using_cache(self):
         src = FindIt(pmid=SAMPLE_PMIDS['nonembargoed'][0])
         assert src.url is not None
-        assert src._cache_path is not None
+        assert src._cache is not None
 
         # source from the same pmid. check that result is same as if we used no cache.
         cached_src = FindIt(pmid=SAMPLE_PMIDS['nonembargoed'][0])

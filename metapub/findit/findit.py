@@ -37,6 +37,7 @@ import requests
 import os, time
 import logging
 
+from ..base import Borg
 from ..exceptions import MetaPubError
 from ..pubmedfetcher import PubMedFetcher
 from ..convert import PubMedArticle2doi_with_score, doi2pmid
@@ -51,6 +52,15 @@ FETCH = PubMedFetcher()
 
 DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'), '.cache')
 CACHE_FILENAME = 'findit-cache.db'
+
+FINDIT_CACHE = None
+
+def _get_findit_cache(cachedir=DEFAULT_CACHE_DIR):
+    global FINDIT_CACHE
+    if not FINDIT_CACHE:
+        _cache_path = get_cache_path(cachedir, CACHE_FILENAME)
+        FINDIT_CACHE = SQLiteCache(_cache_path)
+    return FINDIT_CACHE
 
 class FindIt(object):
     ''' FindIt
@@ -97,12 +107,13 @@ class FindIt(object):
         self._backup_url = None
 
         cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
-        self._cache_path = get_cache_path(cachedir, CACHE_FILENAME)
-        self._cache = None if self._cache_path is None else SQLiteCache(
-            self._cache_path)
+        self._cache = None if cachedir is None else _get_findit_cache(cachedir)
 
         self._log = logging.getLogger('metapub.FindIt')
-        self._log.setLevel(logging.INFO)
+        if kwargs.get('debug', False):
+            self._log.setLevel(logging.DEBUG)
+        else:
+            self._log.setLevel(logging.INFO)
 
         if self.pmid:
             self._load_pma_from_pmid()

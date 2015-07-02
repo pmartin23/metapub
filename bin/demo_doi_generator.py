@@ -31,6 +31,7 @@ if DEBUG:
     ch.setLevel(logging.DEBUG)
 else:
     ch.setLevel(logging.INFO)
+
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 process_log.addHandler(ch)

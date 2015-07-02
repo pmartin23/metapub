@@ -38,10 +38,15 @@ CACHE_FILENAME = 'crossref-cache.db'
 
 
 class CrossRef(Borg):
-    '''CrossRef: a Borg singleton object backed by an SQLite cache'''
+    '''CrossRef: a Borg singleton object backed by an SQLite cache
 
-    _log = logging.getLogger('metapub.CrossRef')      #.setLevel(logging.INFO)
-    _log.setLevel(logging.INFO)
+      Disable cacheing by supplying cachedir=None in init arguments.
+
+      Change class logging level to DEBUG (default: INFO) by supplying
+      debug=True with init arguments.
+    '''
+
+    _log = logging.getLogger('metapub.CrossRef')
 
     re_rfts = re.compile('rft\.(.*?)&amp;')
     re_rfrs = re.compile('rfr_id=.*?&amp;')
@@ -81,8 +86,12 @@ class CrossRef(Borg):
         self.last_params = {}
         self.last_query = ''
 
-        #TODO: allow cachedir=None (turn off cacheing)
         cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
+
+        if kwargs.get('debug', False):
+            self._log.setLevel(logging.DEBUG) 
+        else:
+            self._log.setLevel(logging.INFO) 
         
         if cachedir:
             self._cache_path = get_cache_path(cachedir, CACHE_FILENAME)
