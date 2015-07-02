@@ -156,15 +156,21 @@ class FindIt(object):
         If self.load() comes up as a ConnectionError (usually indicating a problem
         with the internet connection), no result will be cached.
 
+        If cache result has reason like "NOFORMAT", try a fresh load -- there are
+        new formats added to FindIt all the time. :)
+
         :return: (url, reason) (string or None, string or None)
         '''
         cache_result = self._query_cache(self.pmid)
         if cache_result:
-            return (cache_result['url'], cache_result['reason'])
-        else:
-            url, reason = self.load()
-            self._store_cache(self.pmid, url=url, reason=reason)
-            return (url, reason)
+            url = cache_result['url']
+            reason = '' if cache_result['reason'] is None else cache_result['reason']
+            if not reason.startswith('NOFORMAT'):
+                return (url, reason)
+
+        url, reason = self.load()
+        self._store_cache(self.pmid, url=url, reason=reason)
+        return (url, reason)
 
     @property
     def backup_url(self):
@@ -175,11 +181,15 @@ class FindIt(object):
         if self._backup_url is not None:
             return self._backup_url
 
-        baseurl = the_doi_2step(self.doi)
+        try:
+            baseurl = the_doi_2step(self.doi)
+        except MetaPubError as error:
+            self._log.debug('%r', error)
+            return None
 
         urlp = urlparse(baseurl)
 
-        # maybe it's sciencedirect or elsevier?
+        # maybe it's sciencedirect / elsevier:
         if urlp.hostname.find('sciencedirect') > -1 or urlp.hostname.find('elsevier') > -1:
             if self.pma.pii:
                 try:
@@ -187,7 +197,14 @@ class FindIt(object):
                 except Exception as error:
                     self._log.debug('%r', error)
 
-        # maybe it's an "early" print? if so it might look like this:
+        # maybe it's wiley:
+        elif urlp.hostname.find('wiley') > -1:
+            try:
+                self._backup_url = the_wiley_shuffle(self.pma)
+            except Exception as error:
+                self._log.debug('%r', error)
+
+        #TODO maybe it's an "early" print? if so it might look like this:
         #
         # if urlp.path.find('early'):
         #    return None

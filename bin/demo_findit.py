@@ -3,11 +3,15 @@ from metapub.findit import FindIt
 older_pmids = ['2655732', '320292', '7686069', '7689822', '1287655', '7683021', '1309291', '1255861']
 
 vip_pmids = ['1255861',     # J Virol
+             '15252189',    # Physiol Genomics
+             '12066726',    # Br J Anaesth (oxford)
             ]
 
 vip_nonstandard_pmids = [ '1586703' ]  #Blood
 
-doi_pmids = ['15727972']        # Am J Public Health
+doi_pmids = ['15727972',         # Am J Public Health
+             '12170759', 
+            ]
 
 pii_pmids = ['26061871',    # Clin Trans Med
             ]
@@ -18,9 +22,9 @@ dustri_pmids = ['26042486']
 karger_pmids = ['23970213'  #Ann Nutr Metab
             ]
 
-jstage_pmids = ['11446670'] 
+jstage_pmids = ['11446670', '10458483'] 
 
-wiley_pmids = ['14981756']
+wiley_pmids = ['14981756', '10474162', '10470409',]
 
 biochemsoc_pmids = ['11776', '25896238', '11980567']
 

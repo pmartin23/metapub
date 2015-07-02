@@ -67,18 +67,21 @@ def the_sciencedirect_disco(pma):
     try:
         res = requests.get(starturl)
     except requests.exceptions.TooManyRedirects:
-        raise NoPDFLink('TXERROR: TooManyRedirects: cannot reach %s via %s' %
+        raise NoPDFLink('TXERROR: ScienceDirect TooManyRedirects: cannot reach %s via %s' %
                         (pma.journal, starturl))
 
     tree = etree.fromstring(res.text, HTMLParser())
-    div = tree.cssselect('div.icon_pdf')[0]
+    try:
+        div = tree.cssselect('div.icon_pdf')[0]
+    except IndexError:
+        raise NoPDFLink('DENIED: ScienceDirect did not provide pdf link (probably paywalled)')
     url = div.cssselect('a')[0].get('href')
     if url.find('.pdf') > -1:
         return url
     else:
         # give up, it's probably a "shopping cart" link.
         # TODO: parse return, raise more nuanced exceptions here.
-        raise NoPDFLink('DENIED: cannot find pdf link (probably behind paywall)')
+        raise NoPDFLink('DENIED: ScienceDirect did not provide pdf link (probably paywalled)')
 
 def the_biomed_calypso(pma):
     '''  :param: pma (PubMedArticle object)
@@ -144,7 +147,7 @@ def the_jama_dance(pma):
     for item in tree.findall('head/meta'):
         if item.get('name') == 'citation_pdf_url':
             return item.get('content')
-    raise NoPDFLink('DENIED: could not find PDF url in JAMA page (%s).' % url)
+    raise NoPDFLink('DENIED: JAMA did not provide PDF link in (%s).' % url)
 
 def the_jstage_dive(pma):
     '''  :param: pma (PubMedArticle object)
@@ -217,7 +220,7 @@ def the_nature_ballet(pma):
         return res.url
     elif res.headers['content-type'].find('html') > -1:
         raise AccessDenied('DENIED: Nature denied access to %s' % res.url)
-    raise NoPDFLink('TXERROR: unknown problem retrieving from %s' % res.url)
+    raise NoPDFLink('TXERROR: Nature -- unknown problem retrieving from %s' % res.url)
 
 PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 EUROPEPMC_PDF_URL = 'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC{a.pmc}&blobtype=pdf'

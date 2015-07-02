@@ -1,66 +1,8 @@
-# TODO
-#
-#12035837: Can J Neurol Sci -- no URL because No URL format for Journal Can J Neurol Sci
-#       ???
-
-#12036192: Clin. Nephrol. -- no URL because No URL format for Journal Clin Nephrol
-#       http://www.dustri.com/uploads/repository/21/1239843263_CN83_suppl_01_090.pdf
-
-#12037434: Eur. Neurol. -- no URL because No URL format for Journal Eur Neurol
-#12055472: Retina (Philadelphia, Pa.) -- no URL because No URL format for Journal Retina (Philadelphia, Pa)
-#12063046: Jpn. J. Ophthalmol. -- no URL because No URL format for Journal Jpn J Ophthalmol
-#12063482: J. Am. Acad. Dermatol. -- no URL because No URL format for Journal J Am Acad Dermatol
-#12056405: Genes Cells -- no URL because No URL format for Journal Genes Cells
-#12065946: Fetal. Diagn. Ther. -- no URL because No URL format for Journal Fetal Diagn Ther
-#12066726: Br J Anaesth -- no URL because No URL format for Journal Br J Anaesth
-#12071635: J. Neuropathol. Exp. Neurol. -- no URL because No URL format for Journal J Neuropathol Exp Neurol
-#12071824: Arch Dermatol -- no URL because No URL format for Journal Arch Dermatol
-#12070551: Saudi Med J -- no URL because No URL format for Journal Saudi Med J
-#12074273: Circ. J. -- no URL because No URL format for Journal Circ J
-#12076704: Oral Oncol. -- no URL because No URL format for Journal Oral Oncol
-#12080609: Rinsho Shinkeigaku -- no URL because No URL format for Journal Rinsho Shinkeigaku
-#12162770: Arch. Otolaryngol. Head Neck Surg. -- no URL because No URL format for Journal Arch Otolaryngol Head Neck Surg
-#12170759: Cancer Biol. Ther. -- no URL because No URL format for Journal Cancer Biol Ther
-#12173465: Mol. Biol. (Mosk.) -- no URL because No URL format for Journal Mol Biol (Mosk)
-#12173720: Mayo Clin. Proc. -- no URL because No URL format for Journal Mayo Clin Proc
-#12202459: Endocr. Rev. -- no URL because No URL format for Journal Endocr Rev
-#12087194: Genes Genet. Syst. -- no URL because No URL format for Journal Genes Genet Syst
-#12049533: Arch Surg -- no URL because No URL format for Journal Arch Surg
-#10458450: J. Urol. -- no URL because No URL format for Journal J Urol
-#10458483: Tohoku J. Exp. Med. -- no URL because No URL format for Journal Tohoku J Exp Med
-#10458491: Tohoku J. Exp. Med. -- no URL because No URL format for Journal Tohoku J Exp Med
-#10470409: Andrologia -- no URL because No URL format for Journal Andrologia
-#10474162: Dev. Dyn. -- no URL because No URL format for Journal Dev Dyn
-#10520237: Ophthalmic Genet. -- no URL because No URL format for Journal Ophthalmic Genet
-#10521250: Ophthalmic Genet. -- no URL because No URL format for Journal Ophthalmic Genet
-#21199372: no URL because No URL format for Journal Basic Clin Pharmacol Toxicol
-#15533574: no URL because No URL format for Journal Int J Pediatr Otorhinolaryngol
-#17100396: no URL because No URL format for Journal J Med Assoc Thai
-#17415575: no URL because No URL format for Journal Arch. Dermatol. Res.
-#17415800: no URL because No URL format for Journal Mov. Disord.
-#17416296: no URL because No URL format for Journal Arch. Med. Res.
-#17143317: no URL because No URL format for Journal Nat Clin Pract Endocrinol Metab
-#17145028: no URL because No URL format for Journal Med Clin (Barc)
-#17145065: no URL because No URL format for Journal Mutat Res
-#15452722: no URL because No URL format for Journal Graefes Arch Clin Exp Ophthalmol
-#EBioMedicine
-
-# HARDER CASES:
-#
-#10413889: Medicina (B Aires) -- no URL because No URL format for Journal Medicina (B Aires)
-#12027577: Seizure -- no URL because No URL format for Journal Seizure
-#10415464: Ophthalmic Genet. -- no URL because No URL format for Journal Ophthalmic Genet
-#12015062: Zhonghua Xue Ye Xue Za Zhi -- no URL because No URL format for Journal Zhonghua Xue Ye Xue Za Zhi
-#12015065: Zhonghua Xue Ye Xue Za Zhi -- no URL because No URL format for Journal Zhonghua Xue Ye Xue Za Zhi
-#12032748: Int. J. Obes. Relat. Metab. Disord. -- no URL because No URL format for Journal Int J Obes Relat Metab Disord
-
-
-#TODO: journals whose articles can best be accessed by loading up via dx.doi.org
+# journals whose articles can best be accessed by loading up via dx.doi.org
 #       and then doing some text replacement on the URL.
-doi2step_journals = [ 
+doi2step_journals = ( 
                       'J Public Health Policy'  # ex. http://www.palgrave-journals.com/jphp/journal/v36/n2/pdf/jphp201453a.pdf
-                    ]
-
+                    )
 
 todo_journals = {
     'Pharmacol Rep': { 'example': 'http://www.ncbi.nlm.nih.gov/pubmed/?term=23238479[uid] --> www.if-pan.krakow.pl/pjp/pdf/2012/5_1234.pdf' },
@@ -85,6 +27,7 @@ todo_journals = {
     'Clin Ter': {'example': '25756258 --> dx.doi.org/10.7417/CT.2015.1799 --> parse page to get PDF' },
     'J Pediatr (Rio J)': { 'example': '17102902 --> dx.doi.org/10.2223/JPED.1550 --> http://www.jped.com.br/conteudo/06-82-06-437/port.pdf' },
     'Teach Learn Med': { 'example': '17144842 --> dx.doi.org/10.1207/s15328015tlm1804_13 --> pdf link?' },
+    'Med Clin (Barc)': { 'example': '17145028 --> http://www.elsevier.es/es-revista-medicina-clinica-2-linkresolver-alopecia-androgenica-prematura-un-varon-13094419 --> http://apps.elsevier.es/watermark/ctl_servlet?_f=10&pident_articulo=13094419&pident_usuario=0&pcontactid=&pident_revista=2&ty=94&accion=L&origen=zonadelectura&web=www.elsevier.es&lan=es&fichero=2v127n16a13094419pdf001.pdf' },
     }
 
 
@@ -96,6 +39,7 @@ format_templates = {
     'lancet': 'http://www.thelancet.com/pdfs/journals/{ja}/PII{a.pii}.pdf',
     'liebert': 'http://online.liebertpub.com/doi/pdf/{a.doi}',
     'plos': 'http://www.plosbiology.org/article/fetchObjectAttachment.action?url=info:doi/{a.doi}&representation=PDF',
+    'taylor_francis': 'http://www.tandfonline.com/doi/pdf/{a.doi}',
     'wiley': 'http://onlinelibrary.wiley.com/doi/{a.doi}/pdf',
     'jci': 'http://www.jci.org/articles/view/{a.pii}/pdf',
     }
@@ -139,6 +83,7 @@ sciencedirect_journals = (
     'Ambul Pediatr',
     'Appetite',
     'Arch Biochem Biophys',
+    'Arch Med Res',
     'Arch Pediatr',
     'Atherosclerosis',
     'Blood Cells Mol Dis',
@@ -162,6 +107,7 @@ sciencedirect_journals = (
     'Hepatol Res',
     'Hum Immunol',
     'Infect Genet Evol',
+    'Int J Pediatr Otorhinolaryngol',
     'J Acad Nutr Diet',
     'J Am Coll Cardiol',
     'J Am Diet Assoc',
@@ -179,6 +125,7 @@ sciencedirect_journals = (
     'J Urol',
     'Leuk Res',
     'Life Sci',
+    'Mayo Clin Proc',
     'Mol Cell Endocrinol',
     'Mol Cell Probes',
     'Mol Genet Metab',
@@ -191,6 +138,7 @@ sciencedirect_journals = (
     'Neurotoxicology',
     'Nitric Oxide',
     'Nutr Metab Cardiovasc Dis',
+    'Oral Oncol',
     'Patient Educ Couns',
     'Pediatr Nurs',
     'Pediatr Pulmonol',
@@ -204,9 +152,11 @@ sciencedirect_journals = (
 
 
 jama_journals = (
+     'Arch Dermatol',
      'Arch Gen Psychiatry',
      'Arch Neurol',
      'Arch Ophthalmol',
+     'Arch Surg',
      'JAMA',
      'JAMA Dermatol',
      'JAMA Facial Plast Surg',
@@ -229,33 +179,36 @@ doiserbia_journals = ['Genetika']
 # Examples:
 # J Biochem: https://www.jstage.jst.go.jp/article/biochemistry1922/125/4/125_4_803/_pdf
 # Drug Metab Pharmacokinet: https://www.jstage.jst.go.jp/article/dmpk/20/2/20_2_144/_article --> https://www.jstage.jst.go.jp/article/dmpk/20/2/20_2_144/_pdf
-jstage_journals = [
-    'Intern Med',
-    'J Periodontol',
-    'J Biochem',
+jstage_journals = (
+    'Circ J',
     'Drug Metab Pharmacokinet',
     'Endocr J',
-    ]
+    'Genes Genet Syst',
+    'Intern Med',
+    'J Biochem',
+    'J Periodontol',
+    'Tohoku J Exp Med',
+    )
 
 # cell journals
 #cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
 cell_format = 'http://www.cell.com{ja}/pdf/{pii}.pdf'
 cell_journals = {
-    'Am J Hum Genet': { 'ja': '/AJHG' },
-    'Biophys J': { 'ja': '/biophysj' },
-    'Cancer Cell': { 'ja': '/cancer-cell' },
-    'Cell': { 'ja': '' },
-    'Cell Host Microbe': {'ja': '/cell-host-microbe' },
-    'Cell Metab': {'ja': '/cell-metabolism' },
-    'Cell Stem Cell': {'ja': '/cell-stem-cell' },
-    'Chem Biol': {'ja': '/chemistry-biology' },
-    'Curr Biol': {'ja': '/current-biology' },
-    'Dev Cell': {'ja': '/developmental-cell' },
-    'Immunity': {'ja': '/immunity' },
-    'Mol Cell': {'ja': '/molecular-cell' },
-    'Neuron': {'ja': '/neuron' },
-    'Structure': {'ja': '/structure' },
-    'Trends Mol Med': { 'ja': '/trends' },
+    'Am J Hum Genet': {'ja': '/AJHG'},
+    'Biophys J': {'ja': '/biophysj'},
+    'Cancer Cell': {'ja': '/cancer-cell'},
+    'Cell': {'ja': ''},
+    'Cell Host Microbe': {'ja': '/cell-host-microbe'},
+    'Cell Metab': {'ja': '/cell-metabolism'},
+    'Cell Stem Cell': {'ja': '/cell-stem-cell'},
+    'Chem Biol': {'ja': '/chemistry-biology'},
+    'Curr Biol': {'ja': '/current-biology'},
+    'Dev Cell': {'ja': '/developmental-cell'},
+    'Immunity': {'ja': '/immunity'},
+    'Mol Cell': {'ja': '/molecular-cell'},
+    'Neuron': {'ja': '/neuron'},
+    'Structure': {'ja': '/structure'},
+    'Trends Mol Med': { 'ja': '/trends'},
     }
 
 # nature journals -- COMPLETE
@@ -323,12 +276,12 @@ simple_formats_doi = {
     'Ann Hum Biol': format_templates['informa'],
     'Hemoglobin': format_templates['informa'],
     'J Matern Fetal Neonatal Med': format_templates['informa'],
+    'Ophthalmic Genet': format_templates['informa'],
     'Platelets': format_templates['informa'],
     'Ren Fail': format_templates['informa'],
     'Xenobiotica': format_templates['informa'],
 
     'Am J Public Health': 'http://ajph.aphapublications.org/doi/pdf/{a.doi}',
-
     'Am J Respir Cell Mol Biol': format_templates['ats'],
     'Am J Respir Crit Care Med': format_templates['ats'],
 
@@ -341,7 +294,11 @@ simple_formats_doi = {
     'Genet Test Mol Biomarkers': format_templates['liebert'],
     'Thyroid': format_templates['liebert'],
 
+    'Cancer Biol Ther': format_templates['taylor_francis'],
+    'Health Commun': format_templates['taylor_francis'],
+
     'Endocrinology': 'http://press.endocrine.org/doi/pdf/{a.doi}',
+    'Endocr Rev': 'http://press.endocrine.org/doi/pdf/{a.doi}',
     'Mol Endocrinol': 'http://press.endocrine.org/doi/pdf/{a.doi}',
     'J Periodontol': 'http://www.joponline.org/doi/pdf/{a.doi}',
 
@@ -432,6 +389,7 @@ vip_journals = {
         'Arterioscler Thromb Vasc Biol': { 'host' : 'atvb.ahajournals.org' },
         'Brain': { 'host': 'brain.oxfordjournals.org' },
         'Breast Cancer Res': { 'host': 'breast-cancer-research.com' },
+        'Br J Anaesth': { 'host': 'bja.oxfordjournals.org' },
         'Cancer Discov': { 'host': 'cancerdiscovery.aacrjournals.org' },
         'Cancer Epidemiol Biomarkers Prev': { 'host': 'cebp.aacrjournals.org' },
         'Cancer Res': { 'host': 'cancerres.aacrjournals.org' },
@@ -498,7 +456,8 @@ vip_journals = {
         'Nephrol Dial Transplant': { 'host': 'ndt.oxfordjournals.org' },
         'Nucleic Acids Res': { 'host' : 'nar.oxfordjournals.org' },
         'Orphanet J Rare Dis': { 'host' : 'ojrd.com' },
-        'Pediatrics': { 'host': 'pediatrics.aappublications.org'},
+        'Pediatrics': { 'host': 'pediatrics.aappublications.org' },
+        'Physiol Genomics': { 'host': 'physiolgenomics.physiology.org' }, #TODO: backup_url: pmid lookup strategy, e.g. http://physiolgenomics.physiology.org/cgi/pmidlookup?view=long&pmid=15252189 
         'Plant Cell': { 'host': 'www.plantcell.org' }, #TODO:  backup_url: pmid lookup strategy, e.g. http://www.plantcell.org/cgi/pmidlookup?view=long&pmid=9501112
         'Plant Cell Physiol': { 'host': 'pcp.oxfordjournals.org' },
         'Proc Natl Acad Sci USA': { 'host': 'pnas.org' },
@@ -549,6 +508,7 @@ wiley_journals = (
     'Am J Med Genet',
     'Am J Med Genet A',
     'Am J Med Genet B Neuropsychiatr Genet',
+    'Andrologia',
     'Arthritis Rheum',
     'Australas J Dermatol',
     'Basic Clin Pharmacol Toxicol',
@@ -563,6 +523,7 @@ wiley_journals = (
     'Clin Genet',
     'Clin Pharmacol Ther',
     'Diabet Med',
+    'Dev Dyn',
     'Dev Med Child Neurol',
     'Electrophoresis',
     'Environ Mol Mutagen',
@@ -571,6 +532,7 @@ wiley_journals = (
     'Eur J Haematol',
     'Eur J Neurol',
     'Exp Dermatol',
+    'Genes Cells',
     'Genes Chromosomes Cancer',
     'Genet Epidemiol',
     'Haemophilia',
@@ -625,12 +587,17 @@ wiley_journals = (
 #
 # examples:
 # 26110471 Arh Hig Rada Toksikol http://www.degruyter.com/view/j/aiht.2015.66.issue-2/aiht-2015-66-2582/aiht-2015-66-2582.xml
-#12199334: J. Pediatr. Endocrinol. Metab. -- no URL because No URL format for Journal J Pediatr Endocrinol Metab
-#12199344: J. Pediatr. Endocrinol. Metab. -- no URL because No URL format for Journal J Pediatr Endocrinol Metab
+# 12199344: J. Pediatr. Endocrinol. Metab. 
+# 25390015: Horm Mol Biol Clin Investig
 #
 # load by dx.doi.org: http://dx.doi.org/10.2478/cdth-2014-0001
 #       --> http://www.degruyter.com/view/j/cdth.2014.1.issue-1/cdth-2014-0001/cdth-2014-0001.xml
 #   PDF --> http://www.degruyter.com/dg/viewarticle.fullcontentlink:pdfeventlink/$002fj$002fcdth.2014.1.issue-1$002fcdth-2014-0001$002fcdth-2014-0001.pdf?t:ac=j$002fcdth.2014.1.issue-1$002fcdth-2014-0001$002fcdth-2014-0001.xml
+
+degruyter_journals = ( 'Arh Hig Rada Toksikol',
+                       'J Pediatr Endocrinol Metab',
+                       'Horm Mol Biol Clin Investig',
+                     )
 #
 #
 
@@ -660,6 +627,7 @@ wolterskluwer_journals = [
     'J Glaucoma',
     'J Hypertens',
     'J Investig Med',
+    'J Neuropathol Exp Neurol',
     'J Pediatr Hematol Oncol',
     'J Pediatr Gastroenterol Nutr',
     'J Trauma',
@@ -672,22 +640,25 @@ wolterskluwer_journals = [
     'Pharmacogenetics',
     'Plast Reconstr Surg',
     'Psychiatr Genet',
+    'Retina (Philadelphia, Pa)',
     ]
 
 # karger: mostly paywalled, but sometimes...
 # http://www.karger.com/Article/Pdf/351538
 
-karger_journals = [
+karger_journals = (
     'Acta Haematol',
     'Ann Nutr Metab',
     'Cell Physiol Biochem',
     'Cytogenet Genome Res',
     'Dermatology (Basel)',
+    'Eur Neurol',
+    'Fetal Diagn Ther',
     'Horm Res',
     'Hum Hered',
     'Nephron',
     'Nephron Physiol',
-    ]
+    )
 
 # springer is mostly paywalled, but sometimes...
 # http://link.springer.com/content/pdf/10.1007%2Fs13238-015-0153-5.pdf
@@ -726,7 +697,6 @@ springer_journals = [
     'Osteoporos Int',
     'Pediatr Nephrol',
     'Pharm Res',
-    'Physiol Genomics',
     'Protein Cell',
     'Rheumatol Int',
     'Tumour Biol',
