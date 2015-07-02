@@ -291,5 +291,5 @@ def the_karger_conga(pma):
     if res.headers['content-type'].find('pdf') > -1:
         return url
     else:
-        raise AccessDenied('DENIED: Karger url (%s) ' % (url, res.status_code))
+        raise AccessDenied('DENIED: Karger url (%s) did not result in a PDF' % url)
 

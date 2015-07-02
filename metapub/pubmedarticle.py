@@ -8,6 +8,7 @@ from collections import OrderedDict
 
 from .base import MetaPubObject
 from .exceptions import MetaPubError
+from .text_mining import re_numbers
 
 class PubMedArticle(MetaPubObject):
     '''This PubMedArticle class receives an XML string as its required argument
