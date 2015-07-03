@@ -77,6 +77,7 @@ lancet_journals = {
 # "piit" means pii-translated (i.e. punctuation removed)
 sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
 sciencedirect_journals = (
+    'Acad Pediatr',
     'Ann Genet',
     'Am J Pathol',
     'Am J Prev Med',

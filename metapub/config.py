@@ -3,13 +3,13 @@ from __future__ import absolute_import
 import os
 import logging
 
-PKGNAME='metapub'
+PKGNAME = 'metapub'
 
 # where to place XML (temporarily) when downloaded.
 TMPDIR = '/tmp'
 
 # email address submitted to eutils with requests (as required by their api).
-DEFAULT_EMAIL=os.getenv('EUTILS_EMAIL', 'naomi.most@invitae.com')
+DEFAULT_EMAIL = os.getenv('EUTILS_EMAIL', 'naomi.most@invitae.com')
 
 def get_process_log(filepath, loglevel=logging.INFO, name=PKGNAME+'-process'):
     log = logging.getLogger(name)
@@ -27,6 +27,7 @@ def get_data_log(filepath, name=PKGNAME+'-data'):
     datalog.propagate = False
     formatter = logging.Formatter('')
     fh = logging.FileHandler(filepath)
+    fh.setFormatter(formatter)
     datalog.addHandler(fh)
     return datalog
 
