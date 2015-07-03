@@ -1,4 +1,4 @@
-__doc__='currently-experimental mashups of various services to get needed IDs.'
+from __future__ import absolute_import
 
 from .text_mining import re_doi
 

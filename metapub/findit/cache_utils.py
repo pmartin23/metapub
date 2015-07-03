@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, absolute_import
 from datetime import datetime, timedelta
 
 def datetime_to_timestamp(dt, epoch=datetime(1970,1,1)):

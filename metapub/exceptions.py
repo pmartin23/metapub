@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from lxml.etree import XMLSyntaxError
 
 class MetaPubError(Exception):
