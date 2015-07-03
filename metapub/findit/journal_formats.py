@@ -513,6 +513,7 @@ wiley_journals = (
     'Arthritis Rheum',
     'Australas J Dermatol',
     'Basic Clin Pharmacol Toxicol',
+    'Birth Defects Res A Clin Mol Teratol',
     'BJU Int',
     'Breast J',
     'Br J Dermatol',
