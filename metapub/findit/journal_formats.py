@@ -263,6 +263,7 @@ nature_journals = {
     'Neuropsychopharmacology': {'ja': 'npp'},
     'Oncogene': {'ja': 'onc'},
     'Pediatr Res': {'ja': 'pr'},
+    'Pharmacogenomics J': {'ja': 'tpj'},
 }
 
 
