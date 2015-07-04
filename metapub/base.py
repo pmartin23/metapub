@@ -21,7 +21,7 @@ def parse_elink_response(xmlstr):
 class MetaPubObject(object):
     '''Base class for XML parsing objects (e.g. PubMedArticle)'''
 
-    def __init__(self, xmlstr, root=None):
+    def __init__(self, xmlstr, root=None, *args, **kwargs):
         if not xmlstr:
             if xmlstr == '':
                 xmlstr = 'empty'
