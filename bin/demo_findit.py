@@ -19,8 +19,9 @@ pii_pmids = ['26061871',    # Clin Trans Med
 #TODO when Dustri dance is complete
 dustri_pmids = ['26042486']
 
-karger_pmids = ['23970213'  #Ann Nutr Metab
-            ]
+karger_pmids = ['23970213',  #Ann Nutr Metab
+                '11509830',  #Cell Physiol Biochem w/ bad doi in PMA
+               ]
 
 jstage_pmids = ['11446670', '10458483'] 
 

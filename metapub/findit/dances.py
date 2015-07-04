@@ -7,7 +7,9 @@ from urlparse import urlsplit
 import requests
 from lxml.html import HTMLParser
 from lxml import etree
+
 from ..exceptions import AccessDenied, NoPDFLink
+from ..text_mining import find_doi_in_string
 
 from .journal_formats import (format_templates, sciencedirect_url, BMC_format,
                               aaas_format, aaas_journals, lancet_journals,
@@ -282,8 +284,15 @@ def the_karger_conga(pma):
     # example: 23970213.  doi = 10.1159/000351538
     #       http://www.karger.com/Article/FullText/351538
     #       http://www.karger.com/Article/Pdf/351538
-    if pma.doi:
-        baseurl = the_doi_2step(pma.doi)
+
+    if pma.doi: 
+        if find_doi_in_string(pma.doi):
+            kid = pma.doi.split('/')[1]
+            if kid.isdigit():
+                kid = str(int(kid))     # strips the zeroes that are padding the ID in the front.
+        else:
+            # sometimes the Karger ID was put in as the DOI (e.g. pmid 11509830)
+            baseurl = 'http://www.karger.com/Article/FullText/%s' % pma.doi
     else:
         raise NoPDFLink('MISSING: doi (doi lookup failed)')
     # if it directs to an "Abstract", we prolly can't get the PDF. Try anyway.
