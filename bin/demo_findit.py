@@ -5,9 +5,11 @@ older_pmids = ['2655732', '320292', '7686069', '7689822', '1287655', '7683021', 
 vip_pmids = ['1255861',     # J Virol
              '15252189',    # Physiol Genomics
              '12066726',    # Br J Anaesth (oxford)
+             '22796417',    # Bone
             ]
 
-vip_nonstandard_pmids = [ '1586703' ]  #Blood
+vip_nonstandard_pmids = [ '1586703',
+                        ]  #Blood
 
 doi_pmids = ['15727972',         # Am J Public Health
              '12170759', 

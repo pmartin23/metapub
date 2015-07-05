@@ -73,7 +73,7 @@ def find_article_from_pma(pma, use_nih=False):
         :param: use_nih (bool) default: False
         :return: (url, reason)
     '''
-    reason = None
+    reason = ''
     url = None
 
     # protect against unicode character mishaps in journal names.
@@ -216,7 +216,6 @@ def find_article_from_pma(pma, use_nih=False):
             # the front door
             url = cell_format.format(a=pma, ja=cell_journals[jrnl]['ja'],
                                      pii=pma.pii.translate(None, '-()'))
-
         else:
             reason = 'MISSING: pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
 
@@ -248,7 +247,7 @@ def find_article_from_pma(pma, use_nih=False):
         reason = 'CANTDO: this journal has been marked as being abandonware / unsourceable'
 
     # aka if url is STILL None...
-    else:
+    if not url and not reason:
         reason = 'NOFORMAT: No URL format for Journal %s' % jrnl
 
     return (url, reason)
