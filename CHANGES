@@ -88,3 +88,4 @@
 7/1/2015, 0.3.15.1, Made FindIt cacheing instantiate only once. CrossRef and FindIt objects allow supply of "debug" param for logging.
 7/1/2015, 0.3.15.2, FindIt: bugfixes to sciencedirect, karger, square_voliss_data_for_pma (whew). Consistifying "reason" messages some more.
 7/2/2015, 0.3.15.3, FindIt: Retry cache entries if NOFORMAT reason. Added taylor_francis to format_templates.
+7/2/2015, 0.3.15.4, FindIt: logic tweak to make sure NOFORMAT reason occurs for just that reason.
