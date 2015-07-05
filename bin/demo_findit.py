@@ -6,6 +6,9 @@ vip_pmids = ['1255861',     # J Virol
              '15252189',    # Physiol Genomics
              '12066726',    # Br J Anaesth (oxford)
              '22796417',    # Bone
+             '16958849',    # FEMS Microbiol Lett (oxford)
+             '17351018',    # Protein Eng Des Sel (oxford)
+             '9854186',     # J Endocrinol
             ]
 
 vip_nonstandard_pmids = [ '1586703',
@@ -13,6 +16,9 @@ vip_nonstandard_pmids = [ '1586703',
 
 doi_pmids = ['15727972',         # Am J Public Health
              '12170759', 
+             '12444763',         # Inorg Chem (acs)
+             '23136976',         # J Phys Chem A (acs)
+             '25410894',         # Pharmacogenomics
             ]
 
 pii_pmids = ['26061871',    # Clin Trans Med
@@ -25,9 +31,24 @@ karger_pmids = ['23970213',  #Ann Nutr Metab
                 '11509830',  #Cell Physiol Biochem w/ bad doi in PMA
                ]
 
+nature_pmids = ['16419642',  #Hypertens Res
+                '18830250',  #J Hum Hypertens
+                '12187393',  #Int J Obes Relat Metab Disord
+               ]
+
+springer_pmids = [
+            '25543539',     #Hum Genet
+            '25666562', 
+            ]
+
 jstage_pmids = ['11446670', '10458483'] 
 
-wiley_pmids = ['14981756', '10474162', '10470409',]
+wiley_pmids = ['14981756', 
+               '10474162', 
+               '10470409',
+               '10782214',  #Anim Genet
+               '11695191',  #Pest Manag Sci
+              ]
 
 biochemsoc_pmids = ['11776', '25896238', '11980567']
 
@@ -57,14 +78,13 @@ Lancet_pmids = ['25529582',     # marked Free Article
 
 SD_pmids = ['20000000',    # J Environ Sci (China)
             '25735572', 
-            '25543539', 
-            '25666562', 
             '24565554', 
             '10545037',
             '16644204',
             '15878741',     #Biochim Biophys Acta / http://www.sciencedirect.com/science/article/pii/S0925443905000177
             '23246278',     #Molecular Genetics and Metabolism
             '206004',       #Virology
+            '19168055',     #Eur J Pharmacol
             ]
 
 def print_urls_and_reasons_from_pmid_list(pmids):
@@ -107,6 +127,14 @@ print_urls_and_reasons_from_pmid_list(wiley_pmids)
 print ""
 print "karger:"
 print_urls_and_reasons_from_pmid_list(karger_pmids)
+
+print ""
+print "Springer:"
+print_urls_and_reasons_from_pmid_list(springer_pmids)
+
+print ""
+print "Nature:"
+print_urls_and_reasons_from_pmid_list(nature_pmids)
 
 print ""
 print "jstage:"
