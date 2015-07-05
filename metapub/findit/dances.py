@@ -291,8 +291,9 @@ def the_karger_conga(pma):
             if kid.isdigit():
                 kid = str(int(kid))     # strips the zeroes that are padding the ID in the front.
         else:
+            kid = pma.doi
             # sometimes the Karger ID was put in as the DOI (e.g. pmid 11509830)
-            baseurl = 'http://www.karger.com/Article/FullText/%s' % pma.doi
+        baseurl = 'http://www.karger.com/Article/FullText/%s' % kid
     else:
         raise NoPDFLink('MISSING: doi (doi lookup failed)')
     # if it directs to an "Abstract", we prolly can't get the PDF. Try anyway.
