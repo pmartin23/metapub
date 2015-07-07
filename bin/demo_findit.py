@@ -95,7 +95,7 @@ SD_pmids = ['20000000',    # J Environ Sci (China)
 
 def print_urls_and_reasons_from_pmid_list(pmids):
     for pmid in pmids:
-        source = FindIt(pmid=pmid)
+        source = FindIt(pmid=pmid, retry_errors=True)
         if source.url:
             print "Got: ", pmid, source.url, source.pma.journal
         else:

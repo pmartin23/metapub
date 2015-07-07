@@ -104,6 +104,8 @@ class FindIt(object):
         self.pma = None
         self._backup_url = None
 
+        retry_errors = kwargs.get('retry_errors', False)
+
         cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
         self._cache = None if cachedir is None else _get_findit_cache(cachedir)
 
@@ -123,7 +125,7 @@ class FindIt(object):
 
         try:
             if self._cache:
-                self.url, self.reason = self.load_from_cache()
+                self.url, self.reason = self.load_from_cache(retry_errors)
             else:
                 self.url, self.reason = self.load()
         except requests.exceptions.ConnectionError as error:
@@ -143,7 +145,7 @@ class FindIt(object):
         '''
         return find_article_from_pma(self.pma, use_nih=self.use_nih)
 
-    def load_from_cache(self):
+    def load_from_cache(self, retry_errors=False):
         '''Using preloaded identifiers (self.pmid, self.doi, etc), check cache
         for article lookup results. If it's not in the cache, call self.load()
         and store the results in the cache.
@@ -154,16 +156,20 @@ class FindIt(object):
         If self.load() comes up as a ConnectionError (usually indicating a problem
         with the internet connection), no result will be cached.
 
-        If cache result has reason like "NOFORMAT" or "PAYWALL", try a fresh load; 
-        there are new formats added to FindIt all the time. :)
+        If cache result has reason like "NOFORMAT", "TODO", "PAYWALL", or "CANTDO",
+        try a fresh load; there are new formats added to FindIt all the time. :)
 
         :return: (url, reason) (string or None, string or None)
         '''
+        retry_reasons = ['PAYWALL', 'TODO', 'NOFORMAT', 'CANTDO']
+        if retry_errors:
+            retry_reasons.append('TXERROR')
+
         cache_result = self._query_cache(self.pmid)
         if cache_result:
             url = cache_result['url']
             reason = '' if cache_result['reason'] is None else cache_result['reason']
-            if not reason.startswith('NOFORMAT') or reason.startswith('PAYWALL'):
+            if not reason.split(':')[0] in retry_reasons:
                 return (url, reason)
 
         url, reason = self.load()

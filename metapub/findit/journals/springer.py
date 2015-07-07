@@ -389,6 +389,7 @@ springer_journals = [
         'Protein Cell',
         'Protein J',
         'Protoplasma',
+        'Psychol Res',
         'Psychopharmacologia',
         'Psychopharmacology (Berl)',
         'Radiat Environ Biophys',
@@ -449,3 +450,4 @@ springer_journals = [
         'Zhonghua Fu Chan Ke Za Zhi',
         'Zhonghua Xue Ye Xue Za Zhi',
 ]
+

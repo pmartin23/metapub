@@ -23,7 +23,11 @@ if __name__=='__main__':
 
     pmids = open(filename, 'r').readlines()
     for pmid in [item.strip() for item in pmids if item.strip() != '']:
-        src = FindIt(pmid)
+        try:
+            src = FindIt(pmid)
+        except Exception as error:
+            print(error)
+            continue
 
         print(pmid, src.doi, src.pma.title)
         if src.url:
