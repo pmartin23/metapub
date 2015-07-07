@@ -4,6 +4,9 @@ import requests
 from metapub.findit import FindIt
 from metapub.exceptions import *
 
+from requests.packages import urllib3
+urllib3.disable_warnings()
+
 OUTPUT_DIR = 'findit'
 CURL_TIMEOUT = 4000
 

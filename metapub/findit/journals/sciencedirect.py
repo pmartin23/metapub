@@ -22,6 +22,7 @@ sciencedirect_journals = [
         'Adv Protein Chem',
         'Adv Virus Res',
         'Ageing Res Rev',
+        'Air Med J',
         'Alcohol',
         'Allergol Immunopathol (Madr)',
         'Allergol Int',
