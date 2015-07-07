@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-springer_journals = (
+springer_journals = [
         'AAPS PharmSciTech',
         'Acta Clin Croat',
         'Acta Diabetol',
@@ -448,4 +448,4 @@ springer_journals = (
         'Zhongguo Yi Xue Ke Xue Yuan Xue Bao',
         'Zhonghua Fu Chan Ke Za Zhi',
         'Zhonghua Xue Ye Xue Za Zhi',
-)
+]

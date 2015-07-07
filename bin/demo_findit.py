@@ -29,6 +29,7 @@ dustri_pmids = ['26042486']
 
 karger_pmids = ['23970213',  #Ann Nutr Metab
                 '11509830',  #Cell Physiol Biochem w/ bad doi in PMA
+                '20805699',  #Nephron Clin Pract
                ]
 
 nature_pmids = ['16419642',  #Hypertens Res
@@ -41,13 +42,18 @@ springer_pmids = [
             '25666562', 
             ]
 
-jstage_pmids = ['11446670', '10458483'] 
+jstage_pmids = ['11446670', 
+                '10458483',
+                '21297370',  #Yakugaku Zasshi
+               ] 
 
 wiley_pmids = ['14981756', 
                '10474162', 
                '10470409',
                '10782214',  #Anim Genet
                '11695191',  #Pest Manag Sci
+               '15059157',  #Acta Obstet Gynecol Scand
+               '22533155',  #Wiad Lek
               ]
 
 biochemsoc_pmids = ['11776', '25896238', '11980567']
@@ -94,7 +100,9 @@ def print_urls_and_reasons_from_pmid_list(pmids):
             print "Got: ", pmid, source.url, source.pma.journal
         else:
             print "Nope: ", pmid, source.reason, source.pma.journal
-            print "Backup URL: ", pmid, source.backup_url
+            if source.reason.startswith('NOFORMAT'):
+                from IPython import embed; embed()
+            #print "Backup URL: ", pmid, source.backup_url
 
 print ""
 print "doi journals:"

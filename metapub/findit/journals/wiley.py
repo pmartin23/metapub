@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-wiley_journals = (
+wiley_journals = [
         'APMIS',
         'Acad Emerg Med',
         'Acta Anaesthesiol Scand',
@@ -517,4 +517,4 @@ wiley_journals = (
         'Zhonghua Kou Qiang Yi Xue Za Zhi',
         'Zhonghua Yan Ke Za Zhi',
         'Zoonoses Public Health',
-)
+]

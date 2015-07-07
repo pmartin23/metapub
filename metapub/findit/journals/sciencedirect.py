@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
 sciencedirect_url = 'http://www.sciencedirect.com/science/article/pii/{piit}'
-sciencedirect_journals = (
+
+sciencedirect_journals = [
         'Acad Pediatr',
         'Acta Astronaut',
         'Acta Biomater',
@@ -356,6 +357,7 @@ sciencedirect_journals = (
         'J Adolesc Health',
         'J Affect Disord',
         'J Allergy Clin Immunol',
+        'J Allergy Clin Immunol Pract',
         'J Am Acad Child Adolesc Psychiatry',
         'J Am Acad Dermatol',
         'J Am Coll Cardiol',
@@ -734,4 +736,4 @@ sciencedirect_journals = (
         'Zhonghua Fu Chan Ke Za Zhi',
         'Zhonghua Yan Ke Za Zhi',
         'Zhonghua Yi Xue Za Zhi',
-)
+]

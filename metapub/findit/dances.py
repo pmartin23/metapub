@@ -11,15 +11,11 @@ from lxml import etree
 from ..exceptions import AccessDenied, NoPDFLink
 from ..text_mining import find_doi_in_string
 
-from .journal_formats import (doi_templates, BMC_format, aaas_format,
-                              aaas_journals, lancet_journals,
-                              nature_format, nature_journals)
-from .sciencedirect import sciencedirect_url
+from .journals import *
 
 #TODO: make configurable (somehow...)
 AAAS_USERNAME = 'nthmost'
 AAAS_PASSWORD = '434264'
-
 
 DX_DOI_URL = 'http://dx.doi.org/%s'
 def the_doi_2step(doi):
