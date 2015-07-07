@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 
 JOURNAL_CANTDO_LIST = [
     'Nat Monspel Ser Bot',
