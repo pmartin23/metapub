@@ -11,9 +11,10 @@ from lxml import etree
 from ..exceptions import AccessDenied, NoPDFLink
 from ..text_mining import find_doi_in_string
 
-from .journal_formats import (format_templates, sciencedirect_url, BMC_format,
-                              aaas_format, aaas_journals, lancet_journals,
+from .journal_formats import (doi_templates, BMC_format, aaas_format,
+                              aaas_journals, lancet_journals,
                               nature_format, nature_journals)
+from .sciencedirect import sciencedirect_url
 
 #TODO: make configurable (somehow...)
 AAAS_USERNAME = 'nthmost'
@@ -39,7 +40,7 @@ def the_jci_polka(pma):
     '''
     # approach: pii with dx.doi.org fallback to get pdf "view" page; scrape pdf download link.
     if pma.pii:
-        starturl = format_templates['jci'].format(a=pma)
+        starturl = doi_templates['jci'].format(a=pma)
     elif pma.doi:
         starturl = the_doi_2step(pma.doi)
         starturl = starturl + '/pdf'
@@ -168,7 +169,7 @@ def the_wiley_shuffle(pma):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
-    res = requests.get(format_templates['wiley'].format(a=pma))
+    res = requests.get(doi_templates['wiley'].format(a=pma))
     if res.headers['content-type'].find('html') > -1:
         if res.text.find('ACCESS DENIED') > -1:
             raise AccessDenied('DENIED: Wiley E Publisher says no to %s' % res.url)
@@ -188,7 +189,7 @@ def the_lancet_tango(pma):
          :raises: AccessDenied, NoPDFLink
     '''
     if pma.pii:
-        return format_templates['lancet'].format(a=pma, ja=lancet_journals[pma.journal.translate(None, '.')]['ja'])
+        return doi_templates['lancet'].format(a=pma, ja=lancet_journals[pma.journal.translate(None, '.')]['ja'])
     if pma.doi:
         return the_doi_2step(pma.doi).replace('abstract', 'pdf').replace('article', 'pdfs')
     else:

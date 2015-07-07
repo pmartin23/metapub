@@ -42,9 +42,14 @@ from ..convert import doi2pmid
 from ..utils import asciify
 from ..exceptions import MetaPubError
 
-from .journal_formats import *
+#from .sciencedirect import sciencedirect_journals
+#from .wiley import wiley_journals 
+#from .springer import springer_journals
+#from .journal_formats import *
+#from .journal_cantdo_list import JOURNAL_CANTDO_LIST
+
+from .journals import *
 from .dances import *
-from .journal_cantdo_list import JOURNAL_CANTDO_LIST
 
 def find_article_from_pma(pma, use_nih=False):
     '''The real workhorse of FindIt.
