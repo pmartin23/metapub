@@ -37,15 +37,13 @@ import requests
 import os, time
 import logging
 
-from ..base import Borg
 from ..exceptions import MetaPubError
 from ..pubmedfetcher import PubMedFetcher
 from ..convert import PubMedArticle2doi_with_score, doi2pmid
 from ..eutils_common import SQLiteCache, get_cache_path
 
-#from .journal_formats import *
 from .logic import find_article_from_pma
-from .dances import the_sciencedirect_disco, the_doi_2step
+from .dances import the_sciencedirect_disco, the_doi_2step, the_wiley_shuffle
 from .cache_utils import datetime_to_timestamp
 
 FETCH = PubMedFetcher()
@@ -156,8 +154,8 @@ class FindIt(object):
         If self.load() comes up as a ConnectionError (usually indicating a problem
         with the internet connection), no result will be cached.
 
-        If cache result has reason like "NOFORMAT", try a fresh load -- there are
-        new formats added to FindIt all the time. :)
+        If cache result has reason like "NOFORMAT" or "PAYWALL", try a fresh load; 
+        there are new formats added to FindIt all the time. :)
 
         :return: (url, reason) (string or None, string or None)
         '''
@@ -165,7 +163,7 @@ class FindIt(object):
         if cache_result:
             url = cache_result['url']
             reason = '' if cache_result['reason'] is None else cache_result['reason']
-            if not reason.startswith('NOFORMAT'):
+            if not reason.startswith('NOFORMAT') or reason.startswith('PAYWALL'):
                 return (url, reason)
 
         url, reason = self.load()
