@@ -20,6 +20,7 @@ nature_journals = {
     'Mod Pathol': {'ja': 'modpathol'},
     'Mol Psychiatry': {'ja': 'mp'},
     'Nature': {'ja': 'nature'},
+    'Nat Cell Biol': {'ja': 'ncb'},
     'Nat Chem': {'ja': 'nchem'},
     'Nat Clin Pract Endocrinol Metab': {'ja': 'nrendo'},
     'Nat Clin Pract Cardiovasc Med': {'ja': 'nrcardio'},
