@@ -83,6 +83,7 @@ class FindIt(object):
         source.pmid
         source.doi
         source.doi_score
+        source.availability
 
         The "doi_score" is an indication of where the DOI for this PMID ended up
         coming from. If it was supplied by the user or by PubMed, doi_score will be 10.

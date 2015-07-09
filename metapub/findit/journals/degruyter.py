@@ -13,6 +13,7 @@ from __future__ import absolute_import
 # http://www.degruyter.com/dg/viewarticle.fullcontentlink:pdfeventlink/$002fj$002fcdth.2014.1.issue-1$002fcdth-2014-0001$002fcdth-2014-0001.pdf?t:ac=j$002fcdth.2014.1.issue-1$002fcdth-2014-0001$002fcdth-2014-0001.xml
 
 degruyter_journals = ('Arh Hig Rada Toksikol',
+                      'Clin Chem Lab Med',
                       'J Pediatr Endocrinol Metab',
                       'Horm Mol Biol Clin Investig',
                       )

@@ -8,8 +8,11 @@ karger_format = 'http://www.karger.com/Article/Pdf/{kid}'
 
 karger_journals = [
         'Acta Cytol',
+        'Acta Genet Stat Med',
         'Acta Haematol',
+        'Adv Otorhinolaryngol',
         'Am J Nephrol',
+        'AMA Arch Ophthalmol',
         'Ann Nutr Metab',
         'Audiol Neurootol',
         'Biol Neonate',
