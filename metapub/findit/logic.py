@@ -190,11 +190,12 @@ def find_article_from_pma(pma, use_nih=False):
 
     elif jrnl in spandidos_journals.keys():
         pma = square_voliss_data_for_pma(pma)
-        if pma.volume and pma.issue:
-            url = spandidos_format.format(ja=spandidos_journals[jrnl]['ja'], a=pma)
-        else:
+        try:
+            url = the_spandidos_lambada(pma)
+        except MetaPubError as error:
+            reason = str(error)
             # TODO: try the_doi_2step
-            reason = 'MISSING: vip - volume and maybe also issue data missing from PubMedArticle'
+            #reason = 'MISSING: vip - volume and maybe also issue data missing from PubMedArticle'
 
     elif jrnl in jci_journals:
         try:

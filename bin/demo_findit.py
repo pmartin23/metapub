@@ -100,8 +100,8 @@ def print_urls_and_reasons_from_pmid_list(pmids):
             print "Got: ", pmid, source.url, source.pma.journal
         else:
             print "Nope: ", pmid, source.reason, source.pma.journal
-            if source.reason.startswith('NOFORMAT'):
-                from IPython import embed; embed()
+            #if source.reason.startswith('NOFORMAT'):
+            #    from IPython import embed; embed()
             #print "Backup URL: ", pmid, source.backup_url
 
 print ""
