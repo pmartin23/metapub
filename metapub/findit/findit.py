@@ -96,6 +96,7 @@ class FindIt(object):
         self.doi = kwargs.get('doi', None)
         self.url = kwargs.get('url', None)
         self.reason = None
+        self.availability = 0
         self.use_nih = kwargs.get('use_nih', False)
         self.use_crossref = kwargs.get('use_crossref', True)
         self.doi_min_score = kwargs.get('doi_min_score', 2.3)

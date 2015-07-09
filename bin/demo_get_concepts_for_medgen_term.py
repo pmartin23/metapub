@@ -3,6 +3,8 @@ import sys
 from tabulate import tabulate
 from metapub import MedGenFetcher
 
+HAS_GENES_ONLY = False
+
 try:
     term = sys.argv[1]
 except IndexError:
@@ -37,6 +39,9 @@ def _join_or_NA(some_list, select=None, joiner=','):
 
 for this_id in uids:
     concept = fetch.concept_by_uid(this_id)
+
+    if HAS_GENES_ONLY and concept.associated_genes == []:
+        continue
     #print concept.to_dict()
     assert concept.medgen_uid == this_id
     line = [concept.CUI, term, concept.title, concept.semantic_type, concept.medgen_uid]
