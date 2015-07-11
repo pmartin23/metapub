@@ -55,3 +55,8 @@ class TestFindItDances(unittest.TestCase):
         else:
             assert source.url == 'http://www.jci.org/articles/view/82041/version/1/pdf/render'
 
+    def test_jstage_dive(self):
+        pmid = 21297370
+        source = FindIt(pmid=pmid)
+        assert source.url == 'https://www.jstage.jst.go.jp/article/yakushi/131/2/131_2_247/_pdf'
+

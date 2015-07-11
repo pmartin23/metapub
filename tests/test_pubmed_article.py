@@ -304,8 +304,9 @@ class TestPubMedArticle(unittest.TestCase):
         pmid = str(random.randint(22222222, 23333333))
         try:
             article = self.fetch.article_by_pmid(pmid)
-            assert article.pmid == pmid
-            assert article.title is not None
+            if article is not None:
+                assert article.pmid == pmid
+                assert article.title is not None
         except InvalidPMID, e:
             print "PMID %i returned InvalidPMID response (which is totally OK). Run test again!" % pmid
         

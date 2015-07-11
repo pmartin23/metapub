@@ -56,6 +56,10 @@ wiley_pmids = ['14981756',
                '22533155',  #Wiad Lek
               ]
 
+jama_pmids = ['8765374',    # Schweiz Med Wochenschr
+              '13217497',   #AMA Arch Intern Med
+             ]
+
 biochemsoc_pmids = ['11776', '25896238', '11980567']
 
 JAMA_pmids = ['25742465', '23754022', '25739104']
@@ -127,6 +131,10 @@ print_urls_and_reasons_from_pmid_list(PMC_pmids)
 print ""
 print "Biochemical Society:"
 print_urls_and_reasons_from_pmid_list(biochemsoc_pmids)
+
+print ""
+print "JAMA jama jama jama jama chameleon:"
+print_urls_and_reasons_from_pmid_list(jama_pmids)
 
 print ""
 print "Wiley E. Publisher:"

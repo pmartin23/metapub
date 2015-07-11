@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 jama_journals = (
+    'AMA Arch Intern Med',
     'Arch Dermatol',
     'Arch Gen Psychiatry',
     'Arch Neurol',
@@ -17,4 +18,5 @@ jama_journals = (
     'JAMA Pediatr',
     'JAMA Psychiatry',
     'JAMA Surg',
+    'Schweiz Med Wochenschr',
 )

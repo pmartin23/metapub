@@ -244,8 +244,10 @@ def find_article_from_pma(pma, use_nih=False):
             reason = str(error)
 
     elif jrnl in wolterskluwer_journals:
-        url = None
-        reason = 'TODO: wolterskluwer dance needed for Journal %s' % jrnl
+        try:
+            url = the_wolterskluwer_volta(pma)
+        except MetaPubError as error:
+            reason = str(Error)
 
     elif jrnl in paywall_journals:
         reason = 'PAYWALL: this journal has been marked in a list as "never free"'

@@ -37,12 +37,13 @@ def verify_pdf_url(pdfurl, publisher_name=''):
     if res.status_code in OK_STATUS_CODES and res.headers['content-type'].find('pdf') > -1:
         return pdfurl
     else:
-        raise NoPDFLink('DENIED: %s url (%s) did not result in a PDF' % (publisher_name, url))
+        raise NoPDFLink('DENIED: %s url (%s) did not result in a PDF' % (publisher_name, pdfurl))
 
-def the_jci_polka(pma):
+def the_jci_polka(pma, verify=True):
     '''Dance of the Journal of Clinical Investigation, which should be largely free.
 
          :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
@@ -56,10 +57,17 @@ def the_jci_polka(pma):
         raise NoPDFLink('MISSING: pii, doi (doi lookup failed)')
 
     # Iter 1: do this until we see it stop working. (Iter 2: scrape download link from page.)
-    return starturl.replace('/pdf', '/version/1/pdf/render')
+    url = starturl.replace('/pdf', '/version/1/pdf/render')
+    if verify:
+        verify_pdf_url(url, 'JCI')
+    return url
 
-def the_sciencedirect_disco(pma):
-    '''  :param: pma (PubMedArticle object)
+def the_sciencedirect_disco(pma, verify=True):
+    '''Note: verify=True required to find link.  Parameter supplied only for unity 
+       with other dances.
+
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
@@ -91,11 +99,15 @@ def the_sciencedirect_disco(pma):
         return url
     else:
         # give up, it's probably a "shopping cart" link.
-        # TODO: parse return, raise more nuanced exceptions here.
         raise NoPDFLink('DENIED: ScienceDirect did not provide pdf link (probably paywalled)')
 
-def the_biomed_calypso(pma):
-    '''  :param: pma (PubMedArticle object)
+def the_biomed_calypso(pma, verify=False):
+    '''Note: verification turned off by default because BMC is an all-open-access publisher.
+
+       (You may still like to use verify=True to make sure it's a valid link.)
+
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: False]
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
@@ -104,11 +116,17 @@ def the_biomed_calypso(pma):
         article_id = baseid.split('/')[1]
     else:
         raise NoPDFLink('MISSING: doi needed for BMC article')
-    return BMC_format.format(aid=article_id)
+    url = BMC_format.format(aid=article_id)
+    if verify:
+        verify_pdf_url(url, 'BMC')
+    return url
 
 
 def the_aaas_tango(pma, verify=True):
-    '''  :param: pma (PubMedArticle object)
+    '''Note: "verify" param recommended here (page navigation usually necessary).
+    
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
@@ -119,10 +137,14 @@ def the_aaas_tango(pma, verify=True):
     else:
         raise NoPDFLink('MISSING: doi, vip (doi lookup failed)')
 
+    if not verify:
+        return pdfurl
+
     response = requests.get(pdfurl)
     if response.status_code == 200 and response.headers['content-type'].find('pdf') > -1:
         return response.url
 
+    #TODO: form navigation
     if response.status_code == 200 and response.headers['content-type'].find('html') > -1:
         tree = etree.fromstring(response.content, HTMLParser())
         form = tree.cssselect('form')[1]
@@ -150,18 +172,22 @@ def the_jama_dance(pma, verify=True):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
-    #TODO: form navigation
 
-    url = the_doi_2step(pma.doi)
-    res = requests.get(url)
+    baseurl = the_doi_2step(pma.doi)
+    res = requests.get(baseurl)
     parser = HTMLParser()
     tree = etree.fromstring(res.text, parser)
     # we're looking for a meta tag like this:
     # <meta name="citation_pdf_url" content="http://archneur.jamanetwork.com/data/Journals/NEUR/13776/NOC40008.pdf" />
     for item in tree.findall('head/meta'):
         if item.get('name') == 'citation_pdf_url':
-            return item.get('content')
-    raise NoPDFLink('DENIED: JAMA did not provide PDF link in (%s).' % url)
+            pdfurl = item.get('content')
+        else:
+            raise NoPDFLink('DENIED: JAMA did not provide PDF link in (%s).' % baseurl)
+    if verify:
+        #TODO: form navigation
+        verify_pdf_url(pdfurl, 'JAMA')
+    return pdfurl
 
 def the_jstage_dive(pma, verify=True):
     '''  :param: pma (PubMedArticle object)
@@ -173,11 +199,15 @@ def the_jstage_dive(pma, verify=True):
     res = requests.get(url)
     if res.url.find('jstage') > -1:
         url = res.url.replace('_article', '_pdf')
+        pdfpos = url.find('_pdf')
+        # remove everything after the "_pdf" part
+        url = url[:pdfpos+4]
+
     #else:
     #    raise NoPDFLink('TXERROR: %s did not resolve to jstage article' % url)
 
     if verify:
-        verify_url(url, 'jstage')
+        verify_pdf_url(url, 'jstage')
     return url
 
 
@@ -207,7 +237,7 @@ def the_wiley_shuffle(pma, verify=True):
             raise NoPDFLink('TXERROR: Wiley says File Not found (%s)' % res.url)
         iframe = tree.find('body/div/iframe')
         url = iframe.get('src')
-        verify_pdf_url(url)
+        verify_pdf_url(url, 'Wiley')
         return url
 
     elif res.headers['content-type'].find('pdf' > -1):
@@ -228,7 +258,7 @@ def the_lancet_tango(pma, verify=True):
         raise NoPDFLink('MISSING: pii, doi (doi lookup failed)')
     
     if verify:
-        verify_pdf_url
+        verify_pdf_url(url, 'Lancet')
     return url
 
 def the_nature_ballet(pma, verify=True):
@@ -262,10 +292,15 @@ def the_nature_ballet(pma, verify=True):
 
 PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 EUROPEPMC_PDF_URL = 'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC{a.pmc}&blobtype=pdf'
-def the_pmc_twist(pma, use_nih=True, verify=False):
-    '''  :param: pma (PubMedArticle object)
+def the_pmc_twist(pma, verify=True, use_nih=False):
+    '''Look up article in EuropePMC.org.  If not found there, fall back to NIH (if use_nih
+    is True).
+
+       Note: verification highly recommended. EuropePMC has most articles, but not everything.
+
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
          :param: use_nih (bool) [default: False]
-         :param: verify (bool) [default: False]
          :return: url
          :raises: NoPDFLink
     '''
@@ -275,25 +310,27 @@ def the_pmc_twist(pma, use_nih=True, verify=False):
 
     url = EUROPEPMC_PDF_URL.format(a=pma)
 
+    if not verify:
+        return url
+
     try:
         verify_pdf_url(url, 'EuropePMC')
         return url
+
     except (NoPDFLink, AccessDenied):
-        pass
-
-    # Fallback to using NIH.gov if we're allowing it.        
-    if use_nih:
-        #   URL block might be discerned by grepping for this:
-        #
-        #   <div class="el-exception-reason">Bulk downloading of content by IP address [162.217...,</div>
-        url = PMC_PDF_URL.format(a=pma)
-        verify_pdf_url(url, 'NIH (EuropePMC fallback)')
-        return url
-
-    raise NoPDFLink('TXERROR: could not get PDF from EuropePMC.org and USE_NIH set to False')
+        # Fallback to using NIH.gov if we're allowing it.        
+        if use_nih:
+            #   URL block might be discerned by grepping for this:
+            #
+            #   <div class="el-exception-reason">Bulk downloading of content by IP address [162.217...,</div>
+            url = PMC_PDF_URL.format(a=pma)
+            verify_pdf_url(url, 'NIH (EuropePMC fallback)')
+            return url
+    finally:
+        raise NoPDFLink('TXERROR: could not get PDF from EuropePMC.org and USE_NIH set to False')
 
 
-def the_springer_shag(pma):
+def the_springer_shag(pma, verify=True):
     '''  :param: pma (PubMedArticle object)
          :param: verify (bool) [default: True]
          :return: url
@@ -308,7 +345,7 @@ def the_springer_shag(pma):
     url = baseurl.replace('article', 'content/pdf') + '.pdf'
 
     if verify:
-        verify_pdf_url(url)
+        verify_pdf_url(url, 'Springer')
     return url
 
 def the_karger_conga(pma, verify=True):
@@ -360,5 +397,29 @@ def the_spandidos_lambada(pma, verify=True):
 
     if verify:
         verify_pdf_url(url, 'Spandidos')
+    return url
+
+
+def the_wolterskluwer_volta(pma, verify=True):
+    '''  :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
+         :return: url
+         :raises: AccessDenied, NoPDFLink
+    '''
+    doiurl = 'http://content.wkhealth.com/linkback/openurl?doi=%s'
+    volissurl = 'http://content.wkhealth.com/linkback/openurl?issn={a.issn}&volume={a.volume}&issue={a.issue}&spage={a.first_page}'
+    if pma.doi:
+        baseurl = requests.get(doiurl % pma.doi).url
+    elif pma.issn:
+        pma = square_voliss_data_for_pma(pma)
+        baseurl = requests.get(volissurl.format(a=pma)).url
+        
+    tree = etree.fromstring(res.text, HTMLParser())
+    item = tree.cssselect('li.ej-box-01-body-li-article-tools-pdf')[0]
+    link = item.getchildren()[0]
+
+    url = link.get('href')
+    if verify:
+        return verify_pdf_url(url)
     return url
 
