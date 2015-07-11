@@ -414,10 +414,13 @@ def the_wolterskluwer_volta(pma, verify=True):
         pma = square_voliss_data_for_pma(pma)
         baseurl = requests.get(volissurl.format(a=pma)).url
         
+    res = requests.get(baseurl)
     tree = etree.fromstring(res.text, HTMLParser())
-    item = tree.cssselect('li.ej-box-01-body-li-article-tools-pdf')[0]
+    try:
+        item = tree.cssselect('li.ej-box-01-body-li-article-tools-pdf')[0]
+    except IndexError:
+        raise NoPDFLink('DENIED: wolterskluwer did not provide PDF link for this article')
     link = item.getchildren()[0]
-
     url = link.get('href')
     if verify:
         return verify_pdf_url(url)

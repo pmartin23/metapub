@@ -703,7 +703,6 @@ sciencedirect_journals = [
         'Transl Res',
         'Transpl Immunol',
         'Transplant Proc',
-        'Transplantation',
         'Travel Med Infect Dis',
         'Trends Biochem Sci',
         'Trends Cardiovasc Med',

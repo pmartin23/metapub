@@ -105,6 +105,7 @@ wolterskluwer_journals = [
     'Neurologist',
     'Neuroreport',
     'Neurosurgery',
+    'Nucl Med Commun',
     'Obstet Gynecol',
     'Obstet Gynecol Surv',
     'Optom Vis Sci',
@@ -126,6 +127,7 @@ wolterskluwer_journals = [
     'South Med J',
     'Spine',
     'Ther Drug Monit',
+    'Transplantation',
     'Zhonghua Yu Fang Yi Xue Za Zhi',
 ]
 

@@ -210,6 +210,13 @@ class FindIt(object):
             except Exception as error:
                 self._log.debug('%r', error)
 
+        # maybe it's wolterskluwer:
+        elif urlp.hostname.find('pt.wkhealth.com') > -1:
+            try:
+                self._backup_url = the_wolterskluwer_volta(self.pma)
+            except Exception as error:
+                self._log.debug('%r', error)
+
         #TODO maybe it's an "early" print? if so it might look like this:
         #
         # if urlp.path.find('early'):
