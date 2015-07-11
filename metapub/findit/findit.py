@@ -43,7 +43,7 @@ from ..convert import PubMedArticle2doi_with_score, doi2pmid
 from ..eutils_common import SQLiteCache, get_cache_path
 
 from .logic import find_article_from_pma
-from .dances import the_sciencedirect_disco, the_doi_2step, the_wiley_shuffle
+from .dances import the_sciencedirect_disco, the_doi_2step, the_wiley_shuffle, the_wolterskluwer_volta
 from .cache_utils import datetime_to_timestamp
 
 FETCH = PubMedFetcher()
@@ -209,6 +209,8 @@ class FindIt(object):
                 self._backup_url = the_wiley_shuffle(self.pma)
             except Exception as error:
                 self._log.debug('%r', error)
+                self._backup_url = None
+                return None
 
         # maybe it's wolterskluwer:
         elif urlp.hostname.find('pt.wkhealth.com') > -1:
@@ -216,6 +218,8 @@ class FindIt(object):
                 self._backup_url = the_wolterskluwer_volta(self.pma)
             except Exception as error:
                 self._log.debug('%r', error)
+                self._backup_url = None
+                return None
 
         #TODO maybe it's an "early" print? if so it might look like this:
         #

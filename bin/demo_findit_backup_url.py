@@ -29,7 +29,10 @@ def try_backup_url(pmid):
     else:
         print pmid, source.pma.journal, source.reason
         try:
-            print pmid, source.pma.journal, source.backup_url, try_request(source.backup_url)
+            if source.backup_url is not None:
+                print pmid, source.pma.journal, source.backup_url, try_request(source.backup_url)
+            else:
+                print pmid, source.pma.journal, "no backup url"
         except Exception, e:
             print pmid, '%r' % e
 

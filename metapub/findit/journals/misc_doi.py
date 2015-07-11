@@ -38,6 +38,7 @@ simple_formats_doi = {
 
     'Anal Chem': doi_templates['acs'],
     'ACS Appl Mater': doi_templates['acs'],
+    'ACS Nano': doi_templates['acs'],
     'Biochemistry': doi_templates['acs'],
     'Chem Res Toxicol': doi_templates['acs'],
     'Inorg Chem': doi_templates['acs'],
@@ -45,6 +46,8 @@ simple_formats_doi = {
     'J Am Chem Soc': doi_templates['acs'],
     'J Med Chem': doi_templates['acs'],
     'J Phys Chem A': doi_templates['acs'],
+    'Langmuir': doi_templates['acs'],
+    'Nano Lett': doi_templates['acs'],
 
     #http://www.bioone.org/action/showPublications?type=byAlphabet
     #'TODO': 'http://www.bioone.org/doi/pdf/{a.doi}',
@@ -55,6 +58,7 @@ simple_formats_doi = {
     'Genet Test': doi_templates['liebert'],
     'Genet Test Mol Biomarkers': doi_templates['liebert'],
     'Thyroid': doi_templates['liebert'],
+    'Vector Borne Zoonotic Dis': doi_templates['liebert'],
 
     'Pharmacogenomics': doi_templates['futuremed'],
 
@@ -62,6 +66,7 @@ simple_formats_doi = {
     'Biosci Biotechnol Biochem': doi_templates['taylor_francis'],
     'Cancer Biol Ther': doi_templates['taylor_francis'],
     'Cell Cycle': doi_templates['taylor_francis'],
+    'Environ Technol': doi_templates['taylor_francis'],
     'Health Commun': doi_templates['taylor_francis'],
     'J Biomol Struct Dyn': doi_templates['taylor_francis'],
     'J Pers Assess': doi_templates['taylor_francis'],
