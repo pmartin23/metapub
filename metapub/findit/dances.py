@@ -235,6 +235,8 @@ def the_wiley_shuffle(pma, verify=True):
         tree = etree.fromstring(res.text, HTMLParser())
         if tree.find('head/title').text.find('Not Found') > -1:
             raise NoPDFLink('TXERROR: Wiley says File Not found (%s)' % res.url)
+        elif tree.find('head/title').text.find('Maintenance') > -1:
+            raise NoPDFLink('TXERROR: Wiley site under scheduled maintenance -- try again later (url was %s).' % res.url)
         iframe = tree.find('body/div/iframe')
         url = iframe.get('src')
         verify_pdf_url(url, 'Wiley')
@@ -326,8 +328,7 @@ def the_pmc_twist(pma, verify=True, use_nih=False):
             url = PMC_PDF_URL.format(a=pma)
             verify_pdf_url(url, 'NIH (EuropePMC fallback)')
             return url
-    finally:
-        raise NoPDFLink('TXERROR: could not get PDF from EuropePMC.org and USE_NIH set to False')
+    raise NoPDFLink('TXERROR: could not get PDF from EuropePMC.org and USE_NIH set to False')
 
 
 def the_springer_shag(pma, verify=True):

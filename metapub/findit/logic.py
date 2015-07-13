@@ -51,7 +51,7 @@ from ..exceptions import MetaPubError
 from .journals import *
 from .dances import *
 
-def find_article_from_pma(pma, use_nih=False):
+def find_article_from_pma(pma, verify=True, use_nih=False):
     '''The real workhorse of FindIt.
 
         Based on the contents of the supplied PubMedArticle object, this function
@@ -96,7 +96,7 @@ def find_article_from_pma(pma, use_nih=False):
 
     if pma.pmc:
         try:
-            url = the_pmc_twist(pma, use_nih)
+            url = the_pmc_twist(pma, verify, use_nih)
             return (url, None)
         except MetaPubError as error:
             reason = str(error)
@@ -150,48 +150,48 @@ def find_article_from_pma(pma, use_nih=False):
     if jrnl in jstage_journals:
         if pma.doi:
             try:
-                url = the_jstage_dive(pma)
+                url = the_jstage_dive(pma, verify)
             except MetaPubError as error:
                 reason = str(error)
 
     elif jrnl.find('BMC') == 0 or jrnl in BMC_journals:
         # Many Biomed Central journals start with "BMC", but many more don't.
         try:
-            url = the_biomed_calypso(pma)
+            url = the_biomed_calypso(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
     elif jrnl in springer_journals:
         if pma.doi:
             try:
-                url = the_springer_shag(pma)
+                url = the_springer_shag(pma, verify)
             except MetaPubError as error:
                 reason = str(error)
 
     elif jrnl in wiley_journals:
         if pma.doi:
             try:
-                url = the_wiley_shuffle(pma)
+                url = the_wiley_shuffle(pma, verify)
             except MetaPubError as error:
                 reason = str(error)
 
     elif jrnl in jama_journals:
         try:
-            url = the_jama_dance(pma)
+            url = the_jama_dance(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
     elif jrnl in aaas_journals.keys():
         pma = square_voliss_data_for_pma(pma)
         try:
-            url = the_aaas_tango(pma)
+            url = the_aaas_tango(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
     elif jrnl in spandidos_journals.keys():
         pma = square_voliss_data_for_pma(pma)
         try:
-            url = the_spandidos_lambada(pma)
+            url = the_spandidos_lambada(pma, verify)
         except MetaPubError as error:
             reason = str(error)
             # TODO: try the_doi_2step
@@ -199,21 +199,22 @@ def find_article_from_pma(pma, use_nih=False):
 
     elif jrnl in jci_journals:
         try:
-            url = the_jci_polka(pma)
+            url = the_jci_polka(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
     elif jrnl in biochemsoc_journals.keys():
         pma = square_voliss_data_for_pma(pma)
+        # TODO: move to dances
         if pma.volume and pma.issue:
             host = biochemsoc_journals[jrnl]['host']
             url = biochemsoc_format.format(a=pma, host=host, ja=biochemsoc_journals[jrnl]['ja'])
         else:
-            reason = 'MISSING: vip - volume and maybe also issue data missing from PubMedArticle'
+            reason = 'MISSING: vip - volume and/or issue data missing from PubMedArticle'
 
     elif jrnl in nature_journals.keys():
         try:
-            url = the_nature_ballet(pma)
+            url = the_nature_ballet(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
@@ -227,25 +228,25 @@ def find_article_from_pma(pma, use_nih=False):
 
     elif jrnl.find('Lancet') > -1:
         try:
-            url = the_lancet_tango(pma)
+            url = the_lancet_tango(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
     elif jrnl in sciencedirect_journals:
         try:
-            url = the_sciencedirect_disco(pma)
+            url = the_sciencedirect_disco(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
     elif jrnl in karger_journals:
         try:
-            url = the_karger_conga(pma)
+            url = the_karger_conga(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
     elif jrnl in wolterskluwer_journals:
         try:
-            url = the_wolterskluwer_volta(pma)
+            url = the_wolterskluwer_volta(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
@@ -265,7 +266,7 @@ def find_article_from_pma(pma, use_nih=False):
     return (url, reason)
 
 
-def find_article_from_doi(doi, use_nih=False):
+def find_article_from_doi(doi, verify=True, use_nih=False):
     '''pull a PubMedArticle based on CrossRef lookup (using doi2pmid),
     then run it through find_article_from_pma.
 
@@ -274,5 +275,5 @@ def find_article_from_doi(doi, use_nih=False):
     '''
     fetch = PubMedFetcher()
     pma = fetch.article_by_pmid(doi2pmid(doi))
-    return find_article_from_pma(pma, use_nih=use_nih)
+    return find_article_from_pma(pma, verify=verify, use_nih=use_nih)
 

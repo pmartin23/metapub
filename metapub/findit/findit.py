@@ -90,6 +90,12 @@ class FindIt(object):
         If CrossRef came into play during the process to find a DOI that was missing
         for the PubMedArticle object, the doi_score will come from the CrossRef "top
         result".
+
+        The "availability" score is a somewhat arbitrary number between 0 and 10 denoting
+        how likely the source URL would result in acquiring the file.  PubmedCentral PDFs
+        should be availability=10 except when embargoed. "Availability" is affected by 
+        whether "verify" has been used to get the url.  If "verify" has been disabled, 
+        most scores will go down by 50%.
     '''
 
     def __init__(self, pmid=None, **kwargs):
@@ -106,6 +112,7 @@ class FindIt(object):
         self.pma = None
         self._backup_url = None
 
+        self.verify = kwargs.get('verify', True)
         retry_errors = kwargs.get('retry_errors', False)
 
         cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
@@ -127,14 +134,14 @@ class FindIt(object):
 
         try:
             if self._cache:
-                self.url, self.reason = self.load_from_cache(retry_errors)
+                self.url, self.reason = self.load_from_cache(verify=self.verify, retry_errors=retry_errors)
             else:
-                self.url, self.reason = self.load()
+                self.url, self.reason = self.load(verify=self.verify)
         except requests.exceptions.ConnectionError as error:
             self.url = None
             self.reason = 'TXERROR: %r' % error
 
-    def load(self):
+    def load(self, verify=True):
         '''interface to logic.find_article_from_pma; uses self.pma to return
         a (url, reason) tuple.
 
@@ -145,9 +152,9 @@ class FindIt(object):
 
         :return: (url, reason) (string or None, string or None)
         '''
-        return find_article_from_pma(self.pma, use_nih=self.use_nih)
+        return find_article_from_pma(self.pma, use_nih=self.use_nih, verify=True)
 
-    def load_from_cache(self, retry_errors=False):
+    def load_from_cache(self, verify=True, retry_errors=False):
         '''Using preloaded identifiers (self.pmid, self.doi, etc), check cache
         for article lookup results. If it's not in the cache, call self.load()
         and store the results in the cache.
@@ -171,11 +178,19 @@ class FindIt(object):
         if cache_result:
             url = cache_result['url']
             reason = '' if cache_result['reason'] is None else cache_result['reason']
-            if not reason.split(':')[0] in retry_reasons:
-                return (url, reason)
 
+            # if previous result was not verified, rerun it with verify=True
+            if not verify and not cache_result['verify']:
+                if not reason.split(':')[0] in retry_reasons:
+                    return (url, reason)
+
+        ### RETRY
+        # we're here for one of the following reasons:
+        # 1) no cache result for this query
+        # 2) previous result was unverified and now verify=True
+        # 3) previous result had a "reason" in retry_reasons
         url, reason = self.load()
-        self._store_cache(self.pmid, url=url, reason=reason)
+        self._store_cache(self.pmid, url=url, reason=reason, verify=verify)
         return (url, reason)
 
     @property
