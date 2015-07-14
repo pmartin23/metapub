@@ -47,6 +47,7 @@ vip_journals = {
     # http://emboj.embopress.org/cgi/pmidlookup?view=long&pmid=9501081
     'EMBO J': {'host': 'emboj.embopress.org'},
     'Endocr Relat Cancer': {'host': 'erc.endocrinology-journals.org'},
+    'Environ Entomol': {'host': 'ee.oxfordjournals.org'},
     'Eur Heart J': {'host': 'eurheartj.oxfordjournals.org'},
     'Eur J Endocrinol': {'host': 'eje-online.org'},
     'Eur Respir J': {'host': 'erj.ersjournals.com'},

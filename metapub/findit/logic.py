@@ -226,7 +226,7 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
         reason = 'TODO: format example: %s' % todo_journals[jrnl]['example']
 
     elif jrnl in JOURNAL_CANTDO_LIST:
-        reason = 'CANTDO: this journal has been marked as being abandonware / unsourceable'
+        reason = 'CANTDO: this journal has been marked as unsourceable'
 
     # aka if url is STILL None...
     if not url and not reason:

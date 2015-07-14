@@ -5,7 +5,6 @@ __author__ = 'nthmost'
 
 import os
 
-from eutils.exceptions import EutilsBadRequestError
 from lxml import etree
 import requests
 
@@ -93,16 +92,16 @@ class PubMedFetcher(Borg):
         except EutilsBadRequestError:
             raise MetaPubError('Invalid ID "%s" (rejected by Eutils); please check the number and try again.' % pmid)
 
-        if result==None:
+        if result is None:
             return None
+
         if result.find('ERROR') > -1:
             raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle' % pmid)
 
-        #try:
-        return PubMedArticle(result)
-        #except AttributeError:
-            # in this case, eutils let us fetch a good-looking pmid, but it did not parse as an article.
-        #    raise InvalidPMID('Pubmed ID "%s" not found' % pmid)
+        pma = PubMedArticle(result)
+        if pma.pmid is None:
+            raise InvalidPMID('Pubmed ID "%s" not found' % pmid)
+        return pma
 
     def _eutils_article_by_pmcid(self, pmcid):
         # if user submitted a bare number, prepend "PMC" to make sure it is submitted correctly 

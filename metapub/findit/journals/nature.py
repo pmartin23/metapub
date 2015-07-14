@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-# nature journals -- COMPLETE
-nature_format = 'http://www.nature.com/{ja}/journal/v{a.volume}/n{a.issue}/pdf/{a.pii}.pdf'
+# nature journals -- see http://www.nature.com/siteindex/index.html
 nature_format = 'http://www.nature.com/{ja}/journal/v{a.volume}/n{a.issue}/pdf/{a.pii}.pdf'
 nature_journals = {
+    'Am J Gastroenterol': {'ja': 'ajg'},
     'Eur J Clin Nutr': {'ja': 'ejcn'},
     'Eur J Hum Genet': {'ja': 'ejhg'},
     'Eye (Lond)': {'ja': 'eye'},

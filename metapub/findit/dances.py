@@ -109,6 +109,7 @@ def the_vip_shake(pma, verify=True):
     jrnl = standardize_journal_name(pma.journal)
     pma = rectify_pma_for_vip_links(pma)  #raises NoPDFLink if missing data.
     url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
+
     if verify:
         verify_pdf_url(url)
     return url
@@ -125,11 +126,6 @@ def the_vip_nonstandard_shake(pma, verify=True):
     jrnl = standardize_journal_name(pma.journal)
     pma = rectify_pma_for_vip_links(pma)  #raises NoPDFLink if missing data.
     url = vip_journals_nonstandard[jrnl].format(a=pma)
-
-    # Do we need this check?
-    #if url.find('None') > -1:
-    #    reason = 'MISSING: vip (volume or issue or page data missing from PubMedArticle)'
-    #    url = None
 
     if verify:
         verify_pdf_url(url)

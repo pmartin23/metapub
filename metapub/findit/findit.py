@@ -138,7 +138,6 @@ class FindIt(object):
             else:
                 self.url, self.reason = self.load(verify=self.verify)
         except requests.exceptions.ConnectionError as error:
-            self.url = None
             self.reason = 'TXERROR: %r' % error
 
     def load(self, verify=True):
@@ -152,7 +151,7 @@ class FindIt(object):
 
         :return: (url, reason) (string or None, string or None)
         '''
-        return find_article_from_pma(self.pma, use_nih=self.use_nih, verify=True)
+        return find_article_from_pma(self.pma, use_nih=self.use_nih, verify=verify)
 
     def load_from_cache(self, verify=True, retry_errors=False):
         '''Using preloaded identifiers (self.pmid, self.doi, etc), check cache
@@ -179,8 +178,9 @@ class FindIt(object):
             url = cache_result['url']
             reason = '' if cache_result['reason'] is None else cache_result['reason']
 
-            # if previous result was not verified, rerun it with verify=True
-            if not verify and not cache_result['verify']:
+            # Prefer cached results that were verified.
+            # Don't return cached results in retry_reasons list above. (i.e. retry)
+            if cache_result['verify'] or verify == False:
                 if not reason.split(':')[0] in retry_reasons:
                     return (url, reason)
 
@@ -189,7 +189,7 @@ class FindIt(object):
         # 1) no cache result for this query
         # 2) previous result was unverified and now verify=True
         # 3) previous result had a "reason" in retry_reasons
-        url, reason = self.load()
+        url, reason = self.load(verify=verify)
         self._store_cache(self.pmid, url=url, reason=reason, verify=verify)
         return (url, reason)
 
@@ -267,6 +267,7 @@ class FindIt(object):
         '''
 
         self.pma = FETCH.article_by_pmid(self.pmid)
+
         if self.pma.doi:
             self.doi = self.pma.doi
             self.doi_score = 10.0

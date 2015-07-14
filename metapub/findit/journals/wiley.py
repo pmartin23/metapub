@@ -465,7 +465,6 @@ wiley_journals = [
         'Public Health Nurs',
         'Rapid Commun Mass Spectrom',
         'Recenti Prog Med',
-        'Reprod Biomed Online',
         'Reprod Domest Anim',
         'Respirology',
         'Rev Med Virol',

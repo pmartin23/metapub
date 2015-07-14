@@ -19,9 +19,11 @@ def try_request(url):
             return True
 
 def load(pmid, verify=False):
-    source = FindIt(pmid=pmid, verify=verify)
-    if not source.pma:
-        return None
+    try:
+        source = FindIt(pmid=pmid, verify=verify)
+    except InvalidPMID:
+        return None        
+
     if source.url:
         print pmid, source.pma.journal, source.url      #, try_request(source.url)
         return source.url
