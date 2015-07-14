@@ -14,7 +14,7 @@ doi_templates = {
     'informa': 'http://informahealthcare.com/doi/pdf/{a.doi}',
     'lancet': 'http://www.thelancet.com/pdfs/journals/{ja}/PII{a.pii}.pdf',
     'liebert': 'http://online.liebertpub.com/doi/pdf/{a.doi}',
-    'plos': 'http://www.plosbiology.org/article/fetchObjectAttachment.action?url=info:doi/{a.doi}&representation=PDF',
+    'plos': 'http://www.plosone.org/article/fetchObjectAttachment.action?url=info:doi/{a.doi}&representation=PDF',
     'taylor_francis': 'http://www.tandfonline.com/doi/pdf/{a.doi}',
     'wiley': 'http://onlinelibrary.wiley.com/doi/{a.doi}/pdf',
     'jci': 'http://www.jci.org/articles/view/{a.pii}/pdf',

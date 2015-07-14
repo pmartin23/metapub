@@ -504,6 +504,7 @@ def the_spandidos_lambada(pma, verify=True):
          :return: url
          :raises: AccessDenied, NoPDFLink
     '''
+    jrnl = standardize_journal_name(pma.journal)
     baseurl = None
     try:
         pma = rectify_pma_for_vip_links(pma)  #raises NoPDFLink if missing data
@@ -554,6 +555,7 @@ def the_biochemsoc_saunter(pma, verify=True):
          :return: url
          :raises: AccessDenied, NoPDFLink
     '''
+    jrnl = standardize_journal_name(pma.journal)
     pma = rectify_pma_for_vip_links(pma)  #raises NoPDFLink if missing data 
     host = biochemsoc_journals[jrnl]['host']
     url = biochemsoc_format.format(a=pma, host=host, ja=biochemsoc_journals[jrnl]['ja'])
@@ -567,6 +569,7 @@ def the_cell_pogo(pma, verify=True):
          :return: url
          :raises: AccessDenied, NoPDFLink
     '''
+    jrnl = standardize_journal_name(pma.journal)
     if pma.pii:
         # the front door
         url = cell_format.format(a=pma, ja=cell_journals[jrnl]['ja'],
