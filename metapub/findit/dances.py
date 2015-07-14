@@ -41,9 +41,13 @@ def standardize_journal_name(journal_name):
 
 def verify_pdf_url(pdfurl, publisher_name=''):
     res = requests.get(pdfurl)
+    if res.status_code==401:
+        raise NoPDFLink('DENIED: %s url (%s) requires login.' % (publisher_name, pdfurl))
+
     if not res.ok:
         raise NoPDFLink('TXERROR: %i status returned from %s url (%s)' % (res.status_code, 
                             publisher_name, pdfurl))
+
     if res.status_code in OK_STATUS_CODES and res.headers['content-type'].find('pdf') > -1:
         return pdfurl
     else:

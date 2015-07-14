@@ -24,7 +24,7 @@ if __name__=='__main__':
     pmids = open(filename, 'r').readlines()
     for pmid in [item.strip() for item in pmids if item.strip() != '']:
         try:
-            src = FindIt(pmid)
+            src = FindIt(pmid, retry_errors=True)
         except Exception as error:
             print(error)
             continue
