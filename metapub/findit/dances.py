@@ -8,8 +8,10 @@ import requests
 from lxml.html import HTMLParser
 from lxml import etree
 
+from ..pubmedarticle import square_voliss_data_for_pma
 from ..exceptions import AccessDenied, NoPDFLink
 from ..text_mining import find_doi_in_string
+from ..utils import asciify
 
 from .journals import *
 
@@ -29,6 +31,14 @@ def the_doi_2step(doi):
         raise NoPDFLink('dx.doi.org lookup failed for doi %s (HTTP %i returned)' %
                         (doi, response.status_code))
 
+def standardize_journal_name(journal_name):
+    '''protect against unicode character mishaps in journal names.
+
+    Returns a "standardized" journal name with periods stripped out.'''
+    # (did you know that unicode.translate takes ONE argument whilst
+    #   str.translate takes TWO?! true story)
+    return asciify(journal_name).translate(None, '.')
+
 def verify_pdf_url(pdfurl, publisher_name=''):
     res = requests.get(pdfurl)
     if not res.ok:
@@ -39,7 +49,119 @@ def verify_pdf_url(pdfurl, publisher_name=''):
     else:
         raise NoPDFLink('DENIED: %s url (%s) did not result in a PDF' % (publisher_name, pdfurl))
 
-def the_jci_polka(pma, verify=True):
+def rectify_pma_for_vip_links(pma):
+    '''takes a PubMedArticle object and "squares" the volume/issue/page info (sometimes there
+    are weird characters in it, or sometimes the issue number is packed into the volume field,
+    stuff like that).
+
+    If volume, issue, and page data are all represented, return the PubMedArticle (possibly
+    modified).
+
+    If missing data, raise NoPDFLink('MISSING: vip...') 
+    '''
+    pma = square_voliss_data_for_pma(pma)
+    if pma.volume and pma.first_page and pma.issue:
+        return pma
+    raise NoPDFLink('MISSING: vip (volume, issue, and/or first_page missing from PubMedArticle)')
+
+def the_doi_slide(pma, verify=True):
+    '''Dance of the miscellaneous journals that use DOI in their URL construction.
+
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
+         :return: url (string)
+         :raises: AccessDenied, NoPDFLink
+    '''
+    jrnl = asciify(pma.journal).translate(None, '.')
+    if pma.doi:
+        url = simple_formats_doi[jrnl].format(a=pma)
+    else:
+        raise NoPDFLink('MISSING: doi (lookup failed)')
+
+    if verify:
+        verify_pdf_url(url)
+    return url
+
+def the_pmid_pogo(pma, verify=True):
+    '''Dance of the miscellaneous journals that use PMID in their URL construction.
+
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
+         :return: url (string)
+         :raises: AccessDenied, NoPDFLink
+    '''
+    jrnl = standardize_journal_name(pma.journal)
+    url = simple_formats_pmid[jrnl].format(pmid=pma.pmid)
+
+    if verify:
+        verify_pdf_url(url)
+    return url
+
+def the_vip_shake(pma, verify=True):
+    '''Dance of the miscellaneous journals that use volume-issue-page in their
+        URL construction
+
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
+         :return: url (string)
+         :raises: AccessDenied, NoPDFLink
+    '''
+    jrnl = standardize_journal_name(pma.journal)
+    pma = rectify_pma_for_vip_links(pma)  #raises NoPDFLink if missing data.
+    url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
+    if verify:
+        verify_pdf_url(url)
+    return url
+
+def the_vip_nonstandard_shake(pma, verify=True):
+    '''Dance of the miscellaneous journals that use volume-issue-page in their
+        URL construction (but are a little different).
+
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
+         :return: url (string)
+         :raises: AccessDenied, NoPDFLink
+    '''
+    jrnl = standardize_journal_name(pma.journal)
+    pma = rectify_pma_for_vip_links(pma)  #raises NoPDFLink if missing data.
+    url = vip_journals_nonstandard[jrnl].format(a=pma)
+
+    # Do we need this check?
+    #if url.find('None') > -1:
+    #    reason = 'MISSING: vip (volume or issue or page data missing from PubMedArticle)'
+    #    url = None
+
+    if verify:
+        verify_pdf_url(url)
+    return url
+ 
+
+def the_pii_polka(pma, verify=True):
+    '''Dance of the miscellaneous journals that use a PII in their URL construction
+        in their URL construction.
+
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
+         :return: url (string)
+         :raises: AccessDenied, NoPDFLink
+    '''
+    jrnl = standardize_journal_name(pma.journal)
+    if pma.pii:
+        url = simple_formats_pii[jrnl].format(a=pma)
+    else:
+        raise NoPDFLink('MISSING: pii missing from PubMedArticle XML (pii format)')
+
+    if url:
+        res = requests.get(url)
+        if res.text.find('Access Denial') > -1:
+            raise AccessDenied('DENIED: Access Denied by ScienceDirect (%s)' % url)
+
+    if verify:
+        verify_pdf_url(url)
+    return url
+
+
+def the_jci_jig(pma, verify=True):
     '''Dance of the Journal of Clinical Investigation, which should be largely free.
 
          :param: pma (PubMedArticle object)
@@ -130,12 +252,14 @@ def the_aaas_tango(pma, verify=True):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
-    if pma.volume and pma.issue and pma.pages:
+    try:
+        pma = rectify_pma_for_vip_links(pma)
         pdfurl = aaas_format.format(ja=aaas_journals[pma.journal]['ja'], a=pma)
-    elif pma.doi:
-        pdfurl = the_doi_2step(pma.doi) + '.full.pdf'
-    else:
-        raise NoPDFLink('MISSING: doi, vip (doi lookup failed)')
+    except NoPDFLink:
+        if pma.doi:
+            pdfurl = the_doi_2step(pma.doi) + '.full.pdf'
+        else:
+            raise NoPDFLink('MISSING: doi, vip (doi lookup failed)')
 
     if not verify:
         return pdfurl
@@ -195,16 +319,16 @@ def the_jstage_dive(pma, verify=True):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
-    url = the_doi_2step(pma.doi)
-    res = requests.get(url)
-    if res.url.find('jstage') > -1:
-        url = res.url.replace('_article', '_pdf')
-        pdfpos = url.find('_pdf')
-        # remove everything after the "_pdf" part
-        url = url[:pdfpos+4]
-
-    #else:
-    #    raise NoPDFLink('TXERROR: %s did not resolve to jstage article' % url)
+    if pma.doi:
+        url = the_doi_2step(pma.doi)
+        res = requests.get(url)
+        if res.url.find('jstage') > -1:
+            url = res.url.replace('_article', '_pdf')
+            pdfpos = url.find('_pdf')
+            # remove everything after the "_pdf" part
+            url = url[:pdfpos+4]
+    else:
+        raise NoPDFLink('MISSING: doi for dx.doi.org lookup to get jstage link')
 
     if verify:
         verify_pdf_url(url, 'jstage')
@@ -384,17 +508,17 @@ def the_spandidos_lambada(pma, verify=True):
          :return: url
          :raises: AccessDenied, NoPDFLink
     '''
-    pma = square_voliss_data_for_pma(pma)
     baseurl = None
-    if not pma.volume and pma.issue:
+    try:
+        pma = rectify_pma_for_vip_links(pma)  #raises NoPDFLink if missing data
+        url = spandidos_format.format(ja=spandidos_journals[jrnl]['ja'], a=pma)
+    except NoPDFLink:
         # let doi2step exceptions fall to calling function
         if pma.doi:
             baseurl = the_doi_2step(pma.doi)
             url = baseurl + '/download'
         else:
             raise NoPDFLink('MISSING: vip, doi - volume and/or issue missing from PubMedArticle; doi lookup failed.')
-    else:
-        url = spandidos_format.format(ja=spandidos_journals[jrnl]['ja'], a=pma)
 
     if verify:
         verify_pdf_url(url, 'Spandidos')
@@ -412,7 +536,7 @@ def the_wolterskluwer_volta(pma, verify=True):
     if pma.doi:
         baseurl = requests.get(doiurl % pma.doi).url
     elif pma.issn:
-        pma = square_voliss_data_for_pma(pma)
+        pma = rectify_pma_for_vip_links(pma)  #raises NoPDFLink if missing data
         baseurl = requests.get(volissurl.format(a=pma)).url
         
     res = requests.get(baseurl)
@@ -424,6 +548,37 @@ def the_wolterskluwer_volta(pma, verify=True):
     link = item.getchildren()[0]
     url = link.get('href')
     if verify:
-        return verify_pdf_url(url)
+        verify_pdf_url(url)
     return url
+
+
+def the_biochemsoc_saunter(pma, verify=True):
+    '''  :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
+         :return: url
+         :raises: AccessDenied, NoPDFLink
+    '''
+    pma = rectify_pma_for_vip_links(pma)  #raises NoPDFLink if missing data 
+    host = biochemsoc_journals[jrnl]['host']
+    url = biochemsoc_format.format(a=pma, host=host, ja=biochemsoc_journals[jrnl]['ja'])
+    if verify:
+        verify_pdf_url(url, 'biochemsoc')
+    return url
+
+def the_cell_pogo(pma, verify=True):
+    '''  :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
+         :return: url
+         :raises: AccessDenied, NoPDFLink
+    '''
+    if pma.pii:
+        # the front door
+        url = cell_format.format(a=pma, ja=cell_journals[jrnl]['ja'],
+                                     pii=pma.pii.translate(None, '-()'))
+        if verify:
+            verify_pdf_url(url, 'Cell')
+        return url
+    else:
+        # let the SD function raise Exceptions
+        return the_sciencedirect_disco(pma, verify)
 

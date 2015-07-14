@@ -73,6 +73,7 @@ vip_journals = {
     # TODO backup_url: pmid lookup strategy, e.g.
     # http://www.jbc.org/cgi/pmidlookup?view=long&pmid=14722075
     'J Biol Chem': {'host': 'www.jbc.org'},
+    'J Bone Joint Surg Am': {'host': 'jbjs.org'},
     'J Cell Biol': {'host': 'jcb.rupress.org'},
     'J Cell Sci': {'host': 'jcs.biologists.org'},
     'J Child Neurol': {'host': 'jcn.sagepub.com'},

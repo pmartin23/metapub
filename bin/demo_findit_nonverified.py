@@ -7,7 +7,6 @@ from metapub.exceptions import *
 from requests.packages import urllib3
 urllib3.disable_warnings()
 
-OUTPUT_DIR = 'findit'
 CURL_TIMEOUT = 4000
 
 def try_request(url):
@@ -18,16 +17,17 @@ def try_request(url):
     if response.status_code in OK_STATUS_CODES:
         if response.headers.get('content-type').find('pdf') > -1:
             return True
-    return False
 
-def try_backup_url(pmid):
-    source = FindIt(pmid=pmid, verify=False)
+def load(pmid, verify=False):
+    source = FindIt(pmid=pmid, verify=verify)
     if not source.pma:
-        return
+        return None
     if source.url:
-        print pmid, source.pma.journal, source.url, try_request(source.url)
+        print pmid, source.pma.journal, source.url      #, try_request(source.url)
+        return source.url
     else:
         print pmid, source.pma.journal, source.reason
+        return None
 
 if __name__=='__main__':
     import sys
@@ -37,7 +37,19 @@ if __name__=='__main__':
         print "Supply a pubmed ID as the starting point for this script."
         sys.exit()
 
-    for pmid in range(start_pmid, start_pmid+1000):
-        try_backup_url(pmid)
+    try:
+        end_pmid = int(sys.argv[2])
+    except IndexError, TypeError:
+        end_pmid = start_pmid + 1000
 
+    links = []
+    attempts = 0
+    for pmid in range(start_pmid, end_pmid):
+        attempts += 1
+        result = load(pmid, verify=False)
+        if result:
+            links.append(result)
+
+    print "%i links retrieved out of %i attempts" % (len(links), attempts)
+    from IPython import embed; embed()
 

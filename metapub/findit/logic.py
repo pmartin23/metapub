@@ -37,16 +37,8 @@ __author__ = 'nthmost'
 import requests, os
 
 from ..pubmedfetcher import PubMedFetcher
-from ..pubmedarticle import square_voliss_data_for_pma
 from ..convert import doi2pmid
-from ..utils import asciify
 from ..exceptions import MetaPubError
-
-#from .sciencedirect import sciencedirect_journals
-#from .wiley import wiley_journals 
-#from .springer import springer_journals
-#from .journal_formats import *
-#from .journal_cantdo_list import JOURNAL_CANTDO_LIST
 
 from .journals import *
 from .dances import *
@@ -80,11 +72,7 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
     '''
     reason = ''
     url = None
-
-    # protect against unicode character mishaps in journal names.
-    # (did you know that unicode.translate takes ONE argument whilst
-    #   str.translate takes TWO?! true story)
-    jrnl = asciify(pma.journal).translate(None, '.')
+    jrnl = standardize_journal_name(pma.journal)
 
     ##### Pubmed Central: ideally we get the article from PMC if it has a PMC id.
     #
@@ -101,46 +89,37 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
         except MetaPubError as error:
             reason = str(error)
 
-    if jrnl in simple_formats_pii.keys():
-        #TODO: move to dances
-        if pma.pii:
-            url = simple_formats_pii[jrnl].format(a=pma)
-            reason = ''
-        else:
-            url = None
-            reason = 'MISSING: pii missing from PubMedArticle XML (pii format)'
+    #### IDENTIFIER-BASED LISTS ####
 
-        if url:
-            res = requests.get(url)
-            if res.text.find('Access Denial') > -1:
-                url = None
-                reason = 'DENIED: Access Denied by ScienceDirect'
-            #TODO: handle other types of broken conditions here.
+    if jrnl in simple_formats_pii.keys():
+        try:
+            url = the_pii_polka(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     elif jrnl in simple_formats_pmid.keys():
-        url = simple_formats_pmid[jrnl].format(pmid=pma.pmid)
-        return (url, None)
+        try:
+            url = the_pmid_pogo(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     elif jrnl in simple_formats_doi.keys():
-        if pma.doi:
-            url = simple_formats_doi[jrnl].format(a=pma)
-            reason = ''
+        try:
+            url = the_doi_slide(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     elif jrnl in vip_journals.keys():
-        pma = square_voliss_data_for_pma(pma)
-        if pma.volume and pma.issue:
-            url = vip_format.format(host=vip_journals[jrnl]['host'], a=pma)
-        else:
-            # TODO: try the_doi_2step
-            reason = 'MISSING: vip (volume and maybe also issue data missing from PubMedArticle)'
+        try:
+            url = the_vip_shake(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     elif jrnl in vip_journals_nonstandard.keys():
-        pma = square_voliss_data_for_pma(pma)
-        url = vip_journals_nonstandard[jrnl].format(a=pma)
-        if url.find('None') > -1:
-            # TODO: try the_doi_2step
-            reason = 'MISSING: vip (volume or issue or page data missing from PubMedArticle)'
-            url = None
+        try:
+            url = the_vip_nonstandard_shake(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     if url:
         return (url, reason)
@@ -148,11 +127,10 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
     ##### PUBLISHER BASED LISTS #####
 
     if jrnl in jstage_journals:
-        if pma.doi:
-            try:
-                url = the_jstage_dive(pma, verify)
-            except MetaPubError as error:
-                reason = str(error)
+        try:
+            url = the_jstage_dive(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     elif jrnl.find('BMC') == 0 or jrnl in BMC_journals:
         # Many Biomed Central journals start with "BMC", but many more don't.
@@ -182,35 +160,28 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
             reason = str(error)
 
     elif jrnl in aaas_journals.keys():
-        pma = square_voliss_data_for_pma(pma)
         try:
             url = the_aaas_tango(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
     elif jrnl in spandidos_journals.keys():
-        pma = square_voliss_data_for_pma(pma)
         try:
             url = the_spandidos_lambada(pma, verify)
         except MetaPubError as error:
             reason = str(error)
-            # TODO: try the_doi_2step
-            #reason = 'MISSING: vip - volume and maybe also issue data missing from PubMedArticle'
 
     elif jrnl in jci_journals:
         try:
-            url = the_jci_polka(pma, verify)
+            url = the_jci_jig(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
     elif jrnl in biochemsoc_journals.keys():
-        pma = square_voliss_data_for_pma(pma)
-        # TODO: move to dances
-        if pma.volume and pma.issue:
-            host = biochemsoc_journals[jrnl]['host']
-            url = biochemsoc_format.format(a=pma, host=host, ja=biochemsoc_journals[jrnl]['ja'])
-        else:
-            reason = 'MISSING: vip - volume and/or issue data missing from PubMedArticle'
+        try:
+            the_biochemsoc_saunter(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     elif jrnl in nature_journals.keys():
         try:
@@ -219,12 +190,10 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
             reason = str(error)
 
     elif jrnl in cell_journals.keys():
-        if pma.pii:
-            # the front door
-            url = cell_format.format(a=pma, ja=cell_journals[jrnl]['ja'],
-                                     pii=pma.pii.translate(None, '-()'))
-        else:
-            reason = 'MISSING: pii missing from PubMedArticle XML (%s in Cell format)' % jrnl
+        try:
+            url = the_cell_pogo(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     elif jrnl.find('Lancet') > -1:
         try:
