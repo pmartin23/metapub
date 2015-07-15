@@ -53,7 +53,8 @@ class TestFindItDances(unittest.TestCase):
         if source.pma.pmc:
             assert source.url.find('europepmc.org') > -1
         else:
-            assert source.url == 'http://www.jci.org/articles/view/82041/version/1/pdf/render'
+            assert source.reason.find('DENIED') > -1
+            #assert source.url == 'http://www.jci.org/articles/view/82041/version/1/pdf/render'
 
     def test_jstage_dive(self):
         pmid = 21297370
