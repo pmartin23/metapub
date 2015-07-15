@@ -277,7 +277,7 @@ def the_aaas_tango(pma, verify=True):
             raise NoPDFLink('TXERROR: AAAS returned unexpected HTML response for url %s' % (pdfurl))
         else:
             # some items are acquirable via free account registration... but let's not mess with this just yet.
-            raise NoPDFLink('DENIED: AAAS paper subscription-only or requires site regisrtation (url: %s)' % pdfurl)
+            raise NoPDFLink('DENIED: AAAS paper subscription-only or requires site registration (url: %s)' % pdfurl)
     
         form = tree.cssselect('form')[0]
         fbi = form.fields.get('form_build_id')
