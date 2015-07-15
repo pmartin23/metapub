@@ -2,6 +2,8 @@ from __future__ import absolute_import, print_function
 
 __author__ = 'nthmost'
 
+import sys
+
 from urlparse import urlsplit
 
 import requests
@@ -252,14 +254,14 @@ def the_aaas_tango(pma, verify=True):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
-    try:
-        pma = rectify_pma_for_vip_links(pma)
-        pdfurl = aaas_format.format(ja=aaas_journals[pma.journal]['ja'], a=pma)
-    except NoPDFLink:
-        if pma.doi:
-            pdfurl = the_doi_2step(pma.doi) + '.full.pdf'
-        else:
-            raise NoPDFLink('MISSING: doi, vip (doi lookup failed)')
+    #try:
+    #    pma = rectify_pma_for_vip_links(pma)
+    #    pdfurl = aaas_format.format(ja=aaas_journals[pma.journal]['ja'], a=pma)
+    #except NoPDFLink:
+        # try the pmid-based approach
+    baseurl = 'http://www.sciencemag.org/cgi/pmidlookup?view=long&pmid=%s' % pma.pmid
+    res = requests.get(baseurl)
+    pdfurl = res.url.replace('.long', '.full') + '.pdf'
 
     if not verify:
         return pdfurl
@@ -268,10 +270,16 @@ def the_aaas_tango(pma, verify=True):
     if response.status_code == 200 and response.headers['content-type'].find('pdf') > -1:
         return response.url
 
-    #TODO: form navigation
-    if response.status_code == 200 and response.headers['content-type'].find('html') > -1:
+    elif response.status_code == 200 and response.headers['content-type'].find('html') > -1:
         tree = etree.fromstring(response.content, HTMLParser())
-        form = tree.cssselect('form')[1]
+
+        if not tree.find('head/title').text.find('Sign In') > -1:
+            raise NoPDFLink('TXERROR: AAAS returned unexpected HTML response for url %s' % (pdfurl))
+        else:
+            # some items are acquirable via free account registration... but let's not mess with this just yet.
+            raise NoPDFLink('DENIED: AAAS paper subscription-only or requires site regisrtation (url: %s)' % pdfurl)
+    
+        form = tree.cssselect('form')[0]
         fbi = form.fields.get('form_build_id')
 
         baseurl = urlsplit(response.url)
@@ -279,16 +287,19 @@ def the_aaas_tango(pma, verify=True):
 
         payload = {'pass': AAAS_PASSWORD, 'name': AAAS_USERNAME,
                    'form_build_id': fbi, 'remember_me': 1}
+        print("SUBMITTING TO AAAS")
+        print(payload)
+
         response = requests.post(post_url, data=payload)
         if response.status_code == 403:
-            return AccessDenied('DENIED: AAAS subscription-only paper')
+            return AccessDenied('DENIED: AAAS subscription-only paper (url: %s)')
         elif response.headers['content-type'].find('pdf') > -1:
             return response.url
         elif response.headers['content-type'].find('html') > -1:
-            raise NoPDFLink('DENIED: AAAS pdf download requires form navigation. URL: %s' % pdfurl)
+            #if response.content.find('access-denied') > -1:
+            raise NoPDFLink('DENIED: AAAS subscription-only paper (url: %s)' % pdfurl)
     else:
         raise NoPDFLink('TXERROR: AAAS returned %s for url %s' % (response.status_code, pdfurl))
-
 
 def the_jama_dance(pma, verify=True):
     '''  :param: pma (PubMedArticle object)

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 # Science (AAAS) -- requires login "as a courtesy to the community".  Mkay.
-aaas_format = 'http://{ja}.sciencemag.org/content/{a.volume}/{a.issue}/{a.pages}.full.pdf'
+aaas_format = 'http://{ja}.sciencemag.org/content/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
 aaas_journals = {
     'Science': {'ja': 'www'},
     'Sci Adv': {'ja': 'advances'},
