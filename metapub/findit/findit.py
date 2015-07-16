@@ -83,19 +83,12 @@ class FindIt(object):
         source.pmid
         source.doi
         source.doi_score
-        source.availability
 
         The "doi_score" is an indication of where the DOI for this PMID ended up
         coming from. If it was supplied by the user or by PubMed, doi_score will be 10.
         If CrossRef came into play during the process to find a DOI that was missing
         for the PubMedArticle object, the doi_score will come from the CrossRef "top
         result".
-
-        The "availability" score is a somewhat arbitrary number between 0 and 10 denoting
-        how likely the source URL would result in acquiring the file.  PubmedCentral PDFs
-        should be availability=10 except when embargoed. "Availability" is affected by 
-        whether "verify" has been used to get the url.  If "verify" has been disabled, 
-        most scores will go down by 50%.
     '''
 
     def __init__(self, pmid=None, **kwargs):
@@ -103,7 +96,6 @@ class FindIt(object):
         self.doi = kwargs.get('doi', None)
         self.url = kwargs.get('url', None)
         self.reason = None
-        self.availability = 0
         self.use_nih = kwargs.get('use_nih', False)
         self.use_crossref = kwargs.get('use_crossref', True)
         self.doi_min_score = kwargs.get('doi_min_score', 2.3)
@@ -137,6 +129,7 @@ class FindIt(object):
                 self.url, self.reason = self.load_from_cache(verify=self.verify, retry_errors=retry_errors)
             else:
                 self.url, self.reason = self.load(verify=self.verify)
+
         except requests.exceptions.ConnectionError as error:
             self.reason = 'TXERROR: %r' % error
 
