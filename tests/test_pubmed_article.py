@@ -308,7 +308,8 @@ class TestPubMedArticle(unittest.TestCase):
                 assert article.pmid == pmid
                 assert article.title is not None
         except InvalidPMID, e:
-            print "PMID %i returned InvalidPMID response (which is totally OK). Run test again!" % pmid
+            self.test_random_efetch()
+            #print "PMID %s returned InvalidPMID response (which is totally OK). Run test again!" % pmid
         
 
     def test_init1(self):
