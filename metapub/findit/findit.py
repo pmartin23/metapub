@@ -173,7 +173,7 @@ class FindIt(object):
 
             # Prefer cached results that were verified.
             # Don't return cached results in retry_reasons list above. (i.e. retry)
-            if cache_result['verify'] or verify == False:
+            if cache_result.get('verify', False) or verify == False:
                 if not reason.split(':')[0] in retry_reasons:
                     return (url, reason)
 
