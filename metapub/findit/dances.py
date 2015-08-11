@@ -186,6 +186,33 @@ def the_jci_jig(pma, verify=True):
         verify_pdf_url(url, 'JCI')
     return url
 
+def the_najms_mazurka(pma, verify=True):
+    '''Dance of the North Am J Med Sci, which should be largely free.
+
+         :param: pma (PubMedArticle object)
+         :param: verify (bool) [default: True]
+         :return: url (string)
+         :raises: AccessDenied, NoPDFLink
+    '''
+    # approach: the_doi_2step, scrape for PDF link.
+
+    #PDF link looks like this:
+    #http://www.najms.org/downloadpdf.asp?issn=1947-2714;year=2012;volume=4;issue=10;spage=435;epage=441;aulast=Andr%E9n-Sandberg;type=2
+
+    if pma.doi:
+        starturl = the_doi_2step(pma.doi)
+    else:
+        raise NoPDFLink('MISSING: pii, doi (doi lookup failed)')
+    response = requests.get(starturl)
+    if not response.content.find('downloadpdf.asp') > -1:
+        raise NoPDFLink('DENIED: no PDF link in page.')
+    
+    raise NotImplementedError('NAJMS support incomplete; see metapub.findit.dances.the_najms_mazurka')
+
+    if verify:
+        verify_pdf_url(url, 'NAJMS')
+    return url
+
 def the_sciencedirect_disco(pma, verify=True):
     '''Note: verify=True required to find link.  Parameter supplied only for unity 
        with other dances.

@@ -31,6 +31,9 @@ from .paywalled import (schattauer_journals, RSC_journals,
 # JCI == Journal of Clinical Investigation
 jci_journals = ('J Clin Invest')
 
+# NAJMS == North Am J Med Sci
+najms_journals = ('N Am J Med Sci')
+
 paywall_journals = schattauer_journals + thieme_journals + \
                    weird_paywall_publishers + RSC_journals
 

@@ -177,6 +177,12 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
         except MetaPubError as error:
             reason = str(error)
 
+    elif jrnl in najms_journals:
+        try:
+            url = the_najms_mazurka(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
+
     elif jrnl in biochemsoc_journals.keys():
         try:
             the_biochemsoc_saunter(pma, verify)
