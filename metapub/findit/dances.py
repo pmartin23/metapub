@@ -203,11 +203,11 @@ def the_najms_mazurka(pma, verify=True):
         starturl = the_doi_2step(pma.doi)
     else:
         raise NoPDFLink('MISSING: pii, doi (doi lookup failed)')
-    response = requests.get(starturl)
-    if not response.content.find('downloadpdf.asp') > -1:
-        raise NoPDFLink('DENIED: no PDF link in page.')
+    #response = requests.get(starturl)
+    #if not response.content.find('downloadpdf.asp') > -1:
+    #    raise NoPDFLink('DENIED: no PDF link in page.')
     
-    raise NotImplementedError('NAJMS support incomplete; see metapub.findit.dances.the_najms_mazurka')
+    raise NotImplementedError('NOFORMAT: NAJMS support incomplete; see metapub.findit.dances.the_najms_mazurka')
 
     if verify:
         verify_pdf_url(url, 'NAJMS')
