@@ -194,20 +194,21 @@ def the_najms_mazurka(pma, verify=True):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
-    # approach: the_doi_2step, scrape for PDF link.
-
     #PDF link looks like this:
-    #http://www.najms.org/downloadpdf.asp?issn=1947-2714;year=2012;volume=4;issue=10;spage=435;epage=441;aulast=Andr%E9n-Sandberg;type=2
+    #http://www.najms.org/downloadpdf.asp?issn=1947-2714;year=2015;volume=7;issue=6;spage=291;epage=294;aulast=Thawabi;type=2
 
+    url_tmpl = 'http://www.najms.org/downloadpdf.asp?issn={issn};year={a.year};volume={a.volume};issue={a.issue};spage={a.first_page};epage={a.last_page};aulast={author1_lastname};type=2'
     if pma.doi:
-        starturl = the_doi_2step(pma.doi)
+        #starturl = the_doi_2step(pma.doi)
+        starturl = url_tmpl.format(a=pma, author1_lastname=pma.author1_last_fm.split(' ')[0], issn=pma.doi.split('/')[1].split('.')[0])
     else:
         raise NoPDFLink('MISSING: pii, doi (doi lookup failed)')
-    #response = requests.get(starturl)
-    #if not response.content.find('downloadpdf.asp') > -1:
-    #    raise NoPDFLink('DENIED: no PDF link in page.')
-    
-    raise NotImplementedError('NOFORMAT: NAJMS support incomplete; see metapub.findit.dances.the_najms_mazurka')
+    response = requests.get(starturl)
+    if response.ok:
+        print(response.content)
+        from IPython import embed; embed()
+    else:
+        raise NoPDFLink('TXERROR: response from NAJMS website was %i' % response.status_code)
 
     if verify:
         verify_pdf_url(url, 'NAJMS')
