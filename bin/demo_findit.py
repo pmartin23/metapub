@@ -2,7 +2,7 @@ from metapub.findit import FindIt
 
 older_pmids = ['2655732', '320292', '7686069', '7689822', '1287655', '7683021', '1309291', '1255861']
 
-najms_pmids = ['26199928']
+najms_pmids = ['26199928', '24083224', '24083223', '24083222']
 
 vip_pmids = ['1255861',     # J Virol
              '15252189',    # Physiol Genomics

@@ -16,7 +16,6 @@ params = { 'TA':'Journal of Neural Transmission',
                     'vol':121, 
                     'aulast': 'Freitag'
          } 
-
 stuff = fetch.pmids_for_query(**params)
 
 print params
@@ -27,4 +26,11 @@ print stuff
 
 pmids = fetch.pmids_for_query(since='2015/3/1', retmax=1000)
 assert len(pmids)==1000
+
+pmids = fetch.pmids_for_query(journal='N Am J Med Sci', pmc_only=False)
+pmc_only = fetch.pmids_for_query(journal='N Am J Med Sci', pmc_only=True, year=2008)
+
+non_pmc = [pmid for pmid in pmids if pmid not in pmc_only]
+
+print non_pmc
 
