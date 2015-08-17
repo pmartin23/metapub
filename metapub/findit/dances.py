@@ -4,7 +4,7 @@ __author__ = 'nthmost'
 
 import sys
 
-from urlparse import urlsplit
+from urlparse import urlsplit, urljoin
 
 import requests
 from lxml.html import HTMLParser
@@ -203,10 +203,16 @@ def the_najms_mazurka(pma, verify=True):
         starturl = url_tmpl.format(a=pma, author1_lastname=pma.author1_last_fm.split(' ')[0], issn=pma.doi.split('/')[1].split('.')[0])
     else:
         raise NoPDFLink('MISSING: pii, doi (doi lookup failed)')
+
+    url = ''
     response = requests.get(starturl)
     if response.ok:
-        print(response.content)
-        from IPython import embed; embed()
+        body = etree.fromstring(response.content, parser=HTMLParser()).find('body')
+        href = body.findall('table/tr/td/p/a')[0].get('href')
+        if href:
+            url = urljoin('http://www.najms.org', href)
+        else:
+            raise NoPDFLink('TXERROR: NAJMS did not provide PDF link (or could not be parsed from page).')
     else:
         raise NoPDFLink('TXERROR: response from NAJMS website was %i' % response.status_code)
 

@@ -307,7 +307,7 @@ class PubMedArticle(MetaPubObject):
                 return self.first_page[:-len(lastnum)] + lastnum
 
             # If lastpage for some reason was not a number, just return it as-is.
-        except (TypeError):
+        except (ValueError, TypeError):
             return lastnum
 
     def _get_title(self):

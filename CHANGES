@@ -92,3 +92,4 @@
 7/7/2015, 0.3.16, FindIt: major refactor into "findit/journals" submodule. Added 1000+ journals. Added "retry_errors" kwarg (retries TXERROR reasons). Auto-retry any source with reason in: ("PAYWALL", "TODO", "CANTDO", "NOFORMAT").
 7/15/2015, 0.3.17, PubMedFetcher: raises InvalidPMID when XML return from eutils is empty. FindIt: added "verify" keyword to control testing of URLs before returning results.
 7/16/2015, 0.3.17.1, FindIt: cache backwards compatibility fix (support lack of 'verify' key; treat as verify=False)
+8/17/2015, 0.3.17.2, PubMedArticle: "true last page" feature. FindIt: Added NAJMS format. Pegged eutils version to 0.0.9. 
