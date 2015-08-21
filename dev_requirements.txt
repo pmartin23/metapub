@@ -1,0 +1,4 @@
+pytest
+tabulate
+ipython
+pyhamcrest
