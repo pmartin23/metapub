@@ -296,15 +296,19 @@ class PubMedArticle(MetaPubObject):
             return self.pages
 
     def _get_last_page(self):
-        #TODO: return true last page in situations like self.pages = "148-52"
-        #           i.e. we want last_page = "152", not "52"
-        #if lastnum < self.first_page:
-        #    len(lastnum)....
         try:
             lastnum = self.pages.split('-')[1]
-            return lastnum
         except (IndexError, AttributeError):
             return None
+        try: 
+            # Return true last page from pages attribute, i.e if self.pages is
+            # "148-52", return "152".  If self.pages is "291-4", return "294".
+            if int(lastnum) < int(self.first_page):
+                return self.first_page[:-len(lastnum)] + lastnum
+
+            # If lastpage for some reason was not a number, just return it as-is.
+        except (ValueError, TypeError):
+            return lastnum
 
     def _get_title(self):
         return self._get(self._root+'/Article/ArticleTitle') 
