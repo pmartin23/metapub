@@ -15,7 +15,7 @@ from .pubmed_clinicalqueries import *
 from .utils import kpick, parameterize, lowercase_keys
 from .text_mining import re_pmid
 from .exceptions import *
-from .base import Borg, parse_elink_response
+from .base import Borg
 from .config import DEFAULT_EMAIL
 
 def get_uids_from_esearch_result(xmlstr):
