@@ -1,7 +1,11 @@
-from __future__ import absolute_import
-
 import re
-from urlparse import urlparse
+
+try:
+    from urlparse import urlparse
+except ImportError:
+    #assume python3
+    from urllib.parse import urlparse
+    
 
 # examples of real DOIs: 
 #         10.1002/(SICI)1098-1004(1999)14:1<91::AID-HUMU21>3.0.CO;2-B
