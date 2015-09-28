@@ -1,4 +1,1 @@
-Naomi Most
-Naomi Fox
-Reece Hart
-Andrew McMurry
+See commit logs at https://bitbucket.org/metapub/metapub
