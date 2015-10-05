@@ -7,7 +7,9 @@ import re
 import hashlib
 import logging
 import json
-import urllib
+
+#py3k / py2k compatibility
+from six.moves import urllib
 
 import requests
 
@@ -17,7 +19,7 @@ from .eutils_common import SQLiteCache, get_cache_path
 from .pubmedfetcher import PubMedFetcher 
 from .exceptions import *
 
-from .utils import asciify, parameterize, remove_html_markup, deparameterize
+from .utils import asciify, parameterize, remove_html_markup, deparameterize, remove_chars
 from .base import Borg
 
 DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'),'.cache')
@@ -123,14 +125,15 @@ class CrossRef(Borg):
             as possible to get well-polarized results.
         '''
         aulast = None if pma.author1_last_fm is None else pma.author1_last_fm.split(' ')[0]
+        jtitle = remove_chars(pma.journal, '.[]()<>,').replace('J+', '')
         params = { 
-                     'volume': parameterize('%s' % pma.volume),
-                     'issue': parameterize('%s' % pma.issue),
-                     'year': parameterize('%s' % pma.year),
-                     'aulast': parameterize(aulast),
-                     'jtitle': parameterize(pma.journal).translate(None, '.[]()<>,').replace('J+', ''),
-                     'start_page': parameterize(pma.first_page),
-                 }
+                 'volume': parameterize('%s' % pma.volume),
+                 'issue': parameterize('%s' % pma.issue),
+                 'year': parameterize('%s' % pma.year),
+                 'aulast': parameterize(aulast),
+                 'jtitle': parameterize(jtitle),
+                 'start_page': parameterize(pma.first_page),
+             }
         search = parameterize(pma.title)
         return self.query(search, params)
 
@@ -146,7 +149,7 @@ class CrossRef(Borg):
         for result in results:
             result['score'] = float(result['score'])
             result['doi'] = result['doi'].replace('http://dx.doi.org/', '')
-            result['coins'] = urllib.unquote(result['coins'])
+            result['coins'] = urllib.parse.unquote(result['coins'])
             result['slugs'] = self._parse_coins(result['coins'])
             enhanced_results.append(result)
         return enhanced_results
@@ -154,11 +157,12 @@ class CrossRef(Borg):
     def _assemble_query(self, search, params):
         defining_args = self.default_args.copy()
         if params != {}:
-            for k,v in params.items():
+            for k,v in list(params.items()):
                 defining_args[k] = parameterize(v)
-        q = self.query_base_url % urllib.quote_plus(search) 
-        q += '&'.join(['%s=%s' % (k,urllib.quote_plus(v)) for (k,v) in defining_args.items()])
-        return q
+
+        qstring = self.query_base_url % urllib.parse.quote_plus(search)
+        qstring += '&'.join(['%s=%s' % (k, urllib.parse.quote_plus(v)) for (k,v) in list(defining_args.items())])
+        return qstring
 
     def query(self, search, params=None, skip_cache=False):
         '''
@@ -194,30 +198,30 @@ class CrossRef(Borg):
         if params==None:
             params = {}
 
-        q = self._assemble_query(search, params)
+        qstring = self._assemble_query(search, params)
 
         self.last_search = search
         self.last_params = params
-        self.last_query = q
+        self.last_query = qstring
 
         res_text = None
         if not skip_cache:
-            res_text = self._query_cache(q) 
+            res_text = self._query_cache(qstring) 
 
         if res_text == None: 
-            res_text = self._query_api(q) 
+            res_text = self._query_api(qstring)
 
             if self._cache:
-                cache_key = self._make_cache_key(q)
+                cache_key = self._make_cache_key(qstring)
                 self._cache[cache_key] = res_text
                 self._log.info('cached results for key {cache_key} ({q}) '.format(
-                        cache_key=cache_key, q=q))
+                        cache_key=cache_key, q=qstring))
 
         if res_text:
             try:
                 results = json.loads(res_text)
             except ValueError:
-                raise CrossRefConnectionError('invalid JSON response for %s (%s)' % (q, res_text))
+                raise CrossRefConnectionError('invalid JSON response for %s (%s)' % (qstring, res_text))
             return self._get_enhanced_results(results)
         return []
 
@@ -233,7 +237,7 @@ class CrossRef(Borg):
         if top_results:
             return top_results[0]
 
-        test_items = [val for key,val in params.items() if key != 'atitle']
+        test_items = [val for key,val in list(params.items()) if key != 'atitle']
 
         if params and use_best_guess:
             best_guess = None
@@ -251,6 +255,7 @@ class CrossRef(Borg):
             return None
 
     def _make_cache_key(self, inp):
+        inp = asciify(inp)
         return hashlib.md5(inp).hexdigest() 
 
     def _query_cache(self, q, skip_sleep=False):

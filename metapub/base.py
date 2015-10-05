@@ -6,6 +6,7 @@ from .exceptions import MetaPubError
 
 def parse_elink_response(xmlstr):
     '''return all Ids from an elink XML response'''
+    xmlstr = decode(xmlstr)
     dom = etree.fromstring(xmlstr)
     ids = []
     if dom.find('LinkSet/LinkSetDb/LinkName').text:

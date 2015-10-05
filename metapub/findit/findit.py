@@ -31,13 +31,15 @@ from __future__ import absolute_import, print_function
 
 __author__ = 'nthmost'
 
-from urlparse import urlparse
-
 import requests
-import os, time
+import os, time, sys
 import logging
 
+#py3k / py2k compatibility
+from six.moves import urllib
+
 from ..exceptions import MetaPubError
+from ..utils import asciify
 from ..pubmedfetcher import PubMedFetcher
 from ..convert import PubMedArticle2doi_with_score, doi2pmid
 from ..eutils_common import SQLiteCache, get_cache_path
@@ -201,7 +203,7 @@ class FindIt(object):
             self._log.debug('%r', error)
             return None
 
-        urlp = urlparse(baseurl)
+        urlp = urllib.parse(baseurl)
 
         # maybe it's sciencedirect / elsevier:
         if urlp.hostname.find('sciencedirect') > -1 or urlp.hostname.find('elsevier') > -1:
@@ -330,7 +332,8 @@ class FindIt(object):
             # convert to timestamp
             sellby = datetime_to_timestamp(expiry_date)
         else:
-            sellby = expiry_date
+            # make sure sellby is a number, not None
+            sellby = expiry_date if expiry_date else 0
 
         if self._cache:
             cache_key = pmid

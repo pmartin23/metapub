@@ -94,7 +94,7 @@ class MedGenFetcher(Borg):
         '''
         uid = str(uid)
         result = self.qs.esummary( { 'db': 'medgen', 'id': uid } )
-        return MedGenConcept(result)
+        return MedGenConcept(result.decode())
 
     def _eutils_concept_by_cui(self, cui):
         '''Returns MedGenConcept result of lookup of CUI. 
@@ -104,7 +104,6 @@ class MedGenFetcher(Borg):
         '''
         uid = self._eutils_uid_for_cui(cui)
         return self._eutils_concept_by_uid(uid)
-
 
     def _eutils_pubmeds_for_uid(self, uid):
         response = self.qs.elink( { 'dbfrom': 'medgen', 'id': uid, 'db': 'pubmed'} )

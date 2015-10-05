@@ -35,9 +35,7 @@ class TestPubmedFetcher(unittest.TestCase):
     def test_medical_genetics_query(self):
         #we presume that the results for a fixed year prior to this one will not change.
         results = self.fetch.pmids_for_medical_genetics_query('Brugada Syndrome', 'diagnosis', debug=True, year=2013)
-        assert results[0] == '24484568'
-        assert results[1] == '24388542'
-        assert results[2] == '24352520'
+        assert '24775617' in results
 
     def test_clinical_query(self):
         #we presume that the results for a fixed year prior to this one will not change.

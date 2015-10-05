@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function
 __doc__ = '''metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed'''
 __author__ = 'nthmost'
 
-import os
+import os, sys
 
 from lxml import etree
 import requests
@@ -14,12 +14,11 @@ from .pubmedcentral import get_pmid_for_otherid
 from .pubmed_clinicalqueries import *
 from .utils import kpick, parameterize, lowercase_keys
 from .text_mining import re_pmid
-from .exceptions import *
+from .exceptions import EutilsError, MetaPubError, InvalidPMID
 from .base import Borg, parse_elink_response
 from .config import DEFAULT_EMAIL
 
 def get_uids_from_esearch_result(xmlstr):
-    #from IPython import embed; embed()
     dom = etree.fromstring(xmlstr)
     uids = []
     idlist = dom.find('IdList')
@@ -89,13 +88,13 @@ class PubMedFetcher(Borg):
         pmid = str(pmid)
         try:
             result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
-        except EutilsBadRequestError:
+        except EutilsError:
             raise MetaPubError('Invalid ID "%s" (rejected by Eutils); please check the number and try again.' % pmid)
 
-        if result is None:
-            return None
+        if sys.version_info >= (3,0):
+            result = result.decode()
 
-        if result.find('ERROR') > -1:
+        if 'ERROR' in result > -1:
             raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle' % pmid)
 
         pma = PubMedArticle(result)
@@ -242,7 +241,7 @@ class PubMedFetcher(Borg):
         q['NM'] = kpick(kwargs, options=['nm', 'substance name'])
         q['SI'] = kpick(kwargs, options=['si', 'secondary source id']) 
 
-        for feature in q.keys():
+        for feature in list(q.keys()):
             if q[feature] != None:
                 query += ' "%s"[%s]' % (q[feature], feature)
         

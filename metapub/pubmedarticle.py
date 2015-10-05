@@ -1,6 +1,6 @@
-from __future__ import absolute_import, print_function
-
 """metapub.pubmedarticle -- PubMedArticle class instantiated by supplying ncbi XML string."""
+
+from __future__ import absolute_import, print_function
 
 import time
 from datetime import datetime
@@ -437,7 +437,7 @@ def _au_to_last_fm(au):
     if au is None:
         return
     try:
-        return au.find('LastName').text + u' ' + au.find('Initials').text
+        return au.find('LastName').text + ' ' + au.find('Initials').text
     except AttributeError:
         pass
     try:

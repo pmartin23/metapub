@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from lxml.etree import XMLSyntaxError
-from eutils.exceptions import EutilsBadRequestError
+from eutils.exceptions import *
 
 class MetaPubError(Exception):
     pass

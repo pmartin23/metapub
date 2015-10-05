@@ -47,14 +47,15 @@ class TestFindItDances(unittest.TestCase):
         #TODO: update this when the_aaas_tango knows how to navigate forms.
         assert source.url is None
 
+    #Looks like JCI complained about EuropePMC hosting its stuff? 
     def test_jci_polka(self):
         pmid = 26030226
         source = FindIt(pmid=pmid)
-        if source.pma.pmc:
-            assert source.url.find('europepmc.org') > -1
-        else:
-            assert source.reason.find('DENIED') > -1
-            #assert source.url == 'http://www.jci.org/articles/view/82041/version/1/pdf/render'
+    #    if source.pma.pmc:
+    #        assert source.url.find('europepmc.org') > -1
+    #    else:
+        assert source.reason.find('DENIED') > -1
+        assert source.reason.find('jci.org') > -1
 
     def test_jstage_dive(self):
         pmid = 21297370

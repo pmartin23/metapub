@@ -2,7 +2,8 @@ from __future__ import absolute_import
 
 import os
 from lxml import etree
-from urllib import urlretrieve
+
+import requests
 
 from .config import PKGNAME, DEFAULT_EMAIL, TMPDIR
 
@@ -32,7 +33,7 @@ def get_tmp_xml_path(someid):
     return os.path.join(TMPDIR, '%s.xml' % someid)
 
 def _pmc_id_conversion_api(input_id):
-    xmlfile = urlretrieve(PMC_ID_CONVERSION_URI % input_id, get_tmp_xml_path(input_id))
+    xmlfile = requests.get(PMC_ID_CONVERSION_URI % input_id, get_tmp_xml_path(input_id)).content
     root = etree.parse(xmlfile[0])
     root.find('record')
     record = root.find('record')

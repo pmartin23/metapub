@@ -1,8 +1,13 @@
-from __future__ import absolute_import
+from __future__ import print_function
 
-import os
-from lxml import etree
+import os, sys
+import re
 import unicodedata
+
+import six
+from lxml import etree
+from unidecode import unidecode
+
 
 PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\"&"
 
@@ -11,6 +16,11 @@ def kpick(args, options, default=None):
         if args.get(opt, None):
             return args[opt]
     return default
+
+def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE):
+    chars = re.escape(chars)
+    outp = re.sub('['+chars+']', '', inp)
+    return outp
 
 def asciify(inp):
     '''nuke all the unicode from orbit. it's the only way to be sure.'''
@@ -29,34 +39,39 @@ def squash_spaces(inp):
 def parameterize(inp, sep='+'):
     '''make strings suitable for submission to GET-based query service. strips
         out these characters: %s''' % PUNCS_WE_DONT_LIKE
-    return squash_spaces(asciify(inp).translate(None, PUNCS_WE_DONT_LIKE)).replace(' ', sep)
+    inp = remove_chars(inp, PUNCS_WE_DONT_LIKE) 
+    inp = squash_spaces(inp).replace(' ', sep)
+
+    if six.PY2:
+        return asciify(inp)
+    else:
+        return unidecode(inp)
 
 def deparameterize(inp, sep='+'):
     '''somewhat-undo parameterization in string. replace separators (sep) with spaces.'''
     return inp.replace(sep, ' ')
 
-def remove_html_markup(s):
+def remove_html_markup(inp):
     '''remove html and xml tags from text. preserves HTML entities like &amp;'''
     tag = False
     quote = False
     out = ""
 
-    for c in s:
-            if c == '<' and not quote:
-                tag = True
-            elif c == '>' and not quote:
-                tag = False
-            elif (c == '"' or c == "'") and tag:
-                quote = not quote
-            elif not tag:
-                out = out + c
+    for char in inp:
+        if char == '<' and not quote:
+            tag = True
+        elif char == '>' and not quote:
+            tag = False
+        elif (char == '"' or char == "'") and tag:
+            quote = not quote
+        elif not tag:
+            out = out + char
     return out
 
-def lowercase_keys(d):
+def lowercase_keys(dct):
+    '''takes an input dictionary, returns dictionary with all keys lowercased.'''
     result = {}
-    for key, value in d.items():
+    for key, value in list(dct.items()):
         result[key.lower()] = value
     return result
-
-
 

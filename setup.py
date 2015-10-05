@@ -17,8 +17,9 @@ setup(
         'setuptools',
         'lxml',
         'requests',
-        'eutils==0.0.9',
+        'eutils',
         'tabulate',
         'cssselect',
+        'unidecode',
         ],
     )

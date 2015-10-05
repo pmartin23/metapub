@@ -4,7 +4,11 @@ __author__ = 'nthmost'
 
 import sys
 
-from urlparse import urlsplit, urljoin
+#py3k / py2k compatibility
+if sys.version_info >= (3,0):
+    from urllib.parse import urlsplit, urljoin
+else:
+    from urlparse import urlsplit, urljoin
 
 import requests
 from lxml.html import HTMLParser
@@ -13,7 +17,7 @@ from lxml import etree
 from ..pubmedarticle import square_voliss_data_for_pma
 from ..exceptions import AccessDenied, NoPDFLink
 from ..text_mining import find_doi_in_string
-from ..utils import asciify
+from ..utils import remove_chars
 
 from .journals import *
 
@@ -39,7 +43,7 @@ def standardize_journal_name(journal_name):
     Returns a "standardized" journal name with periods stripped out.'''
     # (did you know that unicode.translate takes ONE argument whilst
     #   str.translate takes TWO?! true story)
-    return asciify(journal_name).translate(None, '.')
+    return remove_chars(journal_name, '.')
 
 def verify_pdf_url(pdfurl, publisher_name=''):
     res = requests.get(pdfurl)
@@ -78,7 +82,7 @@ def the_doi_slide(pma, verify=True):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
-    jrnl = asciify(pma.journal).translate(None, '.')
+    jrnl = standardize_journal_name(pma.journal) 
     if pma.doi:
         url = simple_formats_doi[jrnl].format(a=pma)
     else:

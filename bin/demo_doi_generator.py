@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 
 from __future__ import print_function
 
@@ -133,8 +133,8 @@ class PMIDMapping(object):
                 self._get_pma(tries)
         except ConnectionError:
             handle_connection_error()
-        except Exception, e:
-            record_error(self.pmid, 'PubMedArticle', e)
+        except Exception as error:
+            record_error(self.pmid, 'PubMedArticle', error)
 
     def _get_pmcid(self):
         if self.pma.pmc:
@@ -158,7 +158,7 @@ class PMIDMapping(object):
             cr_results = crossref.query_from_PubMedArticle(self.pma)
         except ConnectionError:
             handle_connection_error('CrossRef could not be reached')
-        except Exception, e:
+        except Exception as error:
             record_error(self.pmid, 'CrossRef', e)
             return
 
@@ -199,7 +199,7 @@ def main():
 
     open_logs('%i_%i' % (pmid, stop))
 
-    for pmid in xrange(pmid, pmid+stop):
+    for pmid in range(pmid, pmid+stop):
         blah = PMIDMapping(pmid)
     
 
