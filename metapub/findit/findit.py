@@ -31,11 +31,13 @@ from __future__ import absolute_import, print_function
 
 __author__ = 'nthmost'
 
-import requests
 import os, time, sys
 import logging
 
+import requests
+
 #py3k / py2k compatibility
+import six
 from six.moves import urllib
 
 from ..exceptions import MetaPubError
@@ -300,6 +302,16 @@ class FindIt(object):
                 'doi_score': self.doi_score,
                }
 
+    def _make_cache_key(self, pmid):
+        '''returns normalized key (pmid as integer) for hash lookup / store'''
+        return int(pmid)
+        #key = asciify(inp)
+        #if six.PY3:
+            # if we're in python3, the asciify function just converted inp 
+            # to bytes. We need 'str' type for backwards compatibility.
+        #    key = key.decode()
+        #return key
+
     def _store_cache(self, cache_key, **kwargs):
         '''Store supplied cache_key pointing to values supplied in kwargs.
 
@@ -310,7 +322,7 @@ class FindIt(object):
         '''
         cache_value = kwargs.copy()
         cache_value['timestamp'] = time.time()
-        self._cache[cache_key] = cache_value
+        self._cache[self._make_cache_key(cache_key)] = cache_value
 
     def _query_cache(self, pmid, expiry_date=None):
         '''Return results of a lookup from the cache, if available.
@@ -336,7 +348,7 @@ class FindIt(object):
             sellby = expiry_date if expiry_date else 0
 
         if self._cache:
-            cache_key = pmid
+            cache_key = self._make_cache_key(pmid)
             try:
                 res = self._cache[cache_key]
                 timestamp = res['timestamp']
