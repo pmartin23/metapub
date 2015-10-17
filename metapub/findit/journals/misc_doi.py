@@ -70,6 +70,7 @@ simple_formats_doi = {
     'Health Commun': doi_templates['taylor_francis'],
     'J Biomol Struct Dyn': doi_templates['taylor_francis'],
     'J Pers Assess': doi_templates['taylor_francis'],
+    'Worm': doi_templates['taylor_francis'],
 
     'Endocrinology': 'http://press.endocrine.org/doi/pdf/{a.doi}',
     'Endocr Rev': 'http://press.endocrine.org/doi/pdf/{a.doi}',

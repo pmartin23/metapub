@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function
 __doc__ = '''metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed'''
 __author__ = 'nthmost'
 
-import os, sys
+import os
 
 from lxml import etree
 import requests
@@ -90,12 +90,6 @@ class PubMedFetcher(Borg):
             result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
         except EutilsError:
             raise MetaPubError('Invalid ID "%s" (rejected by Eutils); please check the number and try again.' % pmid)
-
-        if sys.version_info >= (3,0):
-            result = result.decode()
-
-        if 'ERROR' in result > -1:
-            raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle' % pmid)
 
         pma = PubMedArticle(result)
         if pma.pmid is None:

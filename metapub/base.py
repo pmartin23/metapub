@@ -22,19 +22,26 @@ def parse_elink_response(xmlstr):
 class MetaPubObject(object):
     '''Base class for XML parsing objects (e.g. PubMedArticle)'''
 
-    def __init__(self, xmlstr, root=None, *args, **kwargs):
-        if not xmlstr:
-            if xmlstr == '':
-                xmlstr = 'empty'
-            raise MetaPubError('Cannot build MetaPubObject; xml string was %s' % xmlstr)
-        self.xmlstr = xmlstr
-        self.content = self._parse_xml(xmlstr, root)
+    def __init__(self, xml, root=None, *args, **kwargs):
+        '''Instantiate with "xml" as string or bytes containing valid XML.
 
-    def _parse_xml(self, xmlstr, root=None):
-        '''takes xmlstr and (optionally) a root string.
-        Returns an xml document object.
+        Supply name of root element (string) to set virtual top level. (optional).''' 
+ 
+        if not xml:
+            if xml == '':
+                xml = 'empty'
+            raise MetaPubError('Cannot build MetaPubObject; xml string was %s' % xml)
+        self.xml = xml
+        self.content = self._parse_xml(xml, root)
+
+    def _parse_xml(self, xml, root=None):
+        '''takes xml (str or bytes) and (optionally) a root element definition string.
+
+        Returns an lxml document object.
         '''
-        dom = etree.fromstring(xmlstr)
+        if isinstance(xml, str) or isinstance(xml, bytes):
+            dom = etree.XML(xml)
+
         if root:
             return dom.find(root)
         else:

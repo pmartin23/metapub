@@ -50,6 +50,8 @@ class PubMedArticle(MetaPubObject):
     '''
 
     def __init__(self, xmlstr, *args, **kwargs):
+        if isinstance(xmlstr, bytes):
+            xmlstr = xmlstr.decode()
         if xmlstr.find('<PubmedBookArticle>') > -1:
             super(PubMedArticle, self).__init__(xmlstr, 'PubmedBookArticle', args, kwargs)
             self.pubmed_type = 'book'

@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 import os, logging
 
+import six
+
 from eutils.sqlitecache import SQLiteCache
 
 from .config import DEFAULT_EMAIL, PKGNAME
@@ -28,6 +30,10 @@ def get_cache_path(cachedir, filename='metapub-cache.db'):
 
         Supports expansion of user directory shortcut '~' to full path.
     '''
+    # cache keys don't work the same between python 2.x and 3.x.
+    if six.PY3:
+        filename = filename + '.3'
+
     if cachedir is None:
         return None
 
