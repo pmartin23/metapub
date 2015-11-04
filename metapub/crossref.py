@@ -146,7 +146,7 @@ class CrossRef(Borg):
         for result in results:
             result['score'] = float(result['score'])
             result['doi'] = result['doi'].replace('http://dx.doi.org/', '')
-            result['coins'] = urllib.unquote(result['coins'])
+            #result['coins'] = urllib.unquote(result['coins']) - best to not use unquoting if we have unicode
             result['slugs'] = self._parse_coins(result['coins'])
             enhanced_results.append(result)
         return enhanced_results
