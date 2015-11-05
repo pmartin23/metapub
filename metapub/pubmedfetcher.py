@@ -7,6 +7,7 @@ import os
 
 from lxml import etree
 import requests
+import logging
 
 from .eutils_common import get_cache_path, get_eutils_client
 from .pubmedarticle import PubMedArticle
@@ -68,6 +69,7 @@ class PubMedFetcher(Borg):
                 first_page='7', author_name='Grant')
     '''
 
+    _log = logging.getLogger('metapub.PubMedFetcher')
     _cache_filename = 'eutils-cache.db'
 
     def __init__(self, method='eutils', email=DEFAULT_EMAIL, cachedir='default'):
@@ -338,8 +340,9 @@ class PubMedFetcher(Borg):
 
         kwargs = lowercase_keys(kwargs)
         journal_title = kpick(kwargs, options=['jtitle', 'journal', 'journal_title'], default='')
-        author_name = _reduce_author_string(kpick(kwargs, 
-                        options=['aulast', 'author1_last_fm', 'author', 'authors'], default=''))
+        author_name = kpick(kwargs, options=['aulast', 'author1_last_fm'], default=None)
+        if author_name is None:
+            author_name = _reduce_author_string(kpick(kwargs, options=['author', 'authors'], default=''))
         first_page = kpick(kwargs, options=['spage', 'first_page'], default='')
         year = kpick(kwargs, options=['year', 'date', 'pdat'], default='')
         volume = kpick(kwargs, options=['volume'], default='')
@@ -357,6 +360,7 @@ class PubMedFetcher(Borg):
                 inp_dict[k] = ''
 
         req = base_uri.format(**inp_dict)
+        self._log.info("Eutils request ({req})".format(req=req))
         content = requests.get(req).text
         pmids = []
         for item in content.split('\n'):
