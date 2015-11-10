@@ -3,25 +3,12 @@ from __future__ import absolute_import
 import six
 
 from lxml import etree
-'''
-six.string_types
-
-    Possible types for text data. This is basestring() in Python 2 and str in Python 3.
-
-six.text_type
-
-    Type for representing (Unicode) textual data. This is unicode() in Python 2 and str in Python 3.
-
-six.binary_type
-
-    Type for representing binary data. This is str in Python 2 and bytes in Python 3.
-'''
 
 from .exceptions import MetaPubError
 
 def parse_elink_response(xmlstr):
     '''return all Ids from an elink XML response'''
-    if type(xmlstr) == six.binary_type:
+    if six.PY3 and type(xmlstr) == six.binary_type:
         xmlstr = xmlstr.decode()
     dom = etree.fromstring(xmlstr)
     ids = []
