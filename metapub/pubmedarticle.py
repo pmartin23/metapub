@@ -6,6 +6,8 @@ import time
 from datetime import datetime
 from collections import OrderedDict
 
+import six
+
 from .base import MetaPubObject
 from .exceptions import MetaPubError
 from .text_mining import re_numbers
@@ -50,13 +52,14 @@ class PubMedArticle(MetaPubObject):
     '''
 
     def __init__(self, xmlstr, *args, **kwargs):
-        if isinstance(xmlstr, bytes):
+        if six.PY3 and type(xmlstr) == six.binary_type:
             xmlstr = xmlstr.decode()
-        if xmlstr.find('<PubmedBookArticle>') > -1:
+
+        if '<PubmedBookArticle>' in xmlstr:
             super(PubMedArticle, self).__init__(xmlstr, 'PubmedBookArticle', args, kwargs)
             self.pubmed_type = 'book'
             self._root = 'BookDocument'
-        elif xmlstr.find('<PubmedArticle>') > -1:
+        elif '<PubmedArticle>' in xmlstr:
             super(PubMedArticle, self).__init__(xmlstr, 'PubmedArticle', args, kwargs)
             self.pubmed_type = 'article'
             self._root = 'MedlineCitation'
