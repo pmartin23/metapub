@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 """metapub.MedGenFetcher -- tools to deal with NCBI's E-utilities interface to the MedGen db"""
 
@@ -94,7 +94,7 @@ class MedGenFetcher(Borg):
         '''
         uid = str(uid)
         result = self.qs.esummary( { 'db': 'medgen', 'id': uid } )
-        return MedGenConcept(result.decode())
+        return MedGenConcept(result)
 
     def _eutils_concept_by_cui(self, cui):
         '''Returns MedGenConcept result of lookup of CUI. 

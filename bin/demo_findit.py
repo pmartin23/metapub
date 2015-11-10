@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 from metapub.findit import FindIt
 
 older_pmids = ['2655732', '320292', '7686069', '7689822', '1287655', '7683021', '1309291', '1255861']
@@ -81,7 +83,7 @@ BMC_pmids = ['25943194',     # BMC Genet
 
 PMC_pmids = ['25717385',     # Lancet Psychiatry
              '17534376',     # Eur J Hum Genet
-        ]  
+            ]  
 
 Lancet_pmids = ['25529582',     # marked Free Article
                 '25483163',     # not marked Free
@@ -103,87 +105,87 @@ def print_urls_and_reasons_from_pmid_list(pmids):
     for pmid in pmids:
         source = FindIt(pmid=pmid, retry_errors=True)
         if source.url:
-            print "Got: ", pmid, source.url, source.pma.journal
+            print("Got: ", pmid, source.url, source.pma.journal)
         else:
-            print "Nope: ", pmid, source.reason, source.pma.journal
+            print("Nope: ", pmid, source.reason, source.pma.journal)
             #if source.reason.startswith('NOFORMAT'):
             #    from IPython import embed; embed()
-            #print "Backup URL: ", pmid, source.backup_url
+            #print("Backup URL: ", pmid, source.backup_url
 
-print ""
-print "doi journals:"
+print("")
+print("doi journals:")
 print_urls_and_reasons_from_pmid_list(doi_pmids)
 
-print ""
-print "vip journals:"
+print("")
+print("vip journals:")
 print_urls_and_reasons_from_pmid_list(vip_pmids)
 
-print ""
-print "vip nonstandard journals:"
+print("")
+print("vip nonstandard journals:")
 print_urls_and_reasons_from_pmid_list(vip_nonstandard_pmids)
 
-print ""
-print "pii based journals:"
+print("")
+print("pii based journals:")
 print_urls_and_reasons_from_pmid_list(pii_pmids)
 
-print ""
-print "PMC (or should be):"
+print("")
+print("PMC (or should be):")
 print_urls_and_reasons_from_pmid_list(PMC_pmids)
 
-print ""
-print "Biochemical Society:"
+print("")
+print("Biochemical Society:")
 print_urls_and_reasons_from_pmid_list(biochemsoc_pmids)
 
-print ""
-print "JAMA jama jama jama jama chameleon:"
+print("")
+print("JAMA jama jama jama jama chameleon:")
 print_urls_and_reasons_from_pmid_list(jama_pmids)
 
-print ""
-print "Wiley E. Publisher:"
+print("")
+print("Wiley E. Publisher:")
 print_urls_and_reasons_from_pmid_list(wiley_pmids)
 
-print ""
-print "karger:"
+print("")
+print("karger:")
 print_urls_and_reasons_from_pmid_list(karger_pmids)
 
-print ""
-print "Springer:"
+print("")
+print("Springer:")
 print_urls_and_reasons_from_pmid_list(springer_pmids)
 
-print ""
-print "Nature:"
+print("")
+print("Nature:")
 print_urls_and_reasons_from_pmid_list(nature_pmids)
 
-print ""
-print "jstage:"
+print("")
+print("jstage:")
 print_urls_and_reasons_from_pmid_list(jstage_pmids)
 
-print ""
-print "J Clin Invest (JCI):"
+print("")
+print("J Clin Invest (JCI):")
 print_urls_and_reasons_from_pmid_list(JCI_pmids)
 
-print ""
-print "BMC journals:"
+print("")
+print("BMC journals:")
 print_urls_and_reasons_from_pmid_list(BMC_pmids)
 
-print ""
-print "ScienceDirect:"
+print("")
+print("ScienceDirect:")
 print_urls_and_reasons_from_pmid_list(SD_pmids)
 
-print ""
-print "JAMA:"
+print("")
+print("JAMA:")
 print_urls_and_reasons_from_pmid_list(JAMA_pmids)
 
-print ""
-print "Lancet:"
+print("")
+print("Lancet:")
 print_urls_and_reasons_from_pmid_list(Lancet_pmids)
 
-print ""
-print "NAJMS:"
+print("")
+print("NAJMS:")
 print_urls_and_reasons_from_pmid_list(najms_pmids)
 
 
-print ""
-print "older articles:"
+print("")
+print("older articles:")
 print_urls_and_reasons_from_pmid_list(older_pmids)
 

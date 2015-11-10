@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 import sys
 
 from tabulate import tabulate
@@ -8,7 +10,7 @@ HAS_GENES_ONLY = False
 try:
     term = sys.argv[1]
 except IndexError:
-    print 'Supply a Hugo gene name to this script as its argument.'
+    print('Supply a Hugo gene name to this script as its argument.')
     sys.exit()
 
 ####
@@ -19,7 +21,7 @@ logging.getLogger("eutils").setLevel(logging.INFO)
 
 fetch = MedGenFetcher()
 uids = fetch.uids_by_term(term)
-print uids
+print(uids)
 
 # TODO: Term Hierarchy Children (only 1 tier below), Term Hierarchy Parents (only 1 tier above)
 
@@ -52,5 +54,5 @@ for this_id in uids:
 
     table.append(line)
 
-print tabulate(table, headers, tablefmt="simple")
+print(tabulate(table, headers, tablefmt="simple"))
 
