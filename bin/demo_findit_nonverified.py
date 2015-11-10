@@ -22,28 +22,28 @@ def try_request(url):
 
 def load(pmid, verify=False):
     try:
-        source = FindIt(pmid=pmid, verify=verify)
+        source = FindIt(pmid, verify=verify)
     except InvalidPMID:
         return None        
 
     if source.url:
-        print pmid, source.pma.journal, source.url      #, try_request(source.url)
+        print(pmid, source.pma.journal, source.url)      #, try_request(source.url)
         return source.url
     else:
-        print pmid, source.pma.journal, source.reason
+        print(pmid, source.pma.journal, source.reason)
         return None
 
 if __name__=='__main__':
     import sys
     try:
         start_pmid = int(sys.argv[1])
-    except IndexError, TypeError:
-        print "Supply a pubmed ID as the starting point for this script."
+    except (IndexError, TypeError) as err:
+        print("Supply a pubmed ID as the starting point for this script.")
         sys.exit()
 
     try:
         end_pmid = int(sys.argv[2])
-    except IndexError, TypeError:
+    except (IndexError, TypeError) as err:
         end_pmid = start_pmid + 1000
 
     links = []
@@ -54,6 +54,6 @@ if __name__=='__main__':
         if result:
             links.append(result)
 
-    print "%i links retrieved out of %i attempts" % (len(links), attempts)
+    print("%i links retrieved out of %i attempts" % (len(links), attempts))
     from IPython import embed; embed()
 

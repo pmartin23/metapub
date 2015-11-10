@@ -14,7 +14,7 @@ except IndexError:
 
 result = fetch.related_pmids(pmid)
 
-for key in result.keys():
+for key in list(result.keys()):
     print(key)
     for pmid in result[key]:
         outp = pmid

@@ -42,7 +42,7 @@ if __name__=='__main__':
     import sys
     try:
         start_pmid = int(sys.argv[1])
-    except IndexError, TypeError:
+    except (IndexError, TypeError) as err:
         print("Supply a pubmed ID as the starting point for this script.")
         sys.exit()
 

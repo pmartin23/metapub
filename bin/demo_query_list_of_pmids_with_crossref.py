@@ -2,7 +2,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import os, sys, shutil
 import logging
-from urllib import unquote
 
 from metapub import PubMedFetcher, CrossRef 
 from metapub.exceptions import MetaPubError
@@ -64,8 +63,6 @@ if __name__=='__main__':
             else:
                 results_table['cr_aulast'].append('')            
                 results_table['cr_journal'].append('')
-
-            #print(unquote(top_result['coins'])) #.decode('utf8'))
 
             results_table['pma_aulast'].append(asciify(pma.author1_last_fm))
         else:

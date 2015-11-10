@@ -44,17 +44,17 @@ print('pages:',str(article.pages))
 print('year:',str(article.year))
 print('')
 print('MeSH headings: ')
-for DUI in article.mesh.keys():
+for DUI in list(article.mesh.keys()):
     print('\t', DUI, article.mesh[DUI]['descriptor_name'], article.mesh.get('qualifier_name', ''))
 
 if article.publication_types:
     print('\nPublication Type Information')
-    for pt in article.publication_types.keys():
+    for pt in list(article.publication_types.keys()):
         print('\t', pt, article.publication_types[pt])
 
 if article.chemicals:
     print('\nChemical List')
-    for DUI in article.chemicals.keys():
+    for DUI in list(article.chemicals.keys()):
         print('\t', DUI, article.chemicals[DUI]['substance_name'])
 
 if article.grants:
