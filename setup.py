@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'metapub',
-    version = '0.3.17.3',
+    version = '0.3.17.5',
     description = 'Pubmed / NCBI / eutils interaction library, handling the metadata of pubmed papers.',
     url = 'https://bitbucket.org/metapub/metapub',
     author = 'Naomi Most',
@@ -21,5 +21,7 @@ setup(
         'tabulate',
         'cssselect',
         'unidecode',
+        'six',
+        'tox',
         ],
     )

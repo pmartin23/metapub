@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, absolute_import
+from __future__ import print_function, absolute_import, unicode_literals
 
 import os, sys, shutil
 import re
@@ -149,7 +149,7 @@ class CrossRef(Borg):
         for result in results:
             result['score'] = float(result['score'])
             result['doi'] = result['doi'].replace('http://dx.doi.org/', '')
-            result['coins'] = urllib.parse.unquote(result['coins'])
+            #result['coins'] = urllib.parse.unquote(result['coins']) - best to not use unquoting if we have unicode
             result['slugs'] = self._parse_coins(result['coins'])
             enhanced_results.append(result)
         return enhanced_results
