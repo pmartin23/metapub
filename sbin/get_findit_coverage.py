@@ -9,7 +9,7 @@ fetch = PubMedFetcher()
 outfile = open(FINDIT_COVERAGE_CSV, 'w')
 
 # template for CSV output
-CSV_OUTPUT_TEMPLATE = '{source.pma.jrnl},{source.pma.year},{source.pma.pmid},{url},{source.reason}\n'
+CSV_OUTPUT_TEMPLATE = '{source.pma.journal},{source.pma.year},{source.pma.pmid},{url},{source.reason}\n'
 
 
 # for each journal listed in JOURNAL_ISOABBR_LIST_FILENAME,
@@ -66,7 +66,7 @@ def main():
         print('[%s] Sample pmids: %r' % (jrnl, pmids))
         for pmid in pmids:
             source = FindIt(pmid)
-            print('[{source.pma.journal]\t{source.pmid}: {source.url} ({source.reason})'.format(source=source))
+            print('[{source.pma.journal}]\t{source.pmid}: {source.url} ({source.reason})'.format(source=source))
             write_findit_result_to_csv(source)
 
 if __name__ == '__main__':

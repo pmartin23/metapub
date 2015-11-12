@@ -55,11 +55,11 @@ class PubMedArticle(MetaPubObject):
         if six.PY3 and type(xmlstr) == six.binary_type:
             xmlstr = xmlstr.decode()
 
-        if '<PubmedBookArticle>' in xmlstr:
+        if b'<PubmedBookArticle>' in xmlstr:
             super(PubMedArticle, self).__init__(xmlstr, 'PubmedBookArticle', args, kwargs)
             self.pubmed_type = 'book'
             self._root = 'BookDocument'
-        elif '<PubmedArticle>' in xmlstr:
+        elif b'<PubmedArticle>' in xmlstr:
             super(PubMedArticle, self).__init__(xmlstr, 'PubmedArticle', args, kwargs)
             self.pubmed_type = 'article'
             self._root = 'MedlineCitation'
