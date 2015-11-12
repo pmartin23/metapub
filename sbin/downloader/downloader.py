@@ -22,34 +22,96 @@ log = logging.getLogger('library.downloader')
 #suppress those unfortunate SSL-cert warnings from journal websites.
 urllib3.disable_warnings()
 
-def is_pdf_file(filepath):
-    '''uses file's "magic number" to check whether the file is a PDF.
 
-       :param: filepath (string) - path to file
-       :return: bool - True if PDF, False if not.
+def get_filetype(filepath):
+    '''Read file's "magic number" string and return it.
+
+    Args:
+        filepath (str): path to file
+
+    Returns:
+        string containing magicNumber (e.g. "%PDF")
     '''
-    try:
-        infile = open(filepath,'rb')
+    with open(filepath, 'rb') as infile:
         magicNumber = infile.read(4)
-        infile.close()
-        return magicNumber=='%PDF'
-    except Exception as error:
-        return False
+        return magicNumber
+    return None
 
-def has_nonzero_filesize(filepath, min_size=10):
-    '''uses os.stat to check filesize of file.
+def is_pdf_file(filepath):
+    '''Use file's "magic number" string to check whether the file is a PDF.
 
-    :param: filepath (string) - path to file
-    :param: min_size (int) [default: 10] - expected min size in bytes
-    :return: bool - True size > min_size; False if not.
+    Args:
+        filepath (str): path to file
+
+    Returns:
+        True if PDF, False if not (or filepath invalid)
     '''
+    filetype = get_filetype(filepath)
+    if filetype:
+        return filetype=='%PDF'
+    return False
 
+def has_nonzero_filesize(filepath, min_size=1):
+    '''Call get_filesize on specified filepath to determine bytesize of file,
+    and compares this to min_size (default 1).  Return True if filesize > min_size
+    and False if otherwise (or if filepath not extant on filesystem).
+
+    Args:
+        filepath (str): path to file
+        min_size (int): minimum byte size to be considered "nonzero" (optional)
+
+    Returns:
+        True if file meets above conditions, False otherwise.
+    '''
+    size = get_filesize(filepath)
+    if size and size > min_size:
+        return True
+    return False
+
+def get_filesize(filepath):
+    '''Return filesize of specified filepath.
+
+    Args:
+        filepath (str): path to file
+
+    Returns:
+        int or None: size of file in bytes or None if filepath invalid
+    '''
     if os.path.exists(filepath):
         # check that it has a nonzero filesize
         filestat = os.stat(filepath)
-        if filestat.st_size > min_size:
+        return filestat.st_size
+    return None
+
+
+class DownloadResult(object):
+    '''Encapsulates the result conditions of an action the Downloader took.'''
+
+    def __init__(self, **kwargs):
+        self.filepath = kwargs.get('filepath', None)
+        self.url = kwargs.get('url', None)
+        self.source = kwargs.get('source', None)
+        self.status_code = kwargs.get('status_code', None)
+        self.content_type = kwargs.get('content_type', None)
+        self.filetype = kwargs.get('filetype', None)
+        self.filesize = kwargs.get('filesize', None)
+        self.method = kwargs.get('method', None)
+        self.params = kwargs.get('params', None)
+
+    def inspect_file(self):
+        '''if file exists on filesystem, mutate this object's `filesize` and
+        `filetype` attributes to describe the file.'''
+        self.filesize = get_filesize(self.filepath)
+        self.filetype = get_filetype(self.filepath)
+
+    @property
+    def ok(self):
+        '''magic attribute to check whether file downloaded is "OK" -- i.e. it is
+        present on the filesystem and has a filesize greater than 1 bytes.'''
+        self.inspect_file()
+        if self.filesize > 1:
             return True
-    return False
+        return False
 
 
 class Downloader(object):
@@ -68,12 +130,18 @@ class Downloader(object):
         return os.path.join(self.TMPDIR, filename)
 
     def unzip(self, zipfilepath, destdir=None, remove_zip=False):
-        '''unzips zipfilepath into specified destdir (if specified), or into its own 
+        '''unzip zipfilepath into specified destdir (if specified), or into its own 
         directory if destdir not specified.
     
         If remove_zip param True (default: False), remove the source zip file
         after successful extraction.
 
+        Args:
+            zipfilepath (str): absolute path to zipfile
+            destdir (str): optional, default None
+            remove_zip (bool): optional, default False
+        
+        Returns:
             :param: zipfilepath (string) - absolute path to zipfile
             :param: destdir (string) [default: None] 
             :param: remove_zip (bool) [default: False] 
@@ -96,42 +164,48 @@ class Downloader(object):
         return results
 
 
-    def article_from_sources(self, pmid, sources, refile=True):
+    def article_from_sources(self, pmid, sources):
         '''takes pmid and list of ranked ArticleSources, iterates over each source.url 
         until it successfully downloads the desired file.
 
-        If refile == True, immediately use PubMedFileManager to refile article.
+        If PDF successfully downloaded, return the DownloadResult object containing
+        the url and name of the source used to download the file.
 
-        If PDF successfully downloaded, return the ArticleSource object that
-        was used to provide the url to download the file.
+        If all sources become exhausted, return None.
 
-        If all sources.url entries become exhausted, return None.
+        Args:
+            pmid (str)
+            sources (list) - list of ArticleSource objects
 
-            :param: pmid (string)
-            :param: sources (list of ArticleSource objects)
-            :param: refile (bool) [default: True] 
-            :return: ArticleSource or None
+        Returns:
+            DownloadResult object or None
         '''
         filepath = self.get_tmppath_for_pmid(pmid)
         for source in sources:
             # try downloading from explicit URLs
-            if source.url and source.source != 'Library':
-                result = self.request_write_file(source.url, filepath, 'pdf')
-                if result[2]:
-                    return (source, filepath) 
+            if source.url and source.source != 'filesystem':
+                dlrs = self.request_write_file(source.url, filepath, 'pdf')
+                if dlrs.ok:
+                    dlrs.source = source.source
+                    return dlrs
         return None
 
     def request_write_file(self, url, filepath, expected_filetype=None, post_args=None,
                            headers=DEFAULT_HEADERS, timeout=REQUESTS_TIMEOUT):
         '''
-        :param: url (string) - target url pointing to content for download
-        :param: filepath (string) - output filepath
-        :param: expected_filetype (string) [default:None]
-        :param: post_args (dict) [default: None] - arguments to submit as POST request
-        :param: headers (dict) [default: downloader.DEFAULT_HEADERS] - HTTP headers to submit with query
-        :param: timeout (int) [default: downloader.REQUESTS_TIMEOUT] - milliseconds to wait for a response
-        :return: tuple - (response.status_code, response.headers['content-type'], None)
+        Args:
+            url (str): target url pointing to content for download via HTTP
+            filepath (str): output filepath
+            post_args (dict): arguments to submit as POST request [default: None]
+            headers (dict): HTTP headers to submit with query [default: downloader.DEFAULT_HEADERS]
+            timeout (int): milliseconds to wait for a response [default: downloader.REQUESTS_TIMEOUT] 
+
+        Returns:
+            DownloadResult object
         '''
+        # create a DownloadResult object to represent the outcome of this operation.
+        dlrs = DownloadResult(url=url, filepath=filepath)
+
         check_if_pdf = False
         if expected_filetype:
             check_if_pdf = True if expected_filetype.lower()=='pdf' else False
@@ -144,10 +218,16 @@ class Downloader(object):
             response = requests.get(url, stream=True, verify=False, 
                                         timeout=timeout, headers=headers)
 
+        drsp.status_code = response.status_code
+        drsp.content_type = response.headers['content-type']
+
         if response.status_code == 200:
             # If it's sending us something we're not expecting, cut it off right away:
             if expected_filetype and expected_filetype.lower() not in response.headers.get('content-type'):
-                return (response.status_code, response.headers['content-type'], None)
+                drsp.status_code = 200
+                drsp.content_type = response.headers['content-type']
+                drsp.filepath = None
+                return drsp
 
             # If we don't care what it is, or we do care and our filetype expectations are met:
             else:
@@ -157,28 +237,34 @@ class Downloader(object):
                             break
                         handle.write(block)
 
-        # check if file was downloaded and has a filesize greater than 10 bytes:
-        if self._verify_download(filepath, check_if_pdf):
-            return (response.status_code, response.headers['content-type'], filepath)
-        else:
-            return (response.status_code, response.headers['content-type'], None)
+        # update DownloadResult's filetype and filesize characteristics
+        drsp.inspect_file()
+        return drsp
 
     def ftp(self, url, filepath):
-        '''Uses FTP to download file from designated url to designated filepath.'''
-        #result = urllib.urlretrieve(url, filepath)
+        '''Uses FTP to download file from designated url to designated filepath.
+
+        Args:
+            url (str): link to ftp resource (must include "ftp://")
+            filepath (str): output filepath
+
+        Returns:
+            DownloadResult object
+        '''
+        dlrs = DownloadResult(url=url, filepath=filepath)
         result = urllib.request.urlretrieve(url, filepath)
-        return result
+        dlrs.status_code = result[0]
+        print(result)
+        return dlrs
 
     def ftp_get_remote_filesize(self, url):
         '''Uses FTP to check and return integer 'content-length' value of remote file 
             at provided url.'''
-        #req = urllib.urlopen(url)
         req = urllib.request.urlopen(url)
         return int(req.headers.get('content-length'))
 
     def http_get_remote_filesize(self, url):
         '''Checks and returns integer 'Content-Length' header sent from remote url.''' 
-        #req = urllib2.urlopen(url)
         req = urllib.request.urlopen(url)
         return int(req.headers['Content-Length'])
 
@@ -192,53 +278,57 @@ class Downloader(object):
         If post_args is set and protocol is HTTP, uses POST method rather than GET,
         HOWEVER -- WARNING -- no filesize comparison can be done, only a check to 
         see whether the target filepath already exists.
-        
-        :param: url (string) - url to mirror
-        :param: filepath (string) - path to place new/updated file
-        :param: post_args (dict) [default: None] - if set, switches to POST method
-        :param: expected_filetype (string) [default: None] - set to 'pdf' if desired
-        :return: tuple - (response.status_code, response.headers['content-type'], None)
+
+        Args:
+            url (str): url to mirror (HTTP or FTP)
+            filepath (str): path to place new/updated file
+            post_args (dict): if set, switches to POST method [default: None]
+            expected_filetype (str): optional (currently only 'pdf' supported)
+
+        Returns:
+            DownloadResult object
         '''
 
         protocol = urllib.parse.urlparse(url).scheme
         method = 'GET' if not post_args else 'POST'
 
-        if os.path.exists(filepath) and method=='GET':
-            fileinfo = os.stat(filepath)
+        # if file isn't there, filesize will be None. 
+        local_filesize = get_filesize(filepath)
 
-            if protocol=='ftp':
-                remote_filesize = self.ftp_get_remote_filesize(url)
-            else:
-                remote_filesize = self.http_get_remote_filesize(url)
+        # only do the more complex "mirror" operation if local_filesize > 0
+        if local_filesize and method=='GET':
+
+            remote_filesize = self.ftp_get_remote_filesize(url) if protocol=='ftp' else
+                                    self.http_get_remote_filesize(url)
 
             log.debug('[MIRROR] %s: Content-Length = %i, %s: Filesize = %i', url, 
-                        remote_filesize, filepath, fileinfo.st_size)
+                        remote_filesize, filepath, local_filesize)
         
-            if remote_filesize == fileinfo.st_size:
+            if remote_filesize == local_filesize:
                 log.info('[MIRROR] %s: Not downloading since local file %s is identical', url, filepath)
-                return (200, None, filepath)
+                dlrs.status_code = 200
+                dlrs.source = 'filesystem'
+                dlrs.filepath = filepath
+                return dlrs
             else:
                 log.info('[MIRROR] %s: Starting download since local file %s needs an update.', url, filepath)
 
         elif os.path.exists(filepath) and method=='POST':
-            return (200, 'filesystem', filepath)
+            dlrs.status_code = 200
+            dlrs.source = 'filesystem'
+            dlrs.filepath = filepath
+            return dlrs
 
         else:
             log.info('[MIRROR] %s: Starting download since no copy exists at %s.', url, filepath)
 
         if protocol=='ftp':
             log.debug('[MIRROR] %s: downloading via FTP')
-            return self.ftp(url, filepath)
+            result = self.ftp(url, filepath)
+            dlrs.status_code = result[1]
         else:
             log.debug('[MIRROR] %s: downloading via HTTP')
             return self.request_write_file(url, filepath, post_args=post_args, 
                                            expected_filetype=expected_filetype)
-        
 
-    def _verify_download(self, filepath, check_if_pdf=False):
-        if check_if_pdf:
-            if not is_pdf_file(filepath):
-                return False
-
-        return has_nonzero_filesize(filepath)
 
