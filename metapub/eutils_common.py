@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import os, logging
 
@@ -31,8 +31,8 @@ def get_cache_path(cachedir, filename='metapub-cache.db'):
         Supports expansion of user directory shortcut '~' to full path.
     '''
     # cache keys don't work the same between python 2.x and 3.x.
-    if six.PY3:
-        filename = filename + '.3'
+    #if six.PY3:
+    #    filename = filename + '.3'
 
     if cachedir is None:
         return None

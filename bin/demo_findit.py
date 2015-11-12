@@ -1,5 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
+import logging
+
 from metapub.findit import FindIt
 
 older_pmids = ['2655732', '320292', '7686069', '7689822', '1287655', '7683021', '1309291', '1255861']
