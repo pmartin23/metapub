@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 # vip = Volume-Issue-Page format
 #       URLs that have the same format except for the host name

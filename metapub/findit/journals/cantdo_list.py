@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 JOURNAL_CANTDO_LIST = [
     'Nat Monspel Ser Bot',

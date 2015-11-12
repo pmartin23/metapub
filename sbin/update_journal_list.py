@@ -8,7 +8,8 @@ from config import JOURNAL_LIST_URL, JOURNAL_LIST_FILENAME
 def retrieve_journal_list():
     '''Uses Downloader.mirror function to grab JOURNAL_LIST_URL (if different).
 
-    :return: response.content (string)
+    Returns:
+        DownloadResult object
     '''
     dldr = Downloader()
     result = dldr.mirror(JOURNAL_LIST_URL, JOURNAL_LIST_FILENAME)

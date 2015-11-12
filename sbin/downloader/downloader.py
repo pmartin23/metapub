@@ -113,6 +113,9 @@ class DownloadResult(object):
             return True
         return False
 
+    def __str__(self):
+        ok = '(OK)' if self.ok else ''
+        return '{dlrs.url} --> {dlrs.filepath} {ok}'.format(dlrs=self, ok=ok)
 
 class Downloader(object):
     '''handles downloading of PDFs to a temporary location.

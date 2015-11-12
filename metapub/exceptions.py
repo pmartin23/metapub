@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 from lxml.etree import XMLSyntaxError
 from eutils.exceptions import *

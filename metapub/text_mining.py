@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals
+
 import re
 
 try:
@@ -67,11 +69,6 @@ def find_doi_in_string(inp, whitespace=False):
     except IndexError:
         return None
     return _doi_pass_2(doi)
-
-#### NOT TESTED and probably not working #####
-def get_pmc_fulltext_filename_for_PubMedArticle(pma):
-    fmt = '{journal}/{journal}_{year}_{month}_{day}_{voliss}_{pages}'
-    return fmt.format(**pma.to_dict())
 
 def get_nature_doi_from_link(link):
     '''custom method to get a DOI from a nature.com URL
@@ -194,4 +191,9 @@ def get_biomedcentral_doi_from_link(link):
         if path[0] == '/':
             path = path[1:]
         return '10.1186/' + path.replace('/', '-')
+
+#### NOT TESTED and probably not working #####
+def get_pmc_fulltext_filename_for_PubMedArticle(pma):
+    fmt = '{journal}/{journal}_{year}_{month}_{day}_{voliss}_{pages}'
+    return fmt.format(**pma.to_dict())
 

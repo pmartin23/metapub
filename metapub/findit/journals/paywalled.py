@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 # Below: Journals with really annoying paywalls guarding their precious
 # secrets.

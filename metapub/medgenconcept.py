@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 """metapub.medgenconcept -- MedGenConcept class instantiated by supplying ESummary XML string."""
 

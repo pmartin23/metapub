@@ -1,6 +1,6 @@
-"""metapub.pubmedarticle -- PubMedArticle class instantiated by supplying ncbi XML string."""
+from __future__ import absolute_import, unicode_literals
 
-from __future__ import absolute_import, print_function
+'''metapub.pubmedarticle -- PubMedArticle class instantiated by supplying ncbi XML string.'''
 
 import time
 from datetime import datetime

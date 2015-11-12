@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 simple_formats_pii = {
     'Am Heart J': 'http://www.ahjonline.com/article/{a.pii}/pdf',

@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 # simple formats are used for URLs that can be deduced from PubMedArticle XML
 #
