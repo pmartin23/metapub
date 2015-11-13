@@ -40,6 +40,11 @@ import requests
 import six
 from six.moves import urllib
 
+if six.PY2:
+    from urlparse import urlparse
+else:
+    from urllib.parse import urlparse
+
 from ..exceptions import MetaPubError
 from ..utils import asciify
 from ..pubmedfetcher import PubMedFetcher
@@ -205,7 +210,7 @@ class FindIt(object):
             self._log.debug('%r', error)
             return None
 
-        urlp = urllib.parse(baseurl)
+        urlp = urlparse(baseurl)
 
         # maybe it's sciencedirect / elsevier:
         if urlp.hostname.find('sciencedirect') > -1 or urlp.hostname.find('elsevier') > -1:

@@ -2,13 +2,13 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 __author__ = 'nthmost'
 
-import sys
+import six
 
 #py3k / py2k compatibility
-if sys.version_info >= (3,0):
-    from urllib.parse import urlsplit, urljoin
-else:
+if six.PY2:
     from urlparse import urlsplit, urljoin
+else:
+    from urllib.parse import urlsplit, urljoin
 
 import requests
 from lxml.html import HTMLParser
