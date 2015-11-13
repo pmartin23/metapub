@@ -12,6 +12,7 @@ from .base import MetaPubObject
 from .exceptions import MetaPubError
 from .text_mining import re_numbers
 
+
 class PubMedArticle(MetaPubObject):
     '''This PubMedArticle class receives an XML string as its required argument
     and parses it into its constituent parts, exposing them as attributes. 
@@ -52,22 +53,19 @@ class PubMedArticle(MetaPubObject):
     '''
 
     def __init__(self, xmlstr, *args, **kwargs):
-        if six.PY3 and type(xmlstr) == six.binary_type:
-            xmlstr = xmlstr.decode()
+        self.pubmed_type = determine_pubmed_xml_type(xmlstr)
 
-        if b'<PubmedBookArticle>' in xmlstr:
-            super(PubMedArticle, self).__init__(xmlstr, 'PubmedBookArticle', args, kwargs)
-            self.pubmed_type = 'book'
+        if self.pubmed_type=='book':
             self._root = 'BookDocument'
-        elif b'<PubmedArticle>' in xmlstr:
-            super(PubMedArticle, self).__init__(xmlstr, 'PubmedArticle', args, kwargs)
-            self.pubmed_type = 'article'
+            super(PubMedArticle, self).__init__(xmlstr, 'PubmedBookArticle', args, kwargs)
+        elif self.pubmed_type=='article':
             self._root = 'MedlineCitation'
+            super(PubMedArticle, self).__init__(xmlstr, 'PubmedArticle', args, kwargs)
         else:
-            # assume MedlineCitation is the root XML element
-            super(PubMedArticle, self).__init__(xmlstr, None, args, kwargs)
+            # assume we're here because of predownloaded Medline XML.
             self.pubmed_type = 'article'
             self._root = '.'
+            super(PubMedArticle, self).__init__(xmlstr, None, args, kwargs)
 
         pmt = self.pubmed_type
         
@@ -471,3 +469,40 @@ def square_voliss_data_for_pma(pma):
             pma.issue = re_numbers.findall(pma.issue)[0]
     return pma
 
+def determine_pubmed_xml_type(xmlstr):
+    '''returns string "type" of pubmed article XML based on presence of expected strings.
+
+    Possible returns:
+        'article'
+        'book'
+        'unknown'
+
+    Args:
+        xmlstr (str or bytes)
+
+    Returns:
+        typestring (str)
+    '''
+    # The real purpose of this function is to pull the py2/3 compatibility code
+    # away from the PubMedArticle class. This sucks and I (@nthmost) hate it,
+    # but it solves all of the problems of trying to inspect an XML document 
+    # that may have arrived as bytes (from requests) or as a native string, which
+    # when you use unicode_literals in 2.7 gives you even more problems.
+    #
+    # If you have a less ugly way to solve this, by all means, contribute.  :)
+    if six.PY2:
+        if b'<PubmedBookArticle>' in xmlstr:
+            return 'book'
+        elif b'<PubmedArticle>' in xmlstr:
+            return 'article'
+
+    elif six.PY3:
+        if type(xmlstr)==six.binary_type:
+            xmlstr = xmlstr.decode()
+        if '<PubmedBookArticle>' in xmlstr:
+            return 'book'
+        elif '<PubmedArticle>' in xmlstr:
+            return 'article'
+
+    return 'unknown'
+ 

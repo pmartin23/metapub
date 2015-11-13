@@ -50,7 +50,7 @@ def get_sample_pmids_for_journal(jrnl):
 
 def write_findit_result_to_csv(source):
     url = source.url
-    if source.reason.startswith('NOFORMAT') or source.reason.startswith('TODO'):
+    if source.reason.startswith(('NOFORMAT', 'TODO')):
         url = source.backup_url
     outfile.write(CSV_OUTPUT_TEMPLATE.format(source=source, url=url))
     outfile.flush()
