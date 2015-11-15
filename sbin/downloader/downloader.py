@@ -95,7 +95,7 @@ class DownloadResult(object):
         self.content_type = kwargs.get('content_type', None)
         self.filetype = kwargs.get('filetype', None)
         self.filesize = kwargs.get('filesize', None)
-        self.method = kwargs.get('method', None)
+        self.method = kwargs.get('method', 'GET')
         self.params = kwargs.get('params', None)
 
     def inspect_file(self):
@@ -257,7 +257,6 @@ class Downloader(object):
         dlrs = DownloadResult(url=url, filepath=filepath)
         result = urllib.request.urlretrieve(url, filepath)
         dlrs.status_code = result[0]
-        print(result)
         return dlrs
 
     def ftp_get_remote_filesize(self, url):
@@ -301,37 +300,32 @@ class Downloader(object):
         # only do the more complex "mirror" operation if local_filesize > 0
         if local_filesize and method=='GET':
 
-            remote_filesize = self.ftp_get_remote_filesize(url) if protocol=='ftp' else
-                                    self.http_get_remote_filesize(url)
+            remote_filesize = self.ftp_get_remote_filesize(url) if protocol=='ftp' else self.http_get_remote_filesize(url)
 
             log.debug('[MIRROR] %s: Content-Length = %i, %s: Filesize = %i', url, 
                         remote_filesize, filepath, local_filesize)
         
             if remote_filesize == local_filesize:
                 log.info('[MIRROR] %s: Not downloading since local file %s is identical', url, filepath)
-                dlrs.status_code = 200
-                dlrs.source = 'filesystem'
-                dlrs.filepath = filepath
-                return dlrs
+                return DownloadResult(url=url, status_code=200, source='filesystem', filepath=filepath)
             else:
                 log.info('[MIRROR] %s: Starting download since local file %s needs an update.', url, filepath)
 
-        elif os.path.exists(filepath) and method=='POST':
-            dlrs.status_code = 200
-            dlrs.source = 'filesystem'
-            dlrs.filepath = filepath
-            return dlrs
+        # Should we avoid redownloading via POST if we already have the file?
+        # Commented out Nov 14, 2015 --nthmost
+        #elif os.path.exists(filepath) and method=='POST':
+        #    log.info('[MIRROR] %s: Not downloading since local file exists and HTTP method is POST.', url, filepath)
+        #    return DownloadResult(url=url, status_code=200, source='filesystem', filepath=filepath, 
+        #            method='POST', params=post_args)
 
         else:
             log.info('[MIRROR] %s: Starting download since no copy exists at %s.', url, filepath)
 
         if protocol=='ftp':
             log.debug('[MIRROR] %s: downloading via FTP')
-            result = self.ftp(url, filepath)
-            dlrs.status_code = result[1]
+            return self.ftp(url, filepath)
         else:
             log.debug('[MIRROR] %s: downloading via HTTP')
             return self.request_write_file(url, filepath, post_args=post_args, 
                                            expected_filetype=expected_filetype)
-
 

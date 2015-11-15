@@ -19,7 +19,12 @@ def kpick(args, options, default=None):
 
 def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE):
     chars = re.escape(chars)
-    outp = re.sub('['+chars+']', '', inp)
+
+    #TODO: use six.binary_type and whatnot here -- this is getting nuts
+    if six.PY2:
+        outp = re.sub(b'['+chars+']', b'', b'inp')
+    else:
+        outp = re.sub('['+chars+']', '', inp)
     return outp
 
 def asciify(inp):
