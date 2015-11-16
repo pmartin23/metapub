@@ -130,7 +130,7 @@ class CrossRef(Borg):
                  'volume': parameterize('%s' % pma.volume),
                  'issue': parameterize('%s' % pma.issue),
                  'year': parameterize('%s' % pma.year),
-                 'aulast': parameterize(aulast),
+                 'aulast': '' if aulast is None else parameterize(aulast),
                  'jtitle': parameterize(jtitle),
                  'start_page': parameterize(pma.first_page),
              }

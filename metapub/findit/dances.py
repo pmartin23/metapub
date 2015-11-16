@@ -38,11 +38,7 @@ def the_doi_2step(doi):
                         (doi, response.status_code))
 
 def standardize_journal_name(journal_name):
-    '''protect against unicode character mishaps in journal names.
-
-    Returns a "standardized" journal name with periods stripped out.'''
-    # (did you know that unicode.translate takes ONE argument whilst
-    #   str.translate takes TWO?! true story)
+    '''Returns a "standardized" journal name with periods stripped out.'''
     return remove_chars(journal_name, '.')
 
 def verify_pdf_url(pdfurl, publisher_name=''):
@@ -238,7 +234,7 @@ def the_sciencedirect_disco(pma, verify=True):
 
     starturl = None
     if pma.pii:
-        starturl = sciencedirect_url.format(piit=pma.pii.translate(None, '-()'))
+        starturl = sciencedirect_url.format(piit=remove_chars(pma.pii, '-()'))
     elif pma.doi:
         starturl = the_doi_2step(pma.doi)
 
@@ -426,7 +422,7 @@ def the_lancet_tango(pma, verify=True):
          :raises: AccessDenied, NoPDFLink
     '''
     url_template = doi_templates['lancet']
-    jrnl = pma.journal.translate(None, '.')
+    jrnl = standardize_journal_name(pma.journal)
 
     if not pma.pii and pma.doi:
         pma.pii = pma.doi.split('/')[1]
@@ -456,7 +452,7 @@ def the_nature_ballet(pma, verify=True):
 
     if url == '':
         if pma.pii:
-            url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
+            url = nature_format.format(a=pma, ja=nature_journals[standardize_journal_name(pma.journal)]['ja'])
         else:
             if pma.doi:
                 raise NoPDFLink('MISSING: pii, TXERROR: dx.doi.org resolution failed for doi %s' % pma.doi)
@@ -629,7 +625,7 @@ def the_cell_pogo(pma, verify=True):
     if pma.pii:
         # the front door
         url = cell_format.format(a=pma, ja=cell_journals[jrnl]['ja'],
-                                     pii=pma.pii.translate(None, '-()'))
+                                     pii=remove_chars(pma.pii, '-()'))
         if verify:
             verify_pdf_url(url, 'Cell')
         return url

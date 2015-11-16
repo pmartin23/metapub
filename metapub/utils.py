@@ -17,8 +17,17 @@ def kpick(args, options, default=None):
     return default
 
 def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE):
-    chars = re.escape(chars)
-    return re.sub('[%s]' % chars, '', inp)
+    for char in chars:
+        inp = inp.replace(char, '')
+    return inp
+
+    #
+    #chars = re.escape(chars)
+    #try:
+    #    return re.sub('[%s]' % chars, '', inp)
+    #except TypeError:
+    #    # TypeError: expected string or bytes-like object
+    #    return str(re.sub(b'[%s] % chars', b'', bytes(inp)))
 
 def asciify(inp):
     '''nuke all the unicode from orbit. it's the only way to be sure.'''
