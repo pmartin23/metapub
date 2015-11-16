@@ -8,7 +8,6 @@ import six
 from lxml import etree
 from unidecode import unidecode
 
-
 PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\"&"
 
 def kpick(args, options, default=None):
@@ -19,13 +18,7 @@ def kpick(args, options, default=None):
 
 def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE):
     chars = re.escape(chars)
-
-    #TODO: use six.binary_type and whatnot here -- this is getting nuts
-    if six.PY2:
-        outp = re.sub(b'['+chars+']', b'', b'inp')
-    else:
-        outp = re.sub('['+chars+']', '', inp)
-    return outp
+    return re.sub('[%s]' % chars, '', inp)
 
 def asciify(inp):
     '''nuke all the unicode from orbit. it's the only way to be sure.'''
