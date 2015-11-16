@@ -21,14 +21,6 @@ def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE):
         inp = inp.replace(char, '')
     return inp
 
-    #
-    #chars = re.escape(chars)
-    #try:
-    #    return re.sub('[%s]' % chars, '', inp)
-    #except TypeError:
-    #    # TypeError: expected string or bytes-like object
-    #    return str(re.sub(b'[%s] % chars', b'', bytes(inp)))
-
 def asciify(inp):
     '''nuke all the unicode from orbit. it's the only way to be sure.'''
     if inp:
@@ -46,6 +38,9 @@ def squash_spaces(inp):
 def parameterize(inp, sep='+'):
     '''make strings suitable for submission to GET-based query service. strips
         out these characters: %s''' % PUNCS_WE_DONT_LIKE
+    if inp is None:
+        return ''
+
     inp = remove_chars(inp, PUNCS_WE_DONT_LIKE) 
     inp = squash_spaces(inp).replace(' ', sep)
 

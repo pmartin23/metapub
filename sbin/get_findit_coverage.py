@@ -63,8 +63,10 @@ def write_findit_result_to_csv(source):
     outfile.flush()
 
 def main():
-    jrnls = open(JOURNAL_ISOABBR_LIST_FILENAME).readlines()
-    for jrnl in jrnls:
+    jrnls = open(JOURNAL_ISOABBR_LIST_FILENAME).read()
+    start_index = jrnls.find('Acute Care')
+
+    for jrnl in jrnls[start_index:].split('\n'):
         jrnl = jrnl.strip()
         if jrnl == '':
             continue
