@@ -62,6 +62,11 @@ simple_formats_doi = {
 
     'Pharmacogenomics': doi_templates['futuremed'],
 
+    'Acta Orthop Scand': doi_templates['taylor_francis'],
+    'Acta Orthop Scand Suppl': doi_templates['taylor_francis'],
+    'Acta Otolaryngol': doi_templates['taylor_francis'],
+    'Acta Otolaryngol Suppl': doi_templates['taylor_francis'],
+    'Acta Otorhinolaryngol Belg': doi_templates['taylor_francis'],
     'Autophagy': doi_templates['taylor_francis'],
     'Biosci Biotechnol Biochem': doi_templates['taylor_francis'],
     'Cancer Biol Ther': doi_templates['taylor_francis'],

@@ -2,6 +2,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from metapub import FindIt, PubMedFetcher
 
+from metapub.findit.dances import the_doi_2step
+
 from config import JOURNAL_ISOABBR_LIST_FILENAME, FINDIT_COVERAGE_CSV
 
 fetch = PubMedFetcher()
@@ -48,7 +50,7 @@ def get_sample_pmids_for_journal(jrnl, years=None, max_pmids=3):
             idx += 1
     else:
         for year in years:
-            pmids = fetch.pmids_for_query(jrnl, year=year)
+            pmids = fetch.pmids_for_query(journal=jrnl, year=year)
             if len(pmids) < 1:
                 continue
             samples.append(pmids[0])
@@ -56,15 +58,21 @@ def get_sample_pmids_for_journal(jrnl, years=None, max_pmids=3):
 
 def write_findit_result_to_csv(source):
     url = source.url
-    if source.reason:
-        if source.reason.startswith(('NOFORMAT', 'TODO')):
-            url = source.backup_url
+    if source.reason and source.reason.startswith(('NOFORMAT', 'TODO')):
+        if source.doi:
+            try:
+                url = the_doi_2step(source.doi)
+            except Exception as err:
+                url = 'http://dx.doi.org/%s' % source.doi
+        else:
+            url = '(no doi)'
     outfile.write(CSV_OUTPUT_TEMPLATE.format(source=source, url=url))
     outfile.flush()
 
 def main():
     jrnls = open(JOURNAL_ISOABBR_LIST_FILENAME).read()
-    start_index = jrnls.find('Acute Care')
+    #start_index = jrnls.find('Anat. Embryol.')
+    start_index = 0
 
     for jrnl in jrnls[start_index:].split('\n'):
         jrnl = jrnl.strip()

@@ -32,12 +32,24 @@ def asciify(inp):
         return ''
 
 def squash_spaces(inp):
-    '''convert multiple ' ' chars to a singles'''
+    '''convert multiple ' ' chars to a single space'''
     return ' '.join(inp.split())
 
 def parameterize(inp, sep='+'):
-    '''make strings suitable for submission to GET-based query service. strips
-        out these characters: %s''' % PUNCS_WE_DONT_LIKE
+    '''Make strings suitable for submission to GET-based query service. 
+
+    Strips out these characters: %s
+
+    If inp is None, return empty string.
+
+    Args:
+        inp (str or None): input to be parameterized
+        sep (str): separator to use in place of spaces (default='+')
+
+    Returns:
+        "parameterized" str
+
+''' % PUNCS_WE_DONT_LIKE
     if inp is None:
         return ''
 
