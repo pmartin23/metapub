@@ -247,7 +247,7 @@ def the_sciencedirect_disco(pma, verify=True):
         raise NoPDFLink('TXERROR: ScienceDirect TooManyRedirects: cannot reach %s via %s' %
                         (pma.journal, starturl))
 
-    tree = etree.fromstring(res.text, HTMLParser())
+    tree = etree.fromstring(res.content, HTMLParser())
     try:
         div = tree.cssselect('div.icon_pdf')[0]
     except IndexError:
@@ -345,7 +345,7 @@ def the_jama_dance(pma, verify=True):
     baseurl = the_doi_2step(pma.doi)
     res = requests.get(baseurl)
     parser = HTMLParser()
-    tree = etree.fromstring(res.text, parser)
+    tree = etree.fromstring(res.content, parser)
     # we're looking for a meta tag like this:
     # <meta name="citation_pdf_url" content="http://archneur.jamanetwork.com/data/Journals/NEUR/13776/NOC40008.pdf" />
     for item in tree.findall('head/meta'):
@@ -398,10 +398,10 @@ def the_wiley_shuffle(pma, verify=True):
     # wiley sometimes buries PDF links in HTML pages we have to parse.
     res = requests.get(url)
     if res.headers['content-type'].find('html') > -1:
-        if res.text.find('ACCESS DENIED') > -1:
+        if res.content.find('ACCESS DENIED') > -1:
             raise AccessDenied('DENIED: Wiley E Publisher says no to %s' % res.url)
 
-        tree = etree.fromstring(res.text, HTMLParser())
+        tree = etree.fromstring(res.content, HTMLParser())
         if tree.find('head/title').text.find('Not Found') > -1:
             raise NoPDFLink('TXERROR: Wiley says File Not found (%s)' % res.url)
         elif tree.find('head/title').text.find('Maintenance') > -1:
@@ -589,7 +589,7 @@ def the_wolterskluwer_volta(pma, verify=True):
         baseurl = requests.get(volissurl.format(a=pma)).url
         
     res = requests.get(baseurl)
-    tree = etree.fromstring(res.text, HTMLParser())
+    tree = etree.fromstring(res.content, HTMLParser())
     try:
         item = tree.cssselect('li.ej-box-01-body-li-article-tools-pdf')[0]
     except IndexError:

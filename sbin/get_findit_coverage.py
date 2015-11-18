@@ -69,10 +69,13 @@ def write_findit_result_to_csv(source):
     outfile.write(CSV_OUTPUT_TEMPLATE.format(source=source, url=url))
     outfile.flush()
 
-def main():
+def main(start_journal=None):
     jrnls = open(JOURNAL_ISOABBR_LIST_FILENAME).read()
-    #start_index = jrnls.find('Anat. Embryol.')
-    start_index = 0
+
+    if start_journal:
+        start_index = jrnls.find(start_journal)
+    else:
+        start_index = 0
 
     for jrnl in jrnls[start_index:].split('\n'):
         jrnl = jrnl.strip()
@@ -85,10 +88,15 @@ def main():
 
         print('[%s] Sample pmids: %r' % (jrnl, pmids))
         for pmid in pmids:
-            source = FindIt(pmid)
+            source = FindIt(pmid, verify=False)
             print('[{source.pma.journal}]\t{source.pmid}: {source.url} ({source.reason})'.format(source=source))
             write_findit_result_to_csv(source)
 
 if __name__ == '__main__':
-    main()
+    import sys
+    try:
+        main(str(sys.argv[1]))
+    except:
+        main()
+
 
