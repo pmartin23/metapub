@@ -23,6 +23,8 @@ def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE):
 
 def asciify(inp):
     '''nuke all the unicode from orbit. it's the only way to be sure.'''
+    #TODO: be more diplomatic than an atomic bomb: convert international chars to ascii equivalents.
+    # see http://stackoverflow.com/questions/517923/what-is-the-best-way-to-remove-accents-in-a-python-unicode-string
     if inp:
         try:
             return inp.encode('ascii', 'ignore')
