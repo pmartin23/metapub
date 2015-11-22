@@ -45,7 +45,7 @@ def get_sample_pmids_for_journal(jrnl, years=None, max_pmids=3):
     if years is None:
         pmids = fetch.pmids_for_query(journal=jrnl)
         idx = 0
-        while idx < len(pmids) and idx <= max_pmids:
+        while idx < len(pmids) and idx < max_pmids:
             samples.append(pmids[idx])
             idx += 1
     else:
@@ -82,9 +82,11 @@ def main(start_journal=None):
         if jrnl == '':
             continue
 
-        pmids = get_sample_pmids_for_journal(jrnl, years=['1975', '1980', '1990', '2002', '2013'])
-        if pmids == []:
-            pmids = get_sample_pmids_for_journal(jrnl)
+        years = ['1975', '1980', '1990', '2002', '2013']
+        num_desired = len(years)
+        pmids = get_sample_pmids_for_journal(jrnl, years=years)
+        if len(pmids) < num_desired:
+            pmids = pmids + get_sample_pmids_for_journal(jrnl, max_pmids=num_desired-len(pmids))
 
         print('[%s] Sample pmids: %r' % (jrnl, pmids))
         for pmid in pmids:

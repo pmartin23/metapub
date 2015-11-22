@@ -17,7 +17,7 @@ setup(
         'setuptools',
         'lxml',
         'requests',
-        'eutils',
+        #'eutils',  # install from repo
         'tabulate',
         'cssselect',
         'unidecode',
