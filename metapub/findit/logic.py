@@ -201,7 +201,7 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
         except MetaPubError as error:
             reason = str(error)
 
-    elif jrnl.find('Lancet') > -1:
+    elif jrnl in lancet_journals.keys():
         try:
             url = the_lancet_tango(pma, verify)
         except MetaPubError as error:

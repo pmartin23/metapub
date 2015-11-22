@@ -407,7 +407,12 @@ def the_wiley_shuffle(pma, verify=True):
         elif tree.find('head/title').text.find('Maintenance') > -1:
             raise NoPDFLink('TXERROR: Wiley site under scheduled maintenance -- try again later (url was %s).' % res.url)
         iframe = tree.find('body/div/iframe')
-        url = iframe.get('src')
+
+        try:
+            url = iframe.get('src')
+        except AttributeError:
+            # no iframe, give up (probably asking for a login at this point)
+            raise AccessDenied('DENIED: Wiley E Publisher says no to %s' % res.url)
         verify_pdf_url(url, 'Wiley')
         return url
 
