@@ -97,3 +97,4 @@
 11/3/2015, 0.3.17.4, CrossRef/Eutils: Commented out urllib unquoting of "coins" in CrossRef._get_enhanced_results.  This was causing issues with unicode characters in some authors' names.
 11/4/2015, 0.3.17.5, PubMedFetcher: Added logic to not reduce author last name in PubMedFetcher.pmids_for_citation if the key picked is that for a last name.  Added logging.
 11/18/2015, 0.3.17.6, FindIt: Bugfix to solve rare url verification edge case in the_wiley_shuffle.
+11/21/2015, 0.3.17.7, FindIt: adjusted Lancet test to match logical flow of other dances. Added "J Lancet" to "can't do" list.
