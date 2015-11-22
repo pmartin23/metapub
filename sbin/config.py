@@ -8,3 +8,5 @@ JOURNAL_ISOABBR_LIST_FILENAME = '/tmp/NCBI_isoabbr_list.txt'
 
 FINDIT_COVERAGE_CSV = '/tmp/findit_coverage.csv'
 
+PMID_OUTPUT_FILENAME = '/tmp/pmid_coverage_list.txt'
+

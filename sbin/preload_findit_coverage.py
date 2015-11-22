@@ -4,9 +4,15 @@ from metapub import FindIt, PubMedFetcher
 
 from metapub.findit.dances import the_doi_2step
 
-from config import JOURNAL_ISOABBR_LIST_FILENAME, FINDIT_COVERAGE_CSV
+from config import JOURNAL_ISOABBR_LIST_FILENAME, PMID_OUTPUT_FILENAME
 
 fetch = PubMedFetcher()
+
+outfile = open(PMID_OUTPUT_FILENAME, 'w')
+
+def write_pmid_to_list(pmid):
+    outfile.write(pmid + '\n')
+    outfile.flush()
 
 def get_sample_pmids_for_journal(jrnl, years=None, max_pmids=3):
     samples = []
@@ -24,15 +30,10 @@ def get_sample_pmids_for_journal(jrnl, years=None, max_pmids=3):
             samples.append(pmids[0])
     return samples
 
-def main(start_journal=None):
-    jrnls = open(JOURNAL_ISOABBR_LIST_FILENAME).read()
+def main():
+    jrnls = sorted(open(JOURNAL_ISOABBR_LIST_FILENAME).read().split('\n'))
 
-    if start_journal:
-        start_index = jrnls.find(start_journal)
-    else:
-        start_index = 0
-
-    for jrnl in jrnls[start_index:].split('\n'):
+    for jrnl in jrnls:
         jrnl = jrnl.strip()
         if jrnl == '':
             continue
@@ -45,11 +46,7 @@ def main(start_journal=None):
 
         print('[%s] Sample pmids: %r' % (jrnl, pmids))
         for pmid in pmids:
-            try:
-                pma = fetch.article_by_pmid(pmid)
-                print('    %s: %s' % (pmid, pma.title))
-            except Exception as err:
-                print('    %s: ERROR - %r' % (pmid, err))
+            write_pmid_to_list(pmid)
 
 if __name__ == '__main__':
     main()
