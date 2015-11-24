@@ -14,8 +14,9 @@ import requests
 from lxml.html import HTMLParser
 from lxml import etree
 
+from ..dx_doi import DxDOI, DX_DOI_URL
 from ..pubmedarticle import square_voliss_data_for_pma
-from ..exceptions import AccessDenied, NoPDFLink
+from ..exceptions import AccessDenied, NoPDFLink, BadDOI, DxDOIError
 from ..text_mining import find_doi_in_string
 from ..utils import remove_chars
 
@@ -27,15 +28,30 @@ OK_STATUS_CODES = (200, 301, 302, 307)
 AAAS_USERNAME = 'nthmost'
 AAAS_PASSWORD = '434264'
 
-DX_DOI_URL = 'http://dx.doi.org/%s'
+dx_doi_engine = None
+def _start_dx_doi_engine():
+    global dx_doi_engine
+    if dx_doi_engine is None:
+        dx_doi_engine = DxDOI()
+
 def the_doi_2step(doi):
-    'takes a doi (string), returns a url to a paper'
-    response = requests.get(DX_DOI_URL % doi)
-    if response.status_code in [200, 401, 301, 302, 307, 308]:
-        return response.url
-    else:
-        raise NoPDFLink('dx.doi.org lookup failed for doi %s (HTTP %i returned)' %
-                        (doi, response.status_code))
+    '''Given a doi, uses DxDOI lookup engine to source the publisher's 
+            article URL for this doi.
+
+    Args:
+        doi (str): a Digital Object Identifier
+
+    Returns:
+        url (str): link to publisher's website as returned by dx.doi.org
+
+    Raises:
+        NoPDFLink if dx.doi.org lookup failed (see error.message)
+    '''
+    _start_dx_doi_engine()
+    try:
+        return dx_doi_engine.resolve(doi)
+    except (BadDOI, DxDOIError) as error:
+        raise NoPDFLink(error.message)
 
 def standardize_journal_name(journal_name):
     '''Returns a "standardized" journal name with periods stripped out.'''

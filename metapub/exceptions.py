@@ -38,4 +38,10 @@ class AccessDenied(NoPDFLink):
     '''Raised when a FindIt url lookup fails for some specific reason that is
     particular to the journal or publisher.'''
 
+class BadDOI(MetaPubError):
+    '''Raised when DxDOI class tests validity of DOI and it fails to pass muster.'''
+
+class DxDOIError(MetaPubError):
+    '''Raised when a bad status code comes from loading dx.doi.org'''
+
 

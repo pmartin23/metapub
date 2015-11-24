@@ -18,11 +18,11 @@ from tabulate import tabulate
 from .eutils_common import SQLiteCache, get_cache_path
 from .pubmedfetcher import PubMedFetcher 
 from .exceptions import *
+from .config import DEFAULT_CACHE_DIR
 
 from .utils import asciify, parameterize, remove_html_markup, deparameterize, remove_chars
 from .base import Borg
 
-DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'),'.cache')
 CACHE_FILENAME = 'crossref-cache.db'
 
 #TODO implement usage of crossref V2 returns which are much nicer.
@@ -258,17 +258,16 @@ class CrossRef(Borg):
         inp = asciify(inp)
         return hashlib.md5(inp).hexdigest() 
 
-    def _query_cache(self, q, skip_sleep=False):
-        """return results for a CrossRef query, possibly from the cache.
+    def _query_cache(self, q):
+        '''return results for a CrossRef query, possibly from the cache.
 
         :param: q: an assembled query string based on input params
-        :param: skip_sleep: whether to bypass query throttling
         :rtype: json string
 
         The args are joined with args required by search.crossref.org.
 
-        All args will be converted to ASCII, with spaces converted to '+'.
-        """
+        All args will be converted to bytes, with spaces converted to '+'.
+        '''
 
         # sqlite cache usage lifted from eutils (thanks Reece!) --nthmost
 
@@ -287,11 +286,4 @@ class CrossRef(Borg):
             self._log.debug('cache disabled (self._cache is None)')
             return None
 
-        # FUTURE: if it seems necessary: cache throttling 
-        #if not skip_sleep:
-        #    req_int = self.request_interval() if callable(self.request_interval) else self.request_interval
-        #    sleep_time = req_int - (time.clock()-self._last_request_clock)
-        #    if sleep_time > 0:
-        #        self._logger.debug('sleeping {sleep_time:.3f}'.format(sleep_time=sleep_time))
-        #        time.sleep(sleep_time)
 

@@ -8,6 +8,9 @@ PKGNAME = 'metapub'
 # where to place XML (temporarily) when downloaded.
 TMPDIR = '/tmp'
 
+# default cache directory for SQLite cache engines
+DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'),'.cache')
+
 # email address submitted to eutils with requests (as required by their api).
 DEFAULT_EMAIL = os.getenv('EUTILS_EMAIL', 'metapub@nthmost.com')
 

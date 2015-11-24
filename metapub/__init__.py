@@ -9,6 +9,7 @@ from .medgenfetcher import MedGenFetcher
 from .medgenconcept import MedGenConcept
 from .crossref import CrossRef
 from .findit import FindIt
+from .dx_doi import DxDOI
 
-__version__ = '0.3.17.5'
+__version__ = '0.4.0a'
 

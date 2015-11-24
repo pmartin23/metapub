@@ -47,6 +47,7 @@ else:
 
 from ..exceptions import MetaPubError
 from ..utils import asciify
+from ..config import DEFAULT_CACHE_DIR
 from ..pubmedfetcher import PubMedFetcher
 from ..convert import PubMedArticle2doi_with_score, doi2pmid
 from ..eutils_common import SQLiteCache, get_cache_path
@@ -57,7 +58,6 @@ from .cache_utils import datetime_to_timestamp
 
 FETCH = PubMedFetcher()
 
-DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'), '.cache')
 CACHE_FILENAME = 'findit-cache.db'
 
 FINDIT_CACHE = None
