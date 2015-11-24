@@ -51,7 +51,7 @@ def the_doi_2step(doi):
     try:
         return dx_doi_engine.resolve(doi)
     except (BadDOI, DxDOIError) as error:
-        raise NoPDFLink(error.message)
+        raise NoPDFLink('%r' % error)
 
 def standardize_journal_name(journal_name):
     '''Returns a "standardized" journal name with periods stripped out.'''
