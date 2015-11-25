@@ -1,5 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
+import sys
+
 from metapub import FindIt, PubMedFetcher
 
 from metapub.findit.dances import the_doi_2step
@@ -33,14 +35,27 @@ def write_findit_result_to_csv(source):
     outfile.write(CSV_OUTPUT_TEMPLATE.format(source=source, url=url))
     outfile.flush()
 
-def main():
+def main(start_pmid=0):
     pmids = open(PMID_OUTPUT_FILENAME).read()
 
-    for pmid in pmids.split('\n'):
+    if start_pmid:
+        idx = pmids.find(str(start_pmid))
+    else:
+        idx = 0
+
+    for pmid in pmids[idx:].split('\n'):
         source = FindIt(pmid, verify=False)
         print('[{source.pma.journal}]\t{source.pmid}: {source.url} ({source.reason})'.format(source=source))
         write_findit_result_to_csv(source)
 
 if __name__ == '__main__':
-    main()
+    try:
+        start_pmid = int(sys.argv[1])
+        main(start_pmid)
+    except TypeError:
+        print('Argument must be an integer! (Pubmed ID)')
+    except IndexError:
+        print('Supply pmid as argument to this script. (use 0 if starting over.)')
+    finally:
+        sys.exit()
 
