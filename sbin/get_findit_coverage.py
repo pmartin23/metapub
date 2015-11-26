@@ -51,11 +51,13 @@ def main(start_pmid=0):
 if __name__ == '__main__':
     try:
         start_pmid = int(sys.argv[1])
-        main(start_pmid)
     except TypeError:
         print('Argument must be an integer! (Pubmed ID)')
+        sys.exit()
     except IndexError:
         print('Supply pmid as argument to this script. (use 0 if starting over.)')
-    finally:
         sys.exit()
+
+    main(start_pmid)
+
 
