@@ -125,7 +125,7 @@ vip_journals = {
     'Protein Eng Des Sel': {'host': 'peds.oxfordjournals.org'},
     'QJM': {'host': 'qjmed.oxfordjournals.org'},
     'Radiat Res': {'host': 'jrr.oxfordjournals.org'},
-    'Rheumatology (Oxford)': {'host' 'rheumatology.oxfordjournals.org'},
+    'Rheumatology (Oxford)': {'host': 'rheumatology.oxfordjournals.org'},
     'Science': {'host': 'sciencemag.org'},
     'Stroke': {'host': 'stroke.ahajournals.org'},
     'Thorax': {'host': 'thorax.bmj.com'},

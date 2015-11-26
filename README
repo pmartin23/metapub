@@ -265,7 +265,7 @@ https://bitbucket.org/metapub/metapub
 
 About Python 2 and Python 3 Support
 -----------------------------------
-*Alert*: version 0.3.17.6 will be the last version to support python 2.7 only.
+*Alert*: version 0.3.17 will be the last version to support python 2.7 only.
 
 The upcoming metapub version 0.4 will support Python 3.3+ and deal entirely in 
 *unicode strings in both python 2 and python 3*.  The effects this shift may have
@@ -276,5 +276,6 @@ So, while other types of weirdness are highly unlikely, the high probability of
 means you should prepare to test, test, and test again when upgrading between
 these two versions.
 
-Version 0.3.17.6 will remain on pypi until the retiring of python 2.7.
+Bugfixes that apply to this version will continue to appears as the latest 0.3.x
+release here on pypi until Python 2.7 is finally retired.
 
