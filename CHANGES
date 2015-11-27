@@ -99,3 +99,4 @@
 11/18/2015, 0.3.17.6, FindIt: Bugfix to solve rare url verification edge case in the_wiley_shuffle.
 11/21/2015, 0.3.17.7, FindIt: adjusted Lancet test to match logical flow of other dances. Added "J Lancet" to "can't do" list.
 11/28/2015, 0.3.17.8, FindIt: bugfix for VIP journal data (typo in "Rheumatology (Oxford)" entry).
+11/28/2015, 0.3.17.9, FindIt: added DOI check for JAMA journals, raise NoPDFLink if missing.

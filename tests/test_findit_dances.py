@@ -17,6 +17,14 @@ class TestFindItDances(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_jama_dance(self):
+        missing_doi = '1215988'
+        doi_but_unfree = '26575068'
+        source = FindIt(missing_doi)
+        assert source.reason.startswith('MISSING')
+        source = FindIt(doi_but_unfree)
+        assert source.url is None
+
     def test_pmc_twist(self):
         embargoed = '25554792'      # Science / pmc-release = Jan 2, 2016 / PMC4380271
         embargoed_url = 'http://sciencemag.org/content/347/6217/1258522.full.pdf'
