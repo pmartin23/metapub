@@ -357,6 +357,8 @@ def the_jama_dance(pma, verify=True):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
+    if not pma.doi:
+        raise NoPDFLink('MISSING: doi needed for JAMA article.')
 
     baseurl = the_doi_2step(pma.doi)
     res = requests.get(baseurl)
