@@ -18,5 +18,4 @@ jama_journals = (
     'JAMA Pediatr',
     'JAMA Psychiatry',
     'JAMA Surg',
-    'Schweiz Med Wochenschr',
 )
