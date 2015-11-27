@@ -26,7 +26,7 @@ def _get_dx_doi_cache(cachedir=DEFAULT_CACHE_DIR):
 
 class DxDOI(Borg):
     '''Looks up DOIs in dx.doi.org and caches results in an SQLite
-        cache. This is a Borg singleton object.
+    cache. This is a Borg singleton object.
 
     Methods:
 
@@ -102,9 +102,12 @@ class DxDOI(Borg):
             DxDOIError (metapub) - not-ok HTTP status code while loading url
             ConnectionError (urllib3) - problem making dx.doi.org connection
         '''            
+        if doi is None or doi.strip()=='':
+            raise BadDOI('DOI cannot be None or empty string')
+
         if check_doi:
             doi = self.check_doi(doi, whitespace=whitespace)
-
+            
         url = None
         if not skip_cache:
             url = self._query_cache(doi)
