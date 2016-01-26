@@ -16,7 +16,7 @@ class TestPubmedFetcher(unittest.TestCase):
     def test_pmids_for_query(self):
         params = { 'jtitle': 'American Journal of Medical Genetics', 
                     'year': 1996, 
-                    'volume': 61, 
+#                    'volume': 61, 
                     'author1_lastfm': 'Hegmann' }
 
         pmids = self.fetch.pmids_for_query(**params)

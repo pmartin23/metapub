@@ -360,6 +360,8 @@ def the_jama_dance(pma, verify=True):
     if not pma.doi:
         raise NoPDFLink('MISSING: doi needed for JAMA article.')
 
+    from IPython import embed; embed()
+
     baseurl = the_doi_2step(pma.doi)
     res = requests.get(baseurl)
     parser = HTMLParser()
