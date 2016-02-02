@@ -14,13 +14,13 @@ class TestPubmedFetcher(unittest.TestCase):
         pass
 
     def test_pmids_for_query(self):
-        params = { 'jtitle': 'American Journal of Medical Genetics', 
-                    'year': 1996, 
-#                    'volume': 61, 
-                    'author1_lastfm': 'Hegmann' }
+        params = {  'journal': 'PLoS One',
+                    'year': 2013, 
+                    'author': 'McMurry AJ' }
 
         pmids = self.fetch.pmids_for_query(**params)
         assert len(pmids)==1
+        assert pmids[0] == '23533569'
 
         # this pubmed ID was deleted
         params = { 'TA':'Journal of Neural Transmission', 

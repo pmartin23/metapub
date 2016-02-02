@@ -9,6 +9,12 @@ log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 log.addHandler(ch)
 
+"""
+        source = FindIt(missing_doi)
+        missing_doi = '1215988'
+        assert source.reason.startswith('MISSING')
+"""
+
 class TestFindItDances(unittest.TestCase):
 
     def setUp(self):
@@ -18,10 +24,7 @@ class TestFindItDances(unittest.TestCase):
         pass
 
     def test_jama_dance(self):
-        missing_doi = '1215988'
         doi_but_unfree = '26575068'
-        source = FindIt(missing_doi)
-        assert source.reason.startswith('MISSING')
         source = FindIt(doi_but_unfree)
         assert source.url is None
 
