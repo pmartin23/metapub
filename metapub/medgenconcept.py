@@ -39,7 +39,7 @@ class MedGenConcept(MetaPubObject):
 
 
     def to_dict(self):
-        'returns a dictionary composed of all extractable properties of this concept.'
+        """ returns a dictionary composed of all extractable properties of this concept. """
         return { 'CUI': self.CUI, 'title': self.title, 'definition': self.definition,
                  'semantic_id': self.semantic_id, 'semantic_type': self.semantic_type,
                  'modes_of_inheritance': self.modes_of_inheritance, 
@@ -66,10 +66,9 @@ class MedGenConcept(MetaPubObject):
         return self.content.get('uid')
     
     def _get_modes_of_inheritance(self):
-    
-        '''returns a list of all known ModesOfInheritance, in format:
+        """ returns a list of all known ModesOfInheritance, in format:
         [ { 'CUI': 'CNxxxx', 'name': 'some name', 'medgen_uid': 'xxxxxx', 'tui': 'A000 }, ...  ]
-        '''
+        """
         output_list = []
         modes = self.meta.find('ModesOfInheritance').getchildren()
         
@@ -99,11 +98,11 @@ class MedGenConcept(MetaPubObject):
         return output_list
              
     def _get_associated_genes(self):
-        '''returns a list of AssociatedGenes, in format:
+        """ returns a list of AssociatedGenes, in format:
         [ { 'gene_id': 'xxx', 'chromosome': 'X', 'cytogen_loc': 'X9234235', 'hgnc': 'GENE' }, ]
         
         if not available, returns None. 
-        '''
+        """
         genes = []
         try:
             for gene in self.meta.find('AssociatedGenes').getchildren():
@@ -116,12 +115,11 @@ class MedGenConcept(MetaPubObject):
             return None
 
     def _get_names(self):
-        '''returns a list of this concept's equivalent Names in various dictionaries,
+        """ Returns a list of this concept's equivalent Names in various dictionaries,
         in format:
         
         { 'SDUI': '300555', 'SCUI': 'xxx', 'CODE': '300555', 'SAB': 'OMIM' 'TTY': 'PT' 'type': 'syn', 'name': 'DENT DISEASE 2' }
-        
-        '''
+        """
         names = []
 
         # not every ID is present in each Name (e.g. SCUI only appears sometimes).        

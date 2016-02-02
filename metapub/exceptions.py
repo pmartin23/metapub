@@ -7,13 +7,13 @@ class MetaPubError(Exception):
     pass
 
 class InvalidPMID(MetaPubError):
-    '''Raised when NCBI efetch of a pubmed ID results in "invalid" response.'''
+    """Raised when NCBI efetch of a pubmed ID results in "invalid" response."""
 
 class CrossRefConnectionError(MetaPubError):
-    '''Raised when a well-formed CrossRef query results in a server error.'''
+    """Raised when a well-formed CrossRef query results in a server error."""
 
 class NoPDFLink(MetaPubError):
-    '''Raised when a FindIt url lookup fails for some specific reason that is
+    """Raised when a FindIt url lookup fails for some specific reason that is
     particular to the journal or publisher.
 
     This Exception provides extended attributes:
@@ -24,7 +24,7 @@ class NoPDFLink(MetaPubError):
             missing     :    list of data items missing from last attempt (if any)
 
     This Exception is mostly used internally in FindIt as flow control.
-    '''
+    """
     def __init__(self, reason, *args, **kwargs):
         self.message = reason
         self.reason = reason
@@ -35,13 +35,13 @@ class NoPDFLink(MetaPubError):
         super(NoPDFLink, self).__init__(reason, *args, **kwargs) 
 
 class AccessDenied(NoPDFLink):
-    '''Raised when a FindIt url lookup fails for some specific reason that is
-    particular to the journal or publisher.'''
+    """Raised when a FindIt url lookup fails for some specific reason that is
+    particular to the journal or publisher."""
 
 class BadDOI(MetaPubError):
-    '''Raised when DxDOI class tests validity of DOI and it fails to pass muster.'''
+    """Raised when DxDOI class tests validity of DOI and it fails to pass muster."""
 
 class DxDOIError(MetaPubError):
-    '''Raised when a bad status code comes from loading dx.doi.org'''
+    """Raised when a bad status code comes from loading dx.doi.org"""
 
 

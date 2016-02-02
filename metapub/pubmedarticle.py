@@ -125,7 +125,6 @@ class PubMedArticle(MetaPubObject):
     
         self.history = self._get_article_history()
 
-
     def to_dict(self):
         outd = self.__dict__
         outd.pop('content')
@@ -133,10 +132,66 @@ class PubMedArticle(MetaPubObject):
         outd.pop('_root')
         return self.__dict__
 
+    def _cit_author_str(self, author_list_or_string):
+        """ Helper function for constructing article citations.
+
+        :param author_list_or_string:
+        :return: author(s) str suitable for printed citation
+        """
+        if type(author_list_or_string)==list:
+            authors = author_list_or_string
+        else:
+            authors = self.authors_str.split(';')
+
+        if len(authors) > 2:
+            author_str = authors[0].strip().replace(' ', ', ') + ', et al'
+        elif len(authors)==2:
+            author_str = ', '.join([aut.strip().replace(' ', ', ') for aut in authors])
+        else:
+            author_str = self.authors_str.replace(' ', ', ')
+
+        return author_str
+
+    @property
+    def citation(self):
+        """ Returns a formatted citation string built from this article's author(s), title,
+        journal, year, volume, pages, PMID, and doi.
+
+        Article Example:
+
+        McNally, EM, et al. Genetic mutations and mechanisms in dilated cardiomyopathy. Journal of Clinical Investigation. 2013; 123(1):19-26. doi: 10.1172/JCI62862.
+
+        GeneReviews Example:
+        Tranebjarg, L, et al. Jervell and Lange-Nielsen syndrome. 2002 Jul 29 (Updated 2014 Nov 20). In: Pagon, RA, et al., editors. GeneReviews (Internet). Seattle (WA): University of Washington, Seattle; 1993-2015. Available from: http://www.ncbi.nlm.nih.gov/books/NBK1405/.
+        """
+
+        article_cit_fmt = '{author}. {title}. {journal}. {a.year}; {a.volume_issue}:{a.pages}.{doi}'
+        book_cit_fmt = '{author}. {book.title}. {cdate} (Update {mdate}). In: {editors}, editors. {book.journal} (Internet). {book.book_publisher}'
+
+        author_str = self._cit_author_str(self.authors_str)
+
+        # Special handling for GeneReviews and other books:
+        if self.book_accession_id:
+            mdate = self.book_date_revised.strftime('%Y %b %d')
+            cdate = self.book_contribution_date.strftime('%Y %b %d')
+            editors = self._cit_author_str(self.book_editors)
+            return book_cit_fmt.format(a=self, editors=editors, author=author_str, book=self,
+                                       mdate=mdate, cdate=cdate)
+
+        if self.doi:
+            doi_str = ' doi: %s.' % self.doi
+        else:
+            doi_str = ''
+
+        title = '(None)' if not self.title else self.title.strip('.')
+        journal = '(None)' if not self.journal else self.journal.strip('.')
+
+        return article_cit_fmt.format(author=author_str, a=self, title=title, journal=journal, doi=doi_str)
+
     def _construct_datetime(self, d):
         names = ['Year', 'Month', 'Day']
         # if any part is missing, python will default to setting it to 1 anyway.
-        parts = { 'year': 1, 'month': 1, 'day': 1 }
+        parts = {'year': 1, 'month': 1, 'day': 1}
         for name in names:
             if d.find(name) is not None:
                 item = d.find(name).text
