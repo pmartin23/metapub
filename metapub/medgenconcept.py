@@ -10,13 +10,14 @@ from .exceptions import MetaPubError
 
 logger = logging.getLogger()
 
+
 class MedGenConcept(MetaPubObject):
 
     def __init__(self, xmlstr, *args, **kwargs):
         super(MedGenConcept, self).__init__(xmlstr, 'DocumentSummarySet/DocumentSummary', args, kwargs)
 
         if self._get('error'):
-            raise MetaPubError('Supplied XML for MedGenConcept contained explicit error: %s' % self._get('error') )
+            raise MetaPubError('Supplied XML for MedGenConcept contained explicit error: %s' % self._get('error'))
 
         # sometimes, ConceptMeta is an XML document embedded within the XML response. Boo-urns. 
         try:
@@ -37,15 +38,14 @@ class MedGenConcept(MetaPubObject):
         self.chromosome = self._get_chromosome()
         self.medgen_uid = self._get_medgen_uid()
 
-
     def to_dict(self):
         """ returns a dictionary composed of all extractable properties of this concept. """
-        return { 'CUI': self.CUI, 'title': self.title, 'definition': self.definition,
-                 'semantic_id': self.semantic_id, 'semantic_type': self.semantic_type,
-                 'modes_of_inheritance': self.modes_of_inheritance, 
-                 'associated_genes': self.associated_genes, 'medgen_uid': self.medgen_uid,
-                 'names': self.names, 'OMIM': self.OMIM, 'cytogenic': self.cytogenic,
-                 'chromosome': self.chromosome }
+        return {'CUI': self.CUI, 'title': self.title, 'definition': self.definition,
+                'semantic_id': self.semantic_id, 'semantic_type': self.semantic_type,
+                'modes_of_inheritance': self.modes_of_inheritance,
+                'associated_genes': self.associated_genes, 'medgen_uid': self.medgen_uid,
+                'names': self.names, 'OMIM': self.OMIM, 'cytogenic': self.cytogenic,
+                'chromosome': self.chromosome}
 
     def _get_CUI(self):
         return self._get('ConceptId')
@@ -72,10 +72,10 @@ class MedGenConcept(MetaPubObject):
         output_list = []
         modes = self.meta.find('ModesOfInheritance').getchildren()
         
-        extra_key_dict = { 'CUI': None, 
-                           'TUI': None,
-                           'medgen_uid': None, 
-                         }
+        extra_key_dict = {'CUI': None,
+                          'TUI': None,
+                          'medgen_uid': None,
+                          }
         for mode in modes:
             mode_dict = extra_key_dict.copy()
             try:
@@ -106,10 +106,11 @@ class MedGenConcept(MetaPubObject):
         genes = []
         try:
             for gene in self.meta.find('AssociatedGenes').getchildren():
-                genes.append({ 'gene_id': gene.get('gene_id'), 
-                               'hgnc': gene.text,
-                               'chromosome': gene.get('chromosome'),
-                               'cytogen_loc': gene.get('cytogen_loc') })
+                genes.append({'gene_id': gene.get('gene_id'),
+                              'hgnc': gene.text,
+                              'chromosome': gene.get('chromosome'),
+                              'cytogen_loc': gene.get('cytogen_loc')
+                              })
             return genes
         except AttributeError:
             return None
@@ -118,7 +119,8 @@ class MedGenConcept(MetaPubObject):
         """ Returns a list of this concept's equivalent Names in various dictionaries,
         in format:
         
-        { 'SDUI': '300555', 'SCUI': 'xxx', 'CODE': '300555', 'SAB': 'OMIM' 'TTY': 'PT' 'type': 'syn', 'name': 'DENT DISEASE 2' }
+        {'SDUI': '300555', 'SCUI': 'xxx', 'CODE': '300555', 'SAB': 'OMIM' 'TTY': 'PT',
+         'type': 'syn', 'name': 'DENT DISEASE 2'}
         """
         names = []
 
@@ -126,7 +128,7 @@ class MedGenConcept(MetaPubObject):
         possible_keys = ['SDUI', 'SCUI', 'CODE', 'SAB', 'TTY', 'PT', 'type']
         
         for name in self.meta.find('Names').getchildren():
-            outd = { 'name': name.text }
+            outd = {'name': name.text}
             for key in possible_keys:
                 try:
                     outd[key] = name.get(key)            
@@ -136,7 +138,7 @@ class MedGenConcept(MetaPubObject):
         return names
         
     def _get_OMIM(self):
-        """returns this concept's OMIM ids (list of strings), when available, else returns []."""
+        """ Returns this concept's OMIM ids (list of strings), when available, else returns []. """
         omim_root = self.meta.find('OMIM')
         outp = []
         try:
