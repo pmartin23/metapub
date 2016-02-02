@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 # cell journals
-#cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
+# OLD cell_format = 'http://download.cell.com{ja}/pdf/PII{pii}.pdf'
 cell_format = 'http://www.cell.com{ja}/pdf/{pii}.pdf'
 cell_journals = {
     'Am J Hum Genet': {'ja': '/AJHG'},

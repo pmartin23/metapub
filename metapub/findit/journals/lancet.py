@@ -12,4 +12,3 @@ lancet_journals = {
     'Lancet Psychiatry': {'ja': 'lanpsy'},
     'Lancet Respir Med': {'ja': 'lanres'},
 }
-

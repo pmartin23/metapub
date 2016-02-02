@@ -44,4 +44,3 @@ simple_formats_pii = {
     'Surg Neurol': 'http://www.worldneurosurgery.org/article/{a.pii}/pdf',
     'Thromb Res': 'http://www.thrombosisresearch.com/article/{a.pii}/pdf',
 }
-
