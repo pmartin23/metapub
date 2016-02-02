@@ -6,6 +6,7 @@ from lxml import etree
 
 from .exceptions import MetaPubError
 
+
 def parse_elink_response(xmlstr):
     '''return all Ids from an elink XML response'''
     if six.PY3 and type(xmlstr) == six.binary_type:
@@ -35,12 +36,21 @@ class MetaPubObject(object):
                 xml = 'empty'
             raise MetaPubError('Cannot build MetaPubObject; xml string was %s' % xml)
         self.xml = xml
-        self.content = self._parse_xml(xml, root)
+        self.content = self.parse_xml(xml, root)
 
-    def _parse_xml(self, xml, root=None):
-        '''takes xml (str or bytes) and (optionally) a root element definition string.
+    @staticmethod
+    def parse_xml(xml, root=None):
+        '''Takes xml (str or bytes) and (optionally) a root element definition string.
 
-        Returns an lxml document object.
+        If root element defined, DOM object returned is rebased with this element as
+        root.
+
+        Args:
+            xml (str or bytes)
+            root (str): (optional) name of root element
+
+        Returns:
+            lxml document object.
         '''
         if isinstance(xml, str) or isinstance(xml, bytes):
             dom = etree.XML(xml)
@@ -53,7 +63,7 @@ class MetaPubObject(object):
             return dom
 
     def _get(self, tag):
-        '''returns content of named XML element, or None if not found.'''
+        '''Returns content of named XML element, or None if not found.'''
         elem = self.content.find(tag)
         if elem is not None:
             return elem.text
@@ -63,7 +73,6 @@ class MetaPubObject(object):
 class Borg(object):
     '''singleton class backing cache engine objects.'''
     _shared_state = {}
+
     def __init__(self):
         self.__dict__ = self._shared_state
-
-
