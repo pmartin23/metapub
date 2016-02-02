@@ -12,9 +12,11 @@ def _assert_match_is_string_length(match, inp):
     else:
         assert False
 
+
 def assert_is_good_doi(doi):
     match = re_doi.match(doi)
     _assert_match_is_string_length(match, doi)
+
 
 def assert_is_good_pmid(pmid):
     match = re_pmid.match(pmid)
