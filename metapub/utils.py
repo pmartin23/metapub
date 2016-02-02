@@ -1,14 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
-import os, sys
-import re
 import unicodedata
 
 import six
-from lxml import etree
 from unidecode import unidecode
 
 PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\"&"
+
 
 def kpick(args, options, default=None):
     for opt in options:
@@ -16,14 +14,20 @@ def kpick(args, options, default=None):
             return args[opt]
     return default
 
+
 def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE):
     for char in chars:
         inp = inp.replace(char, '')
     return inp
 
+
 def asciify(inp):
-    '''nuke all the unicode from orbit. it's the only way to be sure.'''
-    #TODO: be more diplomatic than an atomic bomb: convert international chars to ascii equivalents.
+    """ Nuke all the unicode from orbit. It's the only way to be sure.
+
+    :param inp: (str)
+    :return: string converted to pure, American ASCII
+    """
+    # TODO: be more diplomatic than an atomic bomb: convert international chars to ascii equivalents.
     # see http://stackoverflow.com/questions/517923/what-is-the-best-way-to-remove-accents-in-a-python-unicode-string
     if inp:
         try:
@@ -33,25 +37,27 @@ def asciify(inp):
     else:
         return ''
 
+
 def squash_spaces(inp):
-    '''convert multiple ' ' chars to a single space'''
+    """ Convert multiple ' ' chars to a single space.
+
+    :param inp: (str)
+    :return: same string with only one space where multiple spaces were.
+    """
     return ' '.join(inp.split())
 
-def parameterize(inp, sep='+'):
-    '''Make strings suitable for submission to GET-based query service. 
 
-    Strips out these characters: %s
+def parameterize(inp, sep='+'):
+    """ Make strings suitable for submission to GET-based query service.
+
+    Strips out the characters named in metapub.utils.PUNCS_WE_DONT_LIKE
 
     If inp is None, return empty string.
 
-    Args:
-        inp (str or None): input to be parameterized
-        sep (str): separator to use in place of spaces (default='+')
-
-    Returns:
-        "parameterized" str
-
-''' % PUNCS_WE_DONT_LIKE
+    :param inp: (str or None): input to be parameterized
+    :param sep: (str): separator to use in place of spaces (default='+')
+    :return: "parameterized" str
+    """
     if inp is None:
         return ''
 
@@ -63,12 +69,24 @@ def parameterize(inp, sep='+'):
     else:
         return unidecode(inp)
 
+
 def deparameterize(inp, sep='+'):
-    '''somewhat-undo parameterization in string. replace separators (sep) with spaces.'''
+    """ Somewhat-undo parameterization in string. Replace separators (sep) with spaces.
+
+    :param inp: (str)
+    :param sep: (str) default: '+'
+    :return: "deparameterized" string
+    """
     return inp.replace(sep, ' ')
 
+
 def remove_html_markup(inp):
-    '''remove html and xml tags from text. preserves HTML entities like &amp;'''
+    """ Remove html and xml tags from text.
+    Preserves HTML entities like &amp;
+
+    :param inp: (str)
+    :return: string with HTML and XML markup removed.
+    """
     tag = False
     quote = False
     out = ""
@@ -84,10 +102,10 @@ def remove_html_markup(inp):
             out = out + char
     return out
 
+
 def lowercase_keys(dct):
-    '''takes an input dictionary, returns dictionary with all keys lowercased.'''
+    """ Takes an input dictionary, returns dictionary with all keys lowercased. """
     result = {}
     for key, value in list(dct.items()):
         result[key.lower()] = value
     return result
-
