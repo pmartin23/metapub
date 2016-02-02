@@ -5,11 +5,11 @@ from lxml import etree
 
 import requests
 
-from .config import PKGNAME, DEFAULT_EMAIL, TMPDIR
+from .config import PKGNAME, DEFAULT_EMAIL
 
 PMC_ID_CONVERSION_URI = 'http://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool='+PKGNAME+'&email='+DEFAULT_EMAIL+'&ids=%s'
 
-__doc__='''An assortment of functions providing access to various web APIs.
+__doc__="""An assortment of functions providing access to various web APIs.
 
     The pubmedcentral.* functions abstract the submission of one of the following
     acceptable IDs to the Pubmed Central ID Conversion API as a lookup to
@@ -26,34 +26,48 @@ __doc__='''An assortment of functions providing access to various web APIs.
         get_doi_for_otherid(string)
 
         get_pmcid_for_otherid(string)
-'''
-
-def get_tmp_xml_path(someid):
-    someid = someid.replace('/', '__')
-    return os.path.join(TMPDIR, '%s.xml' % someid)
+"""
 
 def _pmc_id_conversion_api(input_id):
-    xmlfile = requests.get(PMC_ID_CONVERSION_URI % input_id, get_tmp_xml_path(input_id)).content
-    root = etree.parse(xmlfile[0])
-    root.find('record')
+    xml = requests.get(PMC_ID_CONVERSION_URI % input_id).content
+    root = etree.fromstring(xml)
     record = root.find('record')
     return record
 
 def get_pmid_for_otherid(otherid):
-    '''use the PMC ID conversion API to attempt to convert either PMCID or DOI to a PMID.
-        returns PMID if successful, or None if there is no 'pmid' item in the return.
+    """ Use the PMC ID conversion API to attempt to convert either PMCID or DOI to a PMID.
+    Returns PMID if successful, or None if there is no 'pmid' item in the response.
 
-        :param: otherid (string)
-        :rtype: string
-    '''
+    :param otherid: (str)
+    :return pmid: (str)
+    :rtype: str
+    """
     record = _pmc_id_conversion_api(otherid)
     return record.get('pmid')
 
 def get_pmcid_for_otherid(otherid):
+    """ Use the PMC ID conversion API to attempt to convert either PMID or DOI to a PMCID.
+    Returns PMCID if successful, or None if there is no 'pmcid' item in the response.
+
+    :param otherid: (str)
+    :return pmcid: (str)
+    :rtype: str
+    """
     record = _pmc_id_conversion_api(otherid)
     return record.get('pmcid')
 
 def get_doi_for_otherid(otherid):
+    """ Use the PMC ID conversion API to attempt to convert either PMID or PMCID to a DOI.
+    Returns DOI if successful, or None if there is no 'pmcid' item in the response.
+
+    Note: this method has a very low success rate for retrieving DOIs. Check out the
+    CrossRef object, i.e. `from metapub import CrossRef` which excels at resolving citations
+    into DOIs (and DOIs into citations).
+
+    :param otherid: (str)
+    :return doi: (str)
+    :rtype: str
+    """
     record = _pmc_id_conversion_api(otherid)
     return record.get('doi')
 
