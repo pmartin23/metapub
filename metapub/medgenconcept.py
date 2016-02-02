@@ -136,17 +136,15 @@ class MedGenConcept(MetaPubObject):
         return names
         
     def _get_OMIM(self):
-        '''returns this concept's OMIM ids (list of strings), when available, else returns [].'''
+        """returns this concept's OMIM ids (list of strings), when available, else returns []."""
         omim_root = self.meta.find('OMIM')
-        #from IPython import embed; embed()
-        #print omim_root.find('MIM').text
         outp = []
         try:
             mims = omim_root.get_children()
         except AttributeError:
             return None
 
-        for item in omim_root.get_children():
+        for item in mims:
             try:
                 outp.append(item.text)
             except AttributeError:
@@ -154,14 +152,14 @@ class MedGenConcept(MetaPubObject):
         return outp
         
     def _get_chromosome(self):
-        '''returns this concept's affected chromosome, if applicable/available'''
+        """returns this concept's affected chromosome, if applicable/available"""
         try:
             return self.meta.find('Chromosome').text
         except AttributeError:
             return None
 
     def _get_cytogenic(self):
-        '''returns this concept's cytogenic property, if applicable/available'''
+        """returns this concept's cytogenic property, if applicable/available"""
         try:
             return self.meta.find('Cytogenic').text
         except AttributeError:
