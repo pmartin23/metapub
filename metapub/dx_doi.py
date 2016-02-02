@@ -6,7 +6,6 @@ import requests
 
 from .eutils_common import SQLiteCache, get_cache_path
 from .base import Borg
-from .utils import asciify
 from .config import DEFAULT_CACHE_DIR
 from .exceptions import BadDOI, DxDOIError
 from .text_mining import find_doi_in_string
@@ -25,7 +24,7 @@ def _get_dx_doi_cache(cachedir=DEFAULT_CACHE_DIR):
 
 
 class DxDOI(Borg):
-    '''Looks up DOIs in dx.doi.org and caches results in an SQLite
+    """ Looks up DOIs in dx.doi.org and caches results in an SQLite
     cache. This is a Borg singleton object.
 
     Methods:
@@ -34,7 +33,7 @@ class DxDOI(Borg):
 
         check_doi (doi, *args): returns doi if supplied DOI is good,
                                 raises BadDOI if not good.
-    '''
+    """
 
     _log = logging.getLogger('metapub.DxDOI')
 
@@ -48,21 +47,17 @@ class DxDOI(Borg):
         self._cache = _get_dx_doi_cache(cachedir)
 
     def check_doi(self, doi, whitespace=False):
-        '''checks validity of supplied doi.
+        """ Checks validity of supplied doi.
 
-        if whitespace is True (default False), allows supplied doi to
+        If whitespace is True (default False), allows supplied doi to
         contain whitespace.
 
-        Args:
-            doi (str)
-            whitespace (bool)
+        :param doi: (str)
+        :param whitespace: (bool)
+        :return: doi (str) -- verified DOI)
+        :raise BadDOI if supplied DOI fails regular expression check.
+        """
 
-        Returns:
-            doi (str): verified DOI
-
-        Raises:
-            BadDOI if supplied DOI fails regular expression check.
-        '''
         result_doi = find_doi_in_string(doi, whitespace=False)
         if result_doi is None:
             raise BadDOI('Supplied DOI "%s" fails doi check' % doi)
@@ -77,31 +72,26 @@ class DxDOI(Borg):
                             (doi, response.status_code))
 
     def resolve(self, doi, check_doi=True, whitespace=False, skip_cache=False):
-        '''takes a doi (string), returns a url to a paper.
+        """ Takes a doi (string), returns a url to article page on journal website.
 
         if check_doi is True (default True), checks DOI before
         submitting query to dx.doi.org.
-        
-        if whitespace is True (default False), allows prospective 
+
+        if whitespace is True (default False), allows prospective
         dois to contain whitespace when checked.
 
         if skip_cache is True (default False), doesn't check cache for
         pre-existing results (loads from remote dx.doi.org).
 
-        Args:
-            doi (str)
-            check_doi (bool)
-            whitespace (bool)
-            skip_cache (bool) 
-
-        Returns:
-            url (str)
-
-        Raises:
-            BadDOI (metapub) - supplied DOI failed regular expression check
-            DxDOIError (metapub) - not-ok HTTP status code while loading url
-            ConnectionError (urllib3) - problem making dx.doi.org connection
-        '''            
+        :param doi: (str)
+        :param check_doi: (bool)
+        :param whitespace: (bool)
+        :param skip_cache: (bool)
+        :return: url (str)
+        :raises BadDOI: if supplied DOI failed regular expression check
+        :raises DxDOIError: if not-ok HTTP status code while loading url
+        :raises ConnectionError: if problem making dx.doi.org connection
+        """
         if doi is None or doi.strip()=='':
             raise BadDOI('DOI cannot be None or empty string')
 
@@ -126,14 +116,11 @@ class DxDOI(Borg):
         return inp.strip()
 
     def _query_cache(self, key):
-        '''return results for a cache lookup, if found.
+        """ Return results for a cache lookup, if found.
 
-        Args:
-            key (str) 
-
-        Returns: 
-            val (str) or None
-        '''
+        :param key: (str)
+        :return: val (str) or None
+        """
         if self._cache:
             cache_key = self._make_cache_key(key)
             try:
@@ -148,4 +135,3 @@ class DxDOI(Borg):
         else:
             self._log.debug('cache disabled (self._cache is None)')
             return None
-
