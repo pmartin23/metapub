@@ -9,11 +9,6 @@ log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 log.addHandler(ch)
 
-"""
-        source = FindIt(missing_doi)
-        missing_doi = '1215988'
-        assert source.reason.startswith('MISSING')
-"""
 
 class TestFindItDances(unittest.TestCase):
 
@@ -44,10 +39,9 @@ class TestFindItDances(unittest.TestCase):
         assert source.pma.history.get('pmc-release', None) is None
         print(source.url)
 
-
     def test_aaas_tango(self):
         pmid_needs_form = '18385036'    # Sci Signal requiring form negotiation
-        pmid_needs_form_url = 'http://stke.sciencemag.org/content/1/13/eg3.full.pdf'
+        # pmid_needs_form_url = 'http://stke.sciencemag.org/content/1/13/eg3.full.pdf'
         pmid_no_form = '25678633'       # Science 
         pmid_no_form_url = 'http://sciencemag.org/content/347/6223/695.full.pdf'
 
@@ -55,10 +49,10 @@ class TestFindItDances(unittest.TestCase):
         assert source.url == pmid_no_form_url
 
         source = FindIt(pmid=pmid_needs_form)
-        #TODO: update this when the_aaas_tango knows how to navigate forms.
+        # TODO: update this when the_aaas_tango knows how to navigate forms.
         assert source.url is None
 
-    #Looks like JCI complained about EuropePMC hosting its stuff? 
+    # Looks like JCI complained about EuropePMC hosting its stuff?
     def test_jci_polka(self):
         pmid = 26030226
         source = FindIt(pmid=pmid)
@@ -72,4 +66,3 @@ class TestFindItDances(unittest.TestCase):
         pmid = 21297370
         source = FindIt(pmid=pmid)
         assert source.url == 'https://www.jstage.jst.go.jp/article/yakushi/131/2/131_2_247/_pdf'
-

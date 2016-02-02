@@ -2,6 +2,7 @@ import unittest
 
 from metapub.utils import parameterize
 
+
 class TestUtils(unittest.TestCase):
 
     def setUp(self):
@@ -14,4 +15,3 @@ class TestUtils(unittest.TestCase):
         j = 'Muscle & Nerve'
         j_param = parameterize(j)
         assert j_param == 'Muscle+Nerve'
-

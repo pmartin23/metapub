@@ -6,13 +6,14 @@ import unittest
 # "fixtures"
 
 real_dois = ['10.1002/(SICI)1098-1004(1999)14:1<91::AID-HUMU21>3.0.CO;2-B',
-        '10.1007/s12020-014-0368-x',
-        '10.1101/gad.14.3.278',
-        '10.1016/S0898-1221(00)00204-2',]
+             '10.1007/s12020-014-0368-x',
+             '10.1101/gad.14.3.278',
+             '10.1016/S0898-1221(00)00204-2',
+             ]
 
-fake_dois = ['abcdefg', 'ab.efgh/1234567890', '1.2/blargh' ]
+fake_dois = ['abcdefg', 'ab.efgh/1234567890', '1.2/blargh']
 
-almost_dois = ['10.10.1.0/26', '10.1234/gad.15.4).' ]
+almost_dois = ['10.10.1.0/26', '10.1234/gad.15.4).']
 
 text_with_many_dois = open('tests/data/text_with_many_dois.txt', 'r').read()
 text_with_one_doi = open('tests/data/text_with_one_doi.txt', 'r').read()
@@ -100,4 +101,3 @@ class TestFindDOIs(unittest.TestCase):
 
         doi = get_biomedcentral_doi_from_link('http://www.biomedcentral.com/1471-2164/15/707/table/T2')
         assert doi == '10.1186/1471-2164-15-707'
-

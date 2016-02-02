@@ -11,10 +11,12 @@ try:
         os.unlink(os.path.join(TEST_CACHEDIR, item))
 except OSError:
     pass
+
 try:
     os.rmdir(TEST_CACHEDIR)
 except OSError:
     pass
+
 
 class TestPubmedFetcher(unittest.TestCase):
 
@@ -36,12 +38,12 @@ class TestPubmedFetcher(unittest.TestCase):
         assert str(article.pmid) == pmid
 
     def test_related_pmids(self):
-        ''' * pubmed    (all related links)
+        """ * pubmed    (all related links)
             * citedin   (papers that cited this paper)
             * five      (the "five" that pubmed displays as the top related results)
             * reviews   (review papers that cite this paper)
             * combined  (?)
-        '''
+        """
 
         expected_keys = ['pubmed', 'citedin', 'five', 'reviews', 'combined']
         xmlstr = open('tests/data/sample_related_pmids_result.xml').read()
@@ -51,13 +53,13 @@ class TestPubmedFetcher(unittest.TestCase):
         assert len(resd['citedin']) == 6
 
     def test_configurable_cachedir(self):
-        '''test that `cachedir` keyword argument is fully supported in modes:
+        """ Test that `cachedir` keyword argument is fully supported in modes:
 
         cachedir == 'default'   <-- assumed working since other tests use this.
         cachedir is None
         cachedir is 'some/path'
         cachedir is '~/path'
-        '''
+        """
 
         cachedir = TEST_CACHEDIR
         # start with cachedir==None; test that no cachedir is created.
@@ -75,6 +77,3 @@ class TestPubmedFetcher(unittest.TestCase):
 
         os.unlink(fetch._cache_path)
         os.rmdir(os.path.expanduser('~/testcachedir'))
-
-        
-

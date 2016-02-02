@@ -309,20 +309,18 @@ class TestPubMedArticle(unittest.TestCase):
                 assert article.title is not None
         except InvalidPMID:
             self.test_random_efetch()
-            #print "PMID %s returned InvalidPMID response (which is totally OK). Run test again!" % pmid
-        
+            # print "PMID %s returned InvalidPMID response (which is totally OK). Run test again!" % pmid
 
     def test_init1(self):
-        '''
+        """
         Test on the xml returned by eutils
-        '''
+        """
         article = PubMedArticle(xml_str1)
         assert str(article.pmid) == '4'
 
     def test_init2(self):
-        '''
+        """
         Test on the xml downloaded from medline
-        '''
+        """
         article = PubMedArticle(xml_str2)
         assert str(article.pmid) == '23697015'
-

@@ -16,12 +16,13 @@ volapuk_ipsum = "Ot evisitobs-li ziläk ifi. Löf nästön ospaloms sevön me."
 volapuk_result = b"Ot evisitobs-li zilk ifi. Lf nstn ospaloms sevn me."
 
 # non-ascii glyphs should get stripped out.
-glyph_samples = { "¡ <-- upsidedown exclamation mark.": b" <-- upsidedown exclamation mark.",
-                  "© is a copyright sign": b" is a copyright sign",
-                  "® is a registered trademark": b" is a registered trademark",
-                  "¾ <-- vulgar three-quarters": b" <-- vulgar three-quarters",
-                  "the alpha (α) and the omega (ω)": b"the alpha () and the omega ()",
-                }
+glyph_samples = {"¡ <-- upsidedown exclamation mark.": b" <-- upsidedown exclamation mark.",
+                 "© is a copyright sign": b" is a copyright sign",
+                 "® is a registered trademark": b" is a registered trademark",
+                 "¾ <-- vulgar three-quarters": b" <-- vulgar three-quarters",
+                 "the alpha (α) and the omega (ω)": b"the alpha () and the omega ()",
+                 }
+
 
 def test_glyphs():
     for glyph in list(glyph_samples.keys()):
@@ -29,23 +30,26 @@ def test_glyphs():
         assert type(result) == bytes
         assert result == glyph_samples[glyph]
 
+
 def test_german_ipsum():
     result = asciify(german_ipsum)
     assert type(result) == bytes
     assert result == german_result
+
 
 def test_leet_ipsum():
     result = asciify(leet_ipsum)
     assert type(result) == bytes
     assert result == leet_result
 
+
 def test_volapuk_ipsum():
     result = asciify(volapuk_ipsum)
     assert type(result) == bytes
     assert result == volapuk_result
 
+
 if __name__=='__main__':
     test_german_ipsum()
     test_leet_ipsum()
     test_volapuk_ipsum()
-
