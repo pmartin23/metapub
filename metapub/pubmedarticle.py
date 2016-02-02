@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-'''metapub.pubmedarticle -- PubMedArticle class instantiated by supplying ncbi XML string.'''
+"""metapub.pubmedarticle -- PubMedArticle class instantiated by supplying ncbi XML string."""
 
 import time
 from datetime import datetime
@@ -14,7 +14,7 @@ from .text_mining import re_numbers
 
 
 class PubMedArticle(MetaPubObject):
-    '''This PubMedArticle class receives an XML string as its required argument
+    """This PubMedArticle class receives an XML string as its required argument
     and parses it into its constituent parts, exposing them as attributes. 
 
     Usage:
@@ -50,7 +50,7 @@ class PubMedArticle(MetaPubObject):
         * book_medium (default: None) - string (e.g. "Internet")
         * book_synonyms (default: None) - list of disease synonyms (applicable to "gene" book)
         * book_publication_status (default: None) - string (e.g. "ppublish")
-    '''
+    """
 
     def __init__(self, xmlstr, *args, **kwargs):
         self.pubmed_type = determine_pubmed_xml_type(xmlstr)
@@ -72,56 +72,56 @@ class PubMedArticle(MetaPubObject):
         # shared between book and article types:
         self.pmid = self._get_pmid()
         self.url  = self._get_url()
-        self.authors = self._get_authors() if pmt=='article' else self._get_book_authors()
-        self.title = self._get_title() if pmt=='article' else self._get_book_articletitle()
+        self.authors = self._get_authors() if pmt == 'article' else self._get_book_authors()
+        self.title = self._get_title() if pmt == 'article' else self._get_book_articletitle()
         self.authors_str = self._get_authors_str()
         self.author1_last_fm = self._get_author1_last_fm()        
         self.author1_lastfm = self._get_author1_lastfm()
     
         # 'article' only (not shared):
-        self.pages = None if pmt=='book' else self._get_pages()
-        self.first_page = None if pmt=='book' else self._get_first_page()
-        self.last_page = None if pmt=='book' else self._get_last_page()
-        self.volume = None if pmt=='book' else self._get_volume()
-        self.issue = None if pmt=='book' else self._get_issue()
-        self.volume_issue = None if pmt=='book' else self._get_volume_issue()
-        self.doi = None if pmt=='book' else self._get_doi()
-        self.pii = None if pmt=='book' else self._get_pii()
-        self.pmc = None if pmt=='book' else self._get_pmc()
-        self.issn = None if pmt=='book' else self._get_issn()
+        self.pages = None if pmt == 'book' else self._get_pages()
+        self.first_page = None if pmt == 'book' else self._get_first_page()
+        self.last_page = None if pmt == 'book' else self._get_last_page()
+        self.volume = None if pmt == 'book' else self._get_volume()
+        self.issue = None if pmt == 'book' else self._get_issue()
+        self.volume_issue = None if pmt == 'book' else self._get_volume_issue()
+        self.doi = None if pmt == 'book' else self._get_doi()
+        self.pii = None if pmt == 'book' else self._get_pii()
+        self.pmc = None if pmt == 'book' else self._get_pmc()
+        self.issn = None if pmt == 'book' else self._get_issn()
 
-        #MeSH headings ('article' only)
+        # MeSH headings ('article' only)
         self.mesh = self._get_mesh_headings()
 
-        #Chemical associations ('article' only)
+        # Chemical associations ('article' only)
         self.chemicals = self._get_chemicals()
 
-        #Grant information (?? 'article' only ??)
+        # Grant information (?? 'article' only ??)
         self.grants = self._get_grantlist()
 
-        #Publication Types (?? 'article' only ??)
+        # Publication Types (?? 'article' only ??)
         self.publication_types = self._get_publication_types()
 
         # 'book' only:
-        self.book_accession_id = None if pmt=='article' else self._get_bookaccession_id()
-        self.book_title = None if pmt=='article' else self._get_book_title()
-        self.book_publisher = None if pmt=='article' else self._get_book_publisher()
-        self.book_language = None if pmt=='article' else self._get_book_language()
-        self.book_editors = None if pmt=='article' else self._get_book_editors()
-        self.book_abstracts = None if pmt=='article' else self._get_book_abstracts()
-        self.book_sections = None if pmt=='article' else self._get_book_sections()
-        self.book_copyright = None if pmt=='article' else self._get_book_copyright()
-        self.book_medium = None if pmt=='article' else self._get_book_medium()
-        self.book_synonyms = None if pmt=='article' else self._get_book_synonyms()
-        self.book_publication_status = None if pmt=='article' else self._get_book_publication_status()
-        self.book_history = None if pmt=='article' else self._get_book_history()
-        self.book_contribution_date = None if pmt=='article' else self._get_book_contribution_date()
-        self.book_date_revised = None if pmt=='article' else self._get_book_contribution_date()
+        self.book_accession_id = None if pmt == 'article' else self._get_bookaccession_id()
+        self.book_title = None if pmt == 'article' else self._get_book_title()
+        self.book_publisher = None if pmt == 'article' else self._get_book_publisher()
+        self.book_language = None if pmt == 'article' else self._get_book_language()
+        self.book_editors = None if pmt == 'article' else self._get_book_editors()
+        self.book_abstracts = None if pmt == 'article' else self._get_book_abstracts()
+        self.book_sections = None if pmt == 'article' else self._get_book_sections()
+        self.book_copyright = None if pmt == 'article' else self._get_book_copyright()
+        self.book_medium = None if pmt == 'article' else self._get_book_medium()
+        self.book_synonyms = None if pmt == 'article' else self._get_book_synonyms()
+        self.book_publication_status = None if pmt == 'article' else self._get_book_publication_status()
+        self.book_history = None if pmt == 'article' else self._get_book_history()
+        self.book_contribution_date = None if pmt == 'article' else self._get_book_contribution_date()
+        self.book_date_revised = None if pmt == 'article' else self._get_book_contribution_date()
 
         # the shared oddballs, must be done last.
-        self.abstract = self._get_abstract() if pmt=='article' else self._get_book_abstract()
-        self.journal = self.book_title if pmt=='book' else self._get_journal()
-        self.year = self._get_book_year() if pmt=='book' else self._get_year()
+        self.abstract = self._get_abstract() if pmt == 'article' else self._get_book_abstract()
+        self.journal = self.book_title if pmt == 'book' else self._get_journal()
+        self.year = self._get_book_year() if pmt == 'book' else self._get_year()
     
         self.history = self._get_article_history()
 
@@ -138,14 +138,14 @@ class PubMedArticle(MetaPubObject):
         :param author_list_or_string:
         :return: author(s) str suitable for printed citation
         """
-        if type(author_list_or_string)==list:
+        if type(author_list_or_string) == list:
             authors = author_list_or_string
         else:
             authors = self.authors_str.split(';')
 
         if len(authors) > 2:
             author_str = authors[0].strip().replace(' ', ', ') + ', et al'
-        elif len(authors)==2:
+        elif len(authors) == 2:
             author_str = ', '.join([aut.strip().replace(' ', ', ') for aut in authors])
         else:
             author_str = self.authors_str.replace(' ', ', ')
@@ -202,10 +202,10 @@ class PubMedArticle(MetaPubObject):
                         # fixes spurious crap seen at least once: "2007 (details online)" (pmid 19659763)
                         parts['year'] = int(item[:4])
                     elif name.lower() == 'month':
-                        #Force to 3-letter month name (months can look like "December", "Dec", "1")
+                        # Force to 3-letter month name (months can look like "December", "Dec", "1")
                         parts['month'] = time.strptime(item[:3], '%b').tm_mon
                 except TypeError:
-                    #item is None
+                    # item is None
                     pass
         try:
             return datetime(**parts)
@@ -216,7 +216,7 @@ class PubMedArticle(MetaPubObject):
 
     def _get_bookaccession_id(self):
         for item in self.content.findall('BookDocument/ArticleIdList/ArticleId'):
-            if item.get('IdType')=='bookaccession':
+            if item.get('IdType') == 'bookaccession':
                 return item.text
 
     def _get_book_title(self):
@@ -226,7 +226,7 @@ class PubMedArticle(MetaPubObject):
         return self._get('BookDocument/ArticleTitle')
 
     def _get_book_authors(self):
-        authors = [ _au_to_last_fm(au) for au in self.content.findall('BookDocument/AuthorList/Author') ]
+        authors = [_au_to_last_fm(au) for au in self.content.findall('BookDocument/AuthorList/Author')]
         return authors
 
     def _get_book_publisher(self):
@@ -239,7 +239,7 @@ class PubMedArticle(MetaPubObject):
         return self._get('BookDocument/Language')
 
     def _get_book_editors(self):
-        return [ _au_to_last_fm(au) for au in self.content.findall('BookDocument/Book/AuthorList/Author') ]
+        return [_au_to_last_fm(au) for au in self.content.findall('BookDocument/Book/AuthorList/Author')]
 
     def _get_book_abstracts(self):
         abd = OrderedDict()
@@ -255,7 +255,7 @@ class PubMedArticle(MetaPubObject):
         return sections
 
     def _get_book_abstract(self):
-        abstract_strs = ['%s: %s' % (k,v) for k,v in self.book_abstracts.items()]
+        abstract_strs = ['%s: %s' % (key, val) for key, val in self.book_abstracts.items()]
         return '\n'.join(abstract_strs)
 
     def _get_book_copyright(self):
@@ -275,7 +275,7 @@ class PubMedArticle(MetaPubObject):
 
     def _get_book_synonyms(self):
         syn_list = self.content.find('BookDocument/ItemList')
-        if syn_list is not None and syn_list.get('ListType')=='Synonyms':
+        if syn_list is not None and syn_list.get('ListType') == 'Synonyms':
             return [item.text for item in self.content.findall('BookDocument/ItemList/Item')]
         else:
             return []
@@ -306,35 +306,35 @@ class PubMedArticle(MetaPubObject):
         if abstracts == []:
             return self._get(self._root+'/Article/Abstract/AbstractText')
 
-        if len(abstracts)==1:
+        if len(abstracts) == 1:
             return abstracts[0].text
 
         # this is a type of PMA with several AbstractText listings (like a Book)
         abd = OrderedDict()
         for ab in abstracts:
             abd[ab.get('Label')] = ab.text
-        return '\n'.join(['%s: %s' % (k,v) for k,v in abd.items()])
+        return '\n'.join(['%s: %s' % (key, val) for key, val in abd.items()])
 
     def _get_authors(self):
         # N.B. Citations may have 0 authors. e.g., pmid:7550356
-        authors = [ _au_to_last_fm(au) for au in self.content.findall(self._root+'/Article/AuthorList/Author') ]
+        authors = [_au_to_last_fm(au) for au in self.content.findall(self._root+'/Article/AuthorList/Author')]
         return authors
 
     def _get_authors_str(self):
         return '; '.join(self.authors) 
 
     def _get_author1_last_fm(self):
-        '''return first author's name, in format Last INITS (space between surname and inits)'''
-        #return _au_to_last_fm(self.content.find(self._root+'/Article/AuthorList/Author'))
+        """ return first author's name, in format Last INITS (space between surname and initials)"""
+        # return _au_to_last_fm(self.content.find(self._root+'/Article/AuthorList/Author'))
         if self.authors:
             return self.authors[0]
         else:
             return None
 
     def _get_author1_lastfm(self):
-        '''return first author's name, in format LastINITS'''
+        """return first author's name, in format LastINITS (no space between surname and initials)"""
         if self.author1_last_fm is not None:
-            return self.author1_last_fm.replace(' ','')
+            return self.author1_last_fm.replace(' ', '')
         return None
 
     def _get_journal(self):
@@ -432,26 +432,26 @@ class PubMedArticle(MetaPubObject):
         return self._get(self._root+'/Article/Journal/ISSN')
 
     def _get_mesh_headings(self):
-        if self.pubmed_type=='book':
+        if self.pubmed_type == 'book':
             return None
 
         meshtags = self.content.findall('MedlineCitation/MeshHeadingList/MeshHeading')
-        outd = { }
+        outd = {}
         for mesh in meshtags:
             descript = mesh.find('DescriptorName')  # should always be present
             qual = mesh.find('QualifierName')       # may not be present
 
-            DUI = descript.get('UI')
-            outd[DUI] = { 
+            dui = descript.get('UI')
+            outd[dui] = {
                     'descriptor_name': descript.text,
-                    'major_topic': True if descript.get('MajorTopicYN')=='Y' else False,
+                    'major_topic': True if descript.get('MajorTopicYN') == 'Y' else False,
                     'qualifier_name': None if qual is None else qual.text,
                     'qualifier_ui': None if qual is None else qual.get('UI'),
                 }
         return outd
 
     def _get_chemicals(self):
-        if self.pubmed_type=='book':
+        if self.pubmed_type == 'book':
             return None
 
         outd = {}
@@ -476,16 +476,15 @@ class PubMedArticle(MetaPubObject):
         outl = []
         grants = self.content.findall('MedlineCitation/GrantList')
         for gr in grants:
-            outl.append( {'agency': gr.get('Agency', None), 'country': gr.get('Country', None)} )
+            outl.append({'agency': gr.get('Agency', None), 'country': gr.get('Country', None)})
         return outl
-        
 
     def __str__(self):
         if self.pubmed_type == 'article':
-            return( '%s (%s. %s, %s:%s)' % (
-                 self.title, self.authors_str, self.journal, self.volume_issue, self.pages) )
+            return '%s (%s. %s, %s:%s)' % (
+                 self.title, self.authors_str, self.journal, self.volume_issue, self.pages)
         else:
-            return( '%s (%s. %s, %s)' % (self.title, self.authors_str, self.book_title, self.year))
+            return '%s (%s. %s, %s)' % (self.title, self.authors_str, self.book_title, self.year)
 
 
 ############################################################################
@@ -510,8 +509,9 @@ def _au_to_last_fm(au):
 
 
 def square_voliss_data_for_pma(pma):
-    '''takes a PubMedArticle object, returns same object with corrected volume/issue 
-    information (if needed)'''
+    """ Takes a PubMedArticle object, returns same object with corrected volume/issue
+    information (if needed)
+    """
     if pma.volume != None and pma.issue is None:
         # try to get a number out of the parts that came after the first number.
         volparts = re_numbers.findall(pma.volume)
@@ -525,19 +525,17 @@ def square_voliss_data_for_pma(pma):
     return pma
 
 def determine_pubmed_xml_type(xmlstr):
-    '''returns string "type" of pubmed article XML based on presence of expected strings.
+    """ Returns string "type" of pubmed article XML based on presence of expected strings.
 
     Possible returns:
         'article'
         'book'
         'unknown'
 
-    Args:
-        xmlstr (str or bytes)
-
-    Returns:
-        typestring (str)
-    '''
+    :param xmlstr: xml in any data type (str, bytes, unicode...)
+    :return typestring: (str)
+    :rtype: str
+    """
     # The real purpose of this function is to pull the py2/3 compatibility code
     # away from the PubMedArticle class. This sucks and I (@nthmost) hate it,
     # but it solves all of the problems of trying to inspect an XML document 
@@ -560,4 +558,3 @@ def determine_pubmed_xml_type(xmlstr):
             return 'article'
 
     return 'unknown'
- 
