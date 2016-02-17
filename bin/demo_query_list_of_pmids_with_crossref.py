@@ -59,7 +59,8 @@ if __name__=='__main__':
                 except:
                     results_table['cr_aulast'].append('NA')
                     
-                results_table['cr_journal'].append(asciify(top_result['slugs']['jtitle']))
+                jtitle = top_result['slugs'].get('jtitle', None)
+                results_table['cr_journal'].append(asciify(jtitle))
             else:
                 results_table['cr_aulast'].append('')            
                 results_table['cr_journal'].append('')
