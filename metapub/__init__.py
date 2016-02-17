@@ -11,5 +11,5 @@ from .crossref import CrossRef
 from .findit import FindIt
 from .dx_doi import DxDOI
 
-__version__ = '0.4.0a'
+__version__ = '0.4.0'
 
