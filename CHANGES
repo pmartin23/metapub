@@ -100,3 +100,5 @@
 11/21/2015, 0.3.17.7, FindIt: adjusted Lancet test to match logical flow of other dances. Added "J Lancet" to "can't do" list.
 11/26/2015, 0.3.17.8, FindIt: bugfix for VIP journal data (typo in "Rheumatology (Oxford)" entry).
 11/26/2015, 0.3.17.9, FindIt: added DOI check for JAMA journals, raise NoPDFLink if missing.
+2/17/2016, 0.4.0, PYTHON 2/3 COMPATIBILITY
+2/29/2016, 0.4.0.1, PubMedArticle: bugfix for to_dict method, added test for to_dict function. (Thanks Tim Laurent!)
