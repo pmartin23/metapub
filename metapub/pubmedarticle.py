@@ -128,7 +128,7 @@ class PubMedArticle(MetaPubObject):
     def to_dict(self):
         outd = self.__dict__
         outd.pop('content')
-        outd.pop('xmlstr')
+        outd.pop('xml')
         outd.pop('_root')
         return self.__dict__
 
