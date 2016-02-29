@@ -324,3 +324,7 @@ class TestPubMedArticle(unittest.TestCase):
         """
         article = PubMedArticle(xml_str2)
         assert str(article.pmid) == '23697015'
+
+    def test_to_dict(self):
+        article = PubMedArticle(xml_str1)
+        self.assertTrue(isinstance(article.to_dict(), dict))
