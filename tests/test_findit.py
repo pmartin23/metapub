@@ -2,10 +2,11 @@ import unittest
 
 from metapub import FindIt
 
-SAMPLE_PMIDS = { 'embargoed': [ '25575644', '25700512', '25554792', '25146281', '25766237', '25370453' ],
-                 'nonembargoed': ['26098888' ],
-                 'non_pmc': ['26111251', '17373727']
-               }
+SAMPLE_PMIDS = {'embargoed': ['25575644', '25700512', '25554792', '25146281', '25766237', '25370453'],
+                'nonembargoed': ['26098888'],
+                'non_pmc': ['26111251', '17373727']
+                }
+
 
 class TestFindIt(unittest.TestCase):
 
@@ -16,7 +17,7 @@ class TestFindIt(unittest.TestCase):
         pass
 
     def test_skipping_cache(self):
-        #use a known working, non-PMC pubmed ID
+        # use a known working, non-PMC pubmed ID
         src = FindIt(pmid=26111251, cachedir=None)
         assert src._cache is None
         assert src.url is not None
@@ -33,9 +34,8 @@ class TestFindIt(unittest.TestCase):
         
         assert cached_src.url == fresh_src.url
 
-    #def test_embargoed_pmid(self):
-        #use a currently PMC embargoed pmid, since its status is bound to change (eventually)
+    # def test_embargoed_pmid(self):
+        # use a currently PMC embargoed pmid, since its status is bound to change (eventually)
     #    src = FindIt(pmid=SAMPLE_PMIDS['embargoed'][0], cachedir=None)
     #    assert src.url is None
     #    assert src.reason.startswith('DENIED')
- 

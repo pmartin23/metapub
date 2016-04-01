@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 import sys
 
 from metapub import MedGenFetcher
@@ -7,7 +9,7 @@ from metapub import MedGenFetcher
 try:
     cui = sys.argv[1]
 except IndexError:
-    print 'Supply a ConceptID (CUI) to this script as its argument.'
+    print('Supply a ConceptID (CUI) to this script as its argument.')
     sys.exit()
 
 ####
@@ -18,5 +20,5 @@ logging.getLogger("eutils").setLevel(logging.WARNING)
 
 fetch = MedGenFetcher()
 uid = fetch.uid_for_cui(cui)
-print uid
+print(uid)
 

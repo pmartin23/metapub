@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 jama_journals = (
     'AMA Arch Intern Med',
@@ -18,5 +18,4 @@ jama_journals = (
     'JAMA Pediatr',
     'JAMA Psychiatry',
     'JAMA Surg',
-    'Schweiz Med Wochenschr',
 )

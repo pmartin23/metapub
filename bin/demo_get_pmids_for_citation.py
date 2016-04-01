@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 from metapub import PubMedFetcher
 fetch = PubMedFetcher()
 params = { 'jtitle': 'American Journal of Medical Genetics', 
@@ -7,8 +9,8 @@ params = { 'jtitle': 'American Journal of Medical Genetics',
                     'authors': 'Katherine M. Hegmann; Aimee S. Spikes; Avi Orr-Urtreger; Lisa G. Shaffer' }
 
 stuff = fetch.pmids_for_citation(**params)
-print params
-print stuff
+print(params)
+print(stuff)
 
 params = { 'jtitle':'Journal of Neural Transmission', 
                     'year':2014, 
@@ -19,6 +21,6 @@ params = { 'jtitle':'Journal of Neural Transmission',
 
 stuff = fetch.pmids_for_citation(**params)
 
-print params
-print stuff
+print(params)
+print(stuff)
 

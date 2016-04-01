@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os, sys, shutil
 import logging
-from urllib import unquote
 
 from metapub import PubMedFetcher, CrossRef 
 from metapub.exceptions import MetaPubError
@@ -62,12 +59,11 @@ if __name__=='__main__':
                 except:
                     results_table['cr_aulast'].append('NA')
                     
-                results_table['cr_journal'].append(asciify(top_result['slugs']['jtitle']))
+                jtitle = top_result['slugs'].get('jtitle', None)
+                results_table['cr_journal'].append(asciify(jtitle))
             else:
                 results_table['cr_aulast'].append('')            
                 results_table['cr_journal'].append('')
-
-            #print(unquote(top_result['coins'])) #.decode('utf8'))
 
             results_table['pma_aulast'].append(asciify(pma.author1_last_fm))
         else:

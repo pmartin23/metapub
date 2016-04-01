@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 import sys, logging
 from metapub import PubMedFetcher
 
@@ -6,20 +8,20 @@ logging.loglevel =  logging.INFO
 try:
     someid = sys.argv[1]
 except IndexError:
-    print 'Supply a DOI (example: 10.1038/ng.669)'
+    print('Supply a DOI (example: 10.1038/ng.669)')
     sys.exit()
 
 
 fetch = PubMedFetcher()
 article = fetch.article_by_doi(someid)
 
-print article.title
-print ', '.join(article.authors)
-print ''
+print(article.title)
+print(', '.join(article.authors))
+print()
 
-print article.journal, article.volume_issue
-print ''
-print 'Pubmed ID: ' + article.pmid
+print(article.journal, article.volume_issue)
+print()
+print('Pubmed ID: ' + article.pmid)
 
 
 """

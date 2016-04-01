@@ -1,6 +1,14 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, unicode_literals
 
-'''findit/logic.py
+__author__ = 'nthmost'
+
+from ..pubmedfetcher import PubMedFetcher
+from ..convert import doi2pmid
+from ..exceptions import MetaPubError
+
+from .dances import *
+
+""" findit/logic.py
 
         The get_pdf_from_pma function selects possible PDF links for the
         given article represented in a PubMedArticle object.
@@ -30,21 +38,10 @@ from __future__ import absolute_import, print_function
         effects like getting your IP shut off from PubMedCentral), set the
         HTTP_PROXY environment variable in your code or on the command line before
         using any FindIt functionality.
-'''
-
-__author__ = 'nthmost'
-
-import requests, os
-
-from ..pubmedfetcher import PubMedFetcher
-from ..convert import doi2pmid
-from ..exceptions import MetaPubError
-
-from .journals import *
-from .dances import *
+"""
 
 def find_article_from_pma(pma, verify=True, use_nih=False):
-    '''The real workhorse of FindIt.
+    """ The real workhorse of FindIt.
 
         Based on the contents of the supplied PubMedArticle object, this function
         returns the best possible download link for a Pubmed PDF.
@@ -66,15 +63,16 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
         Optional params:
             use_nih      -- source PubmedCentral articles from nih.gov (NOT recommended)
 
-        :param: (pma PubMedArticle object)
-        :param: use_nih (bool) default: False
+        :param pma: PubMedArticle object)
+        :param verify: (bool) default: True
+        :param use_nih: (bool) default: False
         :return: (url, reason)
-    '''
+    """
     reason = ''
     url = None
     jrnl = standardize_journal_name(pma.journal)
 
-    ##### Pubmed Central: ideally we get the article from PMC if it has a PMC id.
+    # === Pubmed Central: ideally we get the article from PMC if it has a PMC id.
     #
     #   Note: we're using europepmc.org rather than nih.gov (see the_pmc_twist function).
     #
@@ -89,7 +87,7 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
         except MetaPubError as error:
             reason = str(error)
 
-    #### IDENTIFIER-BASED LISTS ####
+    # === IDENTIFIER-BASED LISTS === #
 
     if jrnl in simple_formats_pii.keys():
         try:
@@ -124,7 +122,7 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
     if url:
         return (url, reason)
 
-    ##### PUBLISHER BASED LISTS #####
+    # === PUBLISHER BASED LISTS === #
 
     if jrnl in jstage_journals:
         try:
@@ -201,7 +199,7 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
         except MetaPubError as error:
             reason = str(error)
 
-    elif jrnl.find('Lancet') > -1:
+    elif jrnl in lancet_journals.keys():
         try:
             url = the_lancet_tango(pma, verify)
         except MetaPubError as error:
@@ -242,12 +240,12 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
 
 
 def find_article_from_doi(doi, verify=True, use_nih=False):
-    '''pull a PubMedArticle based on CrossRef lookup (using doi2pmid),
+    """ Pull a PubMedArticle based on CrossRef lookup (using doi2pmid),
     then run it through find_article_from_pma.
 
-        :param: doi (string)
-        :return: (url, reason)
-    '''
+    :param doi: (string)
+    :return: (url, reason)
+    """
     fetch = PubMedFetcher()
     pma = fetch.article_by_pmid(doi2pmid(doi))
     return find_article_from_pma(pma, verify=verify, use_nih=use_nih)

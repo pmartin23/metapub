@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 # simple formats are used for URLs that can be deduced from PubMedArticle XML
 #
@@ -49,12 +49,13 @@ simple_formats_doi = {
     'Langmuir': doi_templates['acs'],
     'Nano Lett': doi_templates['acs'],
 
-    #http://www.bioone.org/action/showPublications?type=byAlphabet
-    #'TODO': 'http://www.bioone.org/doi/pdf/{a.doi}',
+    # http://www.bioone.org/action/showPublications?type=byAlphabet
+    # TODO: 'http://www.bioone.org/doi/pdf/{a.doi}',
 
     'AIDS Res Hum Retroviruses': doi_templates['liebert'],
     'Antioxid Redox Signal': doi_templates['liebert'],
     'Child Obes': doi_templates['liebert'],
+    'DNA Cell Biol': doi_templates['liebert'],
     'Genet Test': doi_templates['liebert'],
     'Genet Test Mol Biomarkers': doi_templates['liebert'],
     'Thyroid': doi_templates['liebert'],
@@ -62,6 +63,11 @@ simple_formats_doi = {
 
     'Pharmacogenomics': doi_templates['futuremed'],
 
+    'Acta Orthop Scand': doi_templates['taylor_francis'],
+    'Acta Orthop Scand Suppl': doi_templates['taylor_francis'],
+    'Acta Otolaryngol': doi_templates['taylor_francis'],
+    'Acta Otolaryngol Suppl': doi_templates['taylor_francis'],
+    'Acta Otorhinolaryngol Belg': doi_templates['taylor_francis'],
     'Autophagy': doi_templates['taylor_francis'],
     'Biosci Biotechnol Biochem': doi_templates['taylor_francis'],
     'Cancer Biol Ther': doi_templates['taylor_francis'],
@@ -70,6 +76,7 @@ simple_formats_doi = {
     'Health Commun': doi_templates['taylor_francis'],
     'J Biomol Struct Dyn': doi_templates['taylor_francis'],
     'J Pers Assess': doi_templates['taylor_francis'],
+    'Worm': doi_templates['taylor_francis'],
 
     'Endocrinology': 'http://press.endocrine.org/doi/pdf/{a.doi}',
     'Endocr Rev': 'http://press.endocrine.org/doi/pdf/{a.doi}',

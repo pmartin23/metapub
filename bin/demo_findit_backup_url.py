@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 import requests
 
@@ -25,23 +27,23 @@ def try_backup_url(pmid):
     if not source.pma:
         return
     if source.url:
-        print pmid, source.pma.journal, source.url, try_request(source.url)
+        print(pmid, source.pma.journal, source.url, try_request(source.url))
     else:
-        print pmid, source.pma.journal, source.reason
+        print(pmid, source.pma.journal, source.reason)
         try:
             if source.backup_url is not None:
-                print pmid, source.pma.journal, source.backup_url, try_request(source.backup_url)
+                print(pmid, source.pma.journal, source.backup_url, try_request(source.backup_url))
             else:
-                print pmid, source.pma.journal, "no backup url"
-        except Exception, e:
-            print pmid, '%r' % e
+                print(pmid, source.pma.journal, "no backup url")
+        except Exception as err:
+            print(pmid, '%r' % err)
 
 if __name__=='__main__':
     import sys
     try:
         start_pmid = int(sys.argv[1])
-    except IndexError, TypeError:
-        print "Supply a pubmed ID as the starting point for this script."
+    except (IndexError, TypeError) as err:
+        print("Supply a pubmed ID as the starting point for this script.")
         sys.exit()
 
     for pmid in range(start_pmid, start_pmid+1000):

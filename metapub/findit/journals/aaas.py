@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 # Science (AAAS) -- requires login "as a courtesy to the community".  Mkay.
 aaas_format = 'http://{ja}.sciencemag.org/content/{a.volume}/{a.issue}/{a.first_page}.full.pdf'

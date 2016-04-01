@@ -16,9 +16,12 @@ Basic usage::
 
   fetch = PubMedFetcher()
   article = fetch.article_by_pmid('123456')
-  print article.title
-  print article.journal, article.year, article.volume, article.issue
-  print article.authors
+  print(article.title)
+  print(article.journal, article.year, article.volume, article.issue)
+  print(article.authors)
+
+  # NEW (0.4.x): PMA can generate a rudimentary MLA article citation string.
+  print(article.citation)
 
 
 PubMedFetcher uses an SQLite cacheing engine (provided through eutils), which by 
@@ -157,6 +160,21 @@ Basic usage::
   print concept.modes_of_inheritance
 
 
+ClinVarVariation / ClinVarFetcher
+=================================
+
+Basic usage::
+
+    fetch = ClinVarFetcher()
+    cv = fetch.variation_by_hgvs('NM_000249.3:c.1958T>G')
+    print(cv.variation_id)
+    print(cv.traits)
+    print(cv.supporting_submissions)
+    print(cv.clinical_significance)
+    print(cv.genes)
+    print(cv.variations)
+
+
 CrossRef
 ========
 
@@ -244,14 +262,38 @@ Hart, which you can check out here:
 
 http://bitbucket.org/biocommons/eutils
 
-This library is in its very early stages and there's a lot that may
-change, and quite a bit planned for implementation in 2015.
+Metapub just turned 1 year old as of November 15, 2015, and has come quite a long
+way in a short time. Metapub has been deployed in production at many bioinformatics 
+facilities (please tell me your story if you are among them!).
 
-Feel free to use the library with confidence that each released version 
-is well tested -- and in a couple of cases, some of its code is already
-in production -- but until (say) version 0.5, don't expect consistency
-between versions.
+Plans for the next 3-6 months include Python 3.x compatibility (for version 0.4) and 
+ClinVar abstraction (version 0.4.something).
 
-YMMV, At your own risk, etc.
+Feel free to use the library with confidence that each released version is well tested 
+and battle-hardened from extensive use, but until (say) version 0.5, don't expect 
+consistency between versions.
+
+YMMV, At your own risk, etc.  Please do report bugs and bring your comments and 
+suggestions to the bitbucket home for metapub at:
+
+https://bitbucket.org/metapub/metapub
 
 --Naomi Most (@nthmost)
+
+
+About Python 2 and Python 3 Support
+-----------------------------------
+*Alert*: version 0.3.17 will be the last version to support python 2.7 only.
+
+The upcoming metapub version 0.4 will support Python 3.3+ and deal entirely in 
+*unicode strings in both python 2 and python 3*.  The effects this shift may have
+on your code depend highly on what you're doing with strings.
+
+So, while other types of weirdness are highly unlikely, the high probability of
+*string processing weirdness* in the transition between metapub 0.3 and 0.4 
+means you should prepare to test, test, and test again when upgrading between
+these two versions.
+
+Bugfixes that apply to this version will continue to appears as the latest 0.3.x
+release here on pypi until Python 2.7 is finally retired.
+

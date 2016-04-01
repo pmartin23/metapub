@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 """metapub.medgenconcept -- MedGenConcept class instantiated by supplying ESummary XML string."""
 
@@ -10,13 +10,14 @@ from .exceptions import MetaPubError
 
 logger = logging.getLogger()
 
+
 class MedGenConcept(MetaPubObject):
 
     def __init__(self, xmlstr, *args, **kwargs):
         super(MedGenConcept, self).__init__(xmlstr, 'DocumentSummarySet/DocumentSummary', args, kwargs)
 
         if self._get('error'):
-            raise MetaPubError('Supplied XML for MedGenConcept contained explicit error: %s' % self._get('error') )
+            raise MetaPubError('Supplied XML for MedGenConcept contained explicit error: %s' % self._get('error'))
 
         # sometimes, ConceptMeta is an XML document embedded within the XML response. Boo-urns. 
         try:
@@ -37,15 +38,14 @@ class MedGenConcept(MetaPubObject):
         self.chromosome = self._get_chromosome()
         self.medgen_uid = self._get_medgen_uid()
 
-
     def to_dict(self):
-        'returns a dictionary composed of all extractable properties of this concept.'
-        return { 'CUI': self.CUI, 'title': self.title, 'definition': self.definition,
-                 'semantic_id': self.semantic_id, 'semantic_type': self.semantic_type,
-                 'modes_of_inheritance': self.modes_of_inheritance, 
-                 'associated_genes': self.associated_genes, 'medgen_uid': self.medgen_uid,
-                 'names': self.names, 'OMIM': self.OMIM, 'cytogenic': self.cytogenic,
-                 'chromosome': self.chromosome }
+        """ returns a dictionary composed of all extractable properties of this concept. """
+        return {'CUI': self.CUI, 'title': self.title, 'definition': self.definition,
+                'semantic_id': self.semantic_id, 'semantic_type': self.semantic_type,
+                'modes_of_inheritance': self.modes_of_inheritance,
+                'associated_genes': self.associated_genes, 'medgen_uid': self.medgen_uid,
+                'names': self.names, 'OMIM': self.OMIM, 'cytogenic': self.cytogenic,
+                'chromosome': self.chromosome}
 
     def _get_CUI(self):
         return self._get('ConceptId')
@@ -66,17 +66,16 @@ class MedGenConcept(MetaPubObject):
         return self.content.get('uid')
     
     def _get_modes_of_inheritance(self):
-    
-        '''returns a list of all known ModesOfInheritance, in format:
+        """ returns a list of all known ModesOfInheritance, in format:
         [ { 'CUI': 'CNxxxx', 'name': 'some name', 'medgen_uid': 'xxxxxx', 'tui': 'A000 }, ...  ]
-        '''
+        """
         output_list = []
         modes = self.meta.find('ModesOfInheritance').getchildren()
         
-        extra_key_dict = { 'CUI': None, 
-                           'TUI': None,
-                           'medgen_uid': None, 
-                         }
+        extra_key_dict = {'CUI': None,
+                          'TUI': None,
+                          'medgen_uid': None,
+                          }
         for mode in modes:
             mode_dict = extra_key_dict.copy()
             try:
@@ -99,36 +98,37 @@ class MedGenConcept(MetaPubObject):
         return output_list
              
     def _get_associated_genes(self):
-        '''returns a list of AssociatedGenes, in format:
+        """ returns a list of AssociatedGenes, in format:
         [ { 'gene_id': 'xxx', 'chromosome': 'X', 'cytogen_loc': 'X9234235', 'hgnc': 'GENE' }, ]
         
         if not available, returns None. 
-        '''
+        """
         genes = []
         try:
             for gene in self.meta.find('AssociatedGenes').getchildren():
-                genes.append({ 'gene_id': gene.get('gene_id'), 
-                               'hgnc': gene.text,
-                               'chromosome': gene.get('chromosome'),
-                               'cytogen_loc': gene.get('cytogen_loc') })
+                genes.append({'gene_id': gene.get('gene_id'),
+                              'hgnc': gene.text,
+                              'chromosome': gene.get('chromosome'),
+                              'cytogen_loc': gene.get('cytogen_loc')
+                              })
             return genes
         except AttributeError:
             return None
 
     def _get_names(self):
-        '''returns a list of this concept's equivalent Names in various dictionaries,
+        """ Returns a list of this concept's equivalent Names in various dictionaries,
         in format:
         
-        { 'SDUI': '300555', 'SCUI': 'xxx', 'CODE': '300555', 'SAB': 'OMIM' 'TTY': 'PT' 'type': 'syn', 'name': 'DENT DISEASE 2' }
-        
-        '''
+        {'SDUI': '300555', 'SCUI': 'xxx', 'CODE': '300555', 'SAB': 'OMIM' 'TTY': 'PT',
+         'type': 'syn', 'name': 'DENT DISEASE 2'}
+        """
         names = []
 
         # not every ID is present in each Name (e.g. SCUI only appears sometimes).        
         possible_keys = ['SDUI', 'SCUI', 'CODE', 'SAB', 'TTY', 'PT', 'type']
         
         for name in self.meta.find('Names').getchildren():
-            outd = { 'name': name.text }
+            outd = {'name': name.text}
             for key in possible_keys:
                 try:
                     outd[key] = name.get(key)            
@@ -138,17 +138,15 @@ class MedGenConcept(MetaPubObject):
         return names
         
     def _get_OMIM(self):
-        '''returns this concept's OMIM ids (list of strings), when available, else returns [].'''
+        """ Returns this concept's OMIM ids (list of strings), when available, else returns []. """
         omim_root = self.meta.find('OMIM')
-        #from IPython import embed; embed()
-        #print omim_root.find('MIM').text
         outp = []
         try:
             mims = omim_root.get_children()
         except AttributeError:
             return None
 
-        for item in omim_root.get_children():
+        for item in mims:
             try:
                 outp.append(item.text)
             except AttributeError:
@@ -156,14 +154,14 @@ class MedGenConcept(MetaPubObject):
         return outp
         
     def _get_chromosome(self):
-        '''returns this concept's affected chromosome, if applicable/available'''
+        """returns this concept's affected chromosome, if applicable/available"""
         try:
             return self.meta.find('Chromosome').text
         except AttributeError:
             return None
 
     def _get_cytogenic(self):
-        '''returns this concept's cytogenic property, if applicable/available'''
+        """returns this concept's cytogenic property, if applicable/available"""
         try:
             return self.meta.find('Cytogenic').text
         except AttributeError:

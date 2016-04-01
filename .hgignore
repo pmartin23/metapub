@@ -13,3 +13,6 @@ dist/
 build/
 sandbox/
 findit/
+.tox/
+.cache/
+.idea

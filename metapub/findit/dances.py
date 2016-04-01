@@ -1,19 +1,24 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 __author__ = 'nthmost'
 
-import sys
+import six
 
-from urlparse import urlsplit, urljoin
+#py3k / py2k compatibility
+if six.PY2:
+    from urlparse import urlsplit, urljoin
+else:
+    from urllib.parse import urlsplit, urljoin
 
 import requests
 from lxml.html import HTMLParser
 from lxml import etree
 
+from ..dx_doi import DxDOI, DX_DOI_URL
 from ..pubmedarticle import square_voliss_data_for_pma
-from ..exceptions import AccessDenied, NoPDFLink
+from ..exceptions import AccessDenied, NoPDFLink, BadDOI, DxDOIError
 from ..text_mining import find_doi_in_string
-from ..utils import asciify
+from ..utils import remove_chars
 
 from .journals import *
 
@@ -23,23 +28,34 @@ OK_STATUS_CODES = (200, 301, 302, 307)
 AAAS_USERNAME = 'nthmost'
 AAAS_PASSWORD = '434264'
 
-DX_DOI_URL = 'http://dx.doi.org/%s'
+dx_doi_engine = None
+def _start_dx_doi_engine():
+    global dx_doi_engine
+    if dx_doi_engine is None:
+        dx_doi_engine = DxDOI()
+
 def the_doi_2step(doi):
-    'takes a doi (string), returns a url to a paper'
-    response = requests.get(DX_DOI_URL % doi)
-    if response.status_code in [200, 401, 301, 302, 307, 308]:
-        return response.url
-    else:
-        raise NoPDFLink('dx.doi.org lookup failed for doi %s (HTTP %i returned)' %
-                        (doi, response.status_code))
+    '''Given a doi, uses DxDOI lookup engine to source the publisher's 
+            article URL for this doi.
+
+    Args:
+        doi (str): a Digital Object Identifier
+
+    Returns:
+        url (str): link to publisher's website as returned by dx.doi.org
+
+    Raises:
+        NoPDFLink if dx.doi.org lookup failed (see error.message)
+    '''
+    _start_dx_doi_engine()
+    try:
+        return dx_doi_engine.resolve(doi)
+    except (BadDOI, DxDOIError) as error:
+        raise NoPDFLink('%r' % error)
 
 def standardize_journal_name(journal_name):
-    '''protect against unicode character mishaps in journal names.
-
-    Returns a "standardized" journal name with periods stripped out.'''
-    # (did you know that unicode.translate takes ONE argument whilst
-    #   str.translate takes TWO?! true story)
-    return asciify(journal_name).translate(None, '.')
+    '''Returns a "standardized" journal name with periods stripped out.'''
+    return remove_chars(journal_name, '.')
 
 def verify_pdf_url(pdfurl, publisher_name=''):
     res = requests.get(pdfurl)
@@ -78,7 +94,7 @@ def the_doi_slide(pma, verify=True):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
-    jrnl = asciify(pma.journal).translate(None, '.')
+    jrnl = standardize_journal_name(pma.journal) 
     if pma.doi:
         url = simple_formats_doi[jrnl].format(a=pma)
     else:
@@ -234,7 +250,7 @@ def the_sciencedirect_disco(pma, verify=True):
 
     starturl = None
     if pma.pii:
-        starturl = sciencedirect_url.format(piit=pma.pii.translate(None, '-()'))
+        starturl = sciencedirect_url.format(piit=remove_chars(pma.pii, '-()'))
     elif pma.doi:
         starturl = the_doi_2step(pma.doi)
 
@@ -247,7 +263,7 @@ def the_sciencedirect_disco(pma, verify=True):
         raise NoPDFLink('TXERROR: ScienceDirect TooManyRedirects: cannot reach %s via %s' %
                         (pma.journal, starturl))
 
-    tree = etree.fromstring(res.text, HTMLParser())
+    tree = etree.fromstring(res.content, HTMLParser())
     try:
         div = tree.cssselect('div.icon_pdf')[0]
     except IndexError:
@@ -341,11 +357,13 @@ def the_jama_dance(pma, verify=True):
          :return: url (string)
          :raises: AccessDenied, NoPDFLink
     '''
+    if not pma.doi:
+        raise NoPDFLink('MISSING: doi needed for JAMA article.')
 
     baseurl = the_doi_2step(pma.doi)
     res = requests.get(baseurl)
     parser = HTMLParser()
-    tree = etree.fromstring(res.text, parser)
+    tree = etree.fromstring(res.content, parser)
     # we're looking for a meta tag like this:
     # <meta name="citation_pdf_url" content="http://archneur.jamanetwork.com/data/Journals/NEUR/13776/NOC40008.pdf" />
     for item in tree.findall('head/meta'):
@@ -398,16 +416,21 @@ def the_wiley_shuffle(pma, verify=True):
     # wiley sometimes buries PDF links in HTML pages we have to parse.
     res = requests.get(url)
     if res.headers['content-type'].find('html') > -1:
-        if res.text.find('ACCESS DENIED') > -1:
+        if 'ACCESS DENIED' in res.text:
             raise AccessDenied('DENIED: Wiley E Publisher says no to %s' % res.url)
 
-        tree = etree.fromstring(res.text, HTMLParser())
+        tree = etree.fromstring(res.content, HTMLParser())
         if tree.find('head/title').text.find('Not Found') > -1:
             raise NoPDFLink('TXERROR: Wiley says File Not found (%s)' % res.url)
         elif tree.find('head/title').text.find('Maintenance') > -1:
             raise NoPDFLink('TXERROR: Wiley site under scheduled maintenance -- try again later (url was %s).' % res.url)
         iframe = tree.find('body/div/iframe')
-        url = iframe.get('src')
+
+        try:
+            url = iframe.get('src')
+        except AttributeError:
+            # no iframe, give up (probably asking for a login at this point)
+            raise AccessDenied('DENIED: Wiley E Publisher says no to %s' % res.url)
         verify_pdf_url(url, 'Wiley')
         return url
 
@@ -422,7 +445,7 @@ def the_lancet_tango(pma, verify=True):
          :raises: AccessDenied, NoPDFLink
     '''
     url_template = doi_templates['lancet']
-    jrnl = pma.journal.translate(None, '.')
+    jrnl = standardize_journal_name(pma.journal)
 
     if not pma.pii and pma.doi:
         pma.pii = pma.doi.split('/')[1]
@@ -452,7 +475,7 @@ def the_nature_ballet(pma, verify=True):
 
     if url == '':
         if pma.pii:
-            url = nature_format.format(a=pma, ja=nature_journals[pma.journal.translate(None, '.')]['ja'])
+            url = nature_format.format(a=pma, ja=nature_journals[standardize_journal_name(pma.journal)]['ja'])
         else:
             if pma.doi:
                 raise NoPDFLink('MISSING: pii, TXERROR: dx.doi.org resolution failed for doi %s' % pma.doi)
@@ -589,7 +612,7 @@ def the_wolterskluwer_volta(pma, verify=True):
         baseurl = requests.get(volissurl.format(a=pma)).url
         
     res = requests.get(baseurl)
-    tree = etree.fromstring(res.text, HTMLParser())
+    tree = etree.fromstring(res.content, HTMLParser())
     try:
         item = tree.cssselect('li.ej-box-01-body-li-article-tools-pdf')[0]
     except IndexError:
@@ -625,7 +648,7 @@ def the_cell_pogo(pma, verify=True):
     if pma.pii:
         # the front door
         url = cell_format.format(a=pma, ja=cell_journals[jrnl]['ja'],
-                                     pii=pma.pii.translate(None, '-()'))
+                                     pii=remove_chars(pma.pii, '-()'))
         if verify:
             verify_pdf_url(url, 'Cell')
         return url

@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 import sys
 
 from tabulate import tabulate
@@ -6,7 +8,7 @@ from metapub import MedGenFetcher
 try:
     term = sys.argv[1]
 except IndexError:
-    print 'Supply a disease/syndrome/condition name in quotation marks as the argument to this script.'
+    print('Supply a disease/syndrome/condition name in quotation marks as the argument to this script.')
     sys.exit()
 
 ####
@@ -17,7 +19,7 @@ logging.getLogger("eutils").setLevel(logging.INFO)
 
 fetch = MedGenFetcher()
 uids = fetch.uids_by_term(term)
-print uids
+print(uids)
 
 headers = ['CUI', 'Title', 'Semantic Type', 'MedGenUID', 
            'OMIM ID', 'Modes of Inheritance', 'Assoc Genes', ]
@@ -48,5 +50,5 @@ for this_id in uids:
         continue
 
 
-print tabulate(table, headers, tablefmt="simple")
+print(tabulate(table, headers, tablefmt="simple"))
 

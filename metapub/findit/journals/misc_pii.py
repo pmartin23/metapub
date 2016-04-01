@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 simple_formats_pii = {
     'Am Heart J': 'http://www.ahjonline.com/article/{a.pii}/pdf',
@@ -44,4 +44,3 @@ simple_formats_pii = {
     'Surg Neurol': 'http://www.worldneurosurgery.org/article/{a.pii}/pdf',
     'Thromb Res': 'http://www.thrombosisresearch.com/article/{a.pii}/pdf',
 }
-

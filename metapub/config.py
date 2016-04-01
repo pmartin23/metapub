@@ -8,8 +8,12 @@ PKGNAME = 'metapub'
 # where to place XML (temporarily) when downloaded.
 TMPDIR = '/tmp'
 
+# default cache directory for SQLite cache engines
+DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'),'.cache')
+
 # email address submitted to eutils with requests (as required by their api).
-DEFAULT_EMAIL = os.getenv('EUTILS_EMAIL', 'naomi.most@invitae.com')
+DEFAULT_EMAIL = os.getenv('EUTILS_EMAIL', 'metapub@nthmost.com')
+
 
 def get_process_log(filepath, loglevel=logging.INFO, name=PKGNAME+'-process'):
     log = logging.getLogger(name)
@@ -21,6 +25,7 @@ def get_process_log(filepath, loglevel=logging.INFO, name=PKGNAME+'-process'):
     log.addHandler(fh)
     return log
 
+
 def get_data_log(filepath, name=PKGNAME+'-data'):
     datalog = logging.getLogger(name)
     datalog.setLevel(logging.DEBUG)
@@ -30,4 +35,3 @@ def get_data_log(filepath, name=PKGNAME+'-data'):
     fh.setFormatter(formatter)
     datalog.addHandler(fh)
     return datalog
-

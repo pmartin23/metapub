@@ -3,8 +3,6 @@ from __future__ import absolute_import, print_function
 __doc__ = '''metapub.PubMedFetcher -- tools to deal with NCBI's E-utilities interface to PubMed'''
 __author__ = 'nthmost'
 
-import os
-
 from lxml import etree
 import requests
 
@@ -19,7 +17,6 @@ from .base import Borg
 from .config import DEFAULT_EMAIL
 
 def get_uids_from_esearch_result(xmlstr):
-    #from IPython import embed; embed()
     dom = etree.fromstring(xmlstr)
     uids = []
     idlist = dom.find('IdList')

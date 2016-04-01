@@ -9,5 +9,3 @@ class TestPubmedSearch(unittest.TestCase):
 
     def tearDown(self):
         pass
-
- 

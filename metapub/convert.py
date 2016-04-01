@@ -1,4 +1,4 @@
-from __future__ import print_function, absolute_import
+from __future__ import print_function, absolute_import, unicode_literals
 
 __doc__='mildly-experimental mashups of various services to get needed IDs.'
 
@@ -35,9 +35,13 @@ def _protected_crossref_query(**kwargs):
 def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
     '''starting with a PubMedArticle object, use CrossRef to find a DOI for given article.
 
-        :param: pma (PubMedArticle object)
-        :param: use_best_guess (bool) [default: False]
-        :param: min_score (float) [default: 2.0]
+    Args:
+        pma (PubMedArticle)
+        use_best_guess (bool): default=False
+        min_score (float): default=2.0
+
+    Returns:
+        doi (str) or None
     '''
     _start_engines()
     result = _protected_crossref_query(pma=pma, use_best_guess=use_best_guess, min_score=min_score)
@@ -50,14 +54,17 @@ def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
 def PubMedArticle2doi_with_score(pma, use_best_guess=False, min_score=2.0):
     '''Starting with a PubMedArticle object, use CrossRef to find a DOI for given article.
 
-        Returns a tuple containing the DOI and the score CrossRef returned for the
-        lookup.  If there was no good result above the min_score threshold, the tuple 
-        will contain (None, 0.0).
+    Returns a tuple containing the DOI and the score CrossRef returned for the
+    lookup.  If there was no good result above the min_score threshold, the tuple 
+    will contain (None, 0.0).
 
-        :param: pma (PubMedArticle object)
-        :param: use_best_guess (bool) [default: False]
-        :param: min_score (float) [default: 2.0]
-        :return: (doi, score) (string, float) or (None, 0.0)
+    Args:
+        pma (PubMedArticle)
+        use_best_guess (bool): default=False
+        min_score (float): default=2.0
+    
+    Returns:
+        tuple (doi string, score) or (None, 0.0)
     '''
 
     _start_engines()
@@ -71,9 +78,16 @@ def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
     '''starting with a pubmed ID, lookup article in pubmed. If DOI found in PubMedArticle object,
         return it.  Otherwise, use CrossRef to find the DOI for given article.
 
-        :param: pmid (string or int)
-        :param: use_best_guess (bool) [default: False]
-        :param: min_score (float) [default: 2.0]
+    Args:
+        pmid (str or int)
+        use_best_guess (bool): default=False
+        min_score (float): minimum score to accept from CrossRef for given doi. default=2.0
+
+    Returns:
+        doi (str) or None
+
+    Raises:
+        InvalidPMID (if pmid is invalid)
     '''
     # let MetaPubError pass back to the caller if pmid is not for realz..
     _start_engines()
@@ -84,16 +98,22 @@ def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
 
 def pmid2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
     '''Starting with a pubmed ID, lookup article in pubmed. 
-        
-        If DOI found in PubMedArticle object, that doi and 10.0 for the doi_score, 
-        i.e. the tuple (doi, 10.0).
     
-        Otherwise, use CrossRef to find the DOI for given article and return (doi, crossref_doi_score).
+    If DOI found in PubMedArticle object, that doi and 10.0 for the doi_score, 
+    i.e. the tuple (doi, 10.0).
 
-        :param: pmid (string or int)
-        :param: use_best_guess (bool) [default: False]
-        :param: min_score (float) [default: 2.0]
-        :return: tuple (doi, doi_score)
+    Otherwise, use CrossRef to find the DOI for given article and return (doi, crossref_doi_score).
+
+    Args:
+        pmid (str or int)
+        use_best_guess (bool): default=False
+        min_score (float): minimum score to accept from CrossRef for given doi. default=2.0
+
+    Returns:
+        tuple (doi, score) or (None, 0.0)
+
+    Raises:
+        InvalidPMID (if pmid is invalid)
     '''
     _start_engines()
     pma = pm_fetch.article_by_pmid(pmid)
@@ -103,9 +123,23 @@ def pmid2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
 
 def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     '''uses CrossRef and PubMed eutils to lookup a PMID given a known doi.
-        Warning: does NO validation (use in combo with metapub.text_mining).
 
-        If a PMID can be found, return it. Otherwise return None.
+    Warning: NO validation of input DOI performed here. Use
+             metapub.text_mining.find_doi_in_string beforehand if needed.
+
+    If a PMID can be found, return it. Otherwise return None.
+
+    In very rare cases, use of the CrossRef->pubmed citation method used
+    here may result in more than one pubmed ID. In this case, this function
+    will return instead the word 'AMBIGUOUS'.
+
+    Args:
+        pmid (str or int)
+        use_best_guess (bool): default=False
+        min_score (float): minimum score to accept from CrossRef for given doi. default=2.0
+
+    Returns:
+        pmid (str) if found; 'AMBIGUOUS' if citation count > 1; None if no results.
     '''
     # for PMA, skip the validation; some pubmed XML has weird partial strings for DOI.
     # We should allow people to search using these oddball strings.
