@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 """ metapub.clinvarfetcher: tools for interacting with ClinVar data """
 
@@ -58,7 +58,7 @@ class ClinVarFetcher(Borg):
             self.get_accession = self._eutils_get_accession
             self.pmids_for_id = self._eutils_pmids_for_id
             self.ids_for_variant = self._eutils_ids_for_variant
-            self.variant2pubmed = self._eutils_variant2pubmed
+            self.pmids_for_hgvs = self._eutils_pmids_for_hgvs
             self.get_variant_summary = self._eutils_get_variant_summary
         else:
             raise NotImplementedError('coming soon: fetch from local clinvar via medgen-mysql.')

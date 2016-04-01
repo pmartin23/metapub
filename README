@@ -165,14 +165,17 @@ ClinVarVariation / ClinVarFetcher
 
 Basic usage::
 
-    fetch = ClinVarFetcher()
-    cv = fetch.variation_by_hgvs('NM_000249.3:c.1958T>G')
+    clinvar = ClinVarFetcher()
+    cv = clinvar.variation_by_hgvs('NM_000249.3:c.1958T>G')
     print(cv.variation_id)
     print(cv.traits)
     print(cv.supporting_submissions)
     print(cv.clinical_significance)
     print(cv.genes)
     print(cv.variations)
+
+    pubmed_citations = clinvar.pmids_for_hgvs('NM_000249.3:c.1958T>G')
+    print(pubmed_citations)
 
 
 CrossRef
