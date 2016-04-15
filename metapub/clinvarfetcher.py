@@ -36,9 +36,9 @@ class ClinVarFetcher(Borg):
 
         pmids = clinvar.pmids_for_id(65533)  # can also submit ID as string
 
-    Get list of pubmed IDs (pmids) for hgvs_c string:
+    Get list of pubmed IDs (pmids) for hgvs string:
 
-        pmids = clinvar.variant2pubmed('NM_017547.3:c.1289A>G')
+        pmids = clinvar.pmids_for_hgvs('NM_017547.3:c.1289A>G')
 
     For more info, see the ClinVar eutils page:
     http://www.ncbi.nlm.nih.gov/clinvar/docs/maintenance_use/

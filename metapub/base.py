@@ -8,7 +8,11 @@ from .exceptions import MetaPubError
 
 
 def parse_elink_response(xmlstr):
-    '''return all Ids from an elink XML response'''
+    """ return all Ids from an elink XML response
+
+    :param xmlstr:
+    :return: list of IDs, or None if XML response empty
+    """
     if six.PY3 and type(xmlstr) == six.binary_type:
         xmlstr = xmlstr.decode()
     dom = etree.fromstring(xmlstr)
@@ -24,7 +28,8 @@ def parse_elink_response(xmlstr):
 
 
 class MetaPubObject(object):
-    '''Base class for XML parsing objects (e.g. PubMedArticle)'''
+    """ Base class for XML parsing objects (e.g. PubMedArticle)
+    """
 
     def __init__(self, xml, root=None, *args, **kwargs):
         '''Instantiate with "xml" as string or bytes containing valid XML.
@@ -71,7 +76,7 @@ class MetaPubObject(object):
 
 # singleton class used by the fetchers.
 class Borg(object):
-    '''singleton class backing cache engine objects.'''
+    """ singleton class backing cache engine objects. """
     _shared_state = {}
 
     def __init__(self):
