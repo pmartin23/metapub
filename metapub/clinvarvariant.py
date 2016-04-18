@@ -58,19 +58,23 @@ class ClinVarVariant(MetaPubObject):
 
     ### HGVS string convenience properties
 
+    def _get_hgvs_or_empty_list(self, hgvsdict):
+        try:
+            accession = hgvsdict['AccessionVersion']
+            change = hgvsdict['Change']
+            return [accession + ':' + change]
+        except KeyError:
+            # example of missing Change: ClinVar ID 409 
+            # example of missing AccessionVersion:  ClinVar ID 11344
+            return []
+
     @property
     def hgvs_c(self):
         """ Returns a list of all coding HGVS strings from the Allelle data. """
         strlist = []
         for hgvsdict in self.hgvs:
             if hgvsdict['Type'].find('coding') > -1:
-                accession = hgvsdict['AccessionVersion']
-                try:
-                    change = hgvsdict['Change']
-                    strlist.append(accession + ':' + change)
-                except KeyError:
-                    # example: ClinVar ID 409 ("NM_002111.6(HTT):c.53_55[(41_?)] (p.Gln40(41_?))")
-                    pass
+                strlist = strlist + self._get_hgvs_or_empty_list(hgvsdict)
         return strlist
 
     @property
@@ -79,7 +83,7 @@ class ClinVarVariant(MetaPubObject):
         strlist = []
         for hgvsdict in self.hgvs:
             if hgvsdict['Type'].find('genomic') > -1:
-                strlist.append(hgvsdict['AccessionVersion'] + ':' + hgvsdict['Change'])
+                strlist = strlist + self._get_hgvs_or_empty_list(hgvsdict)
         return strlist
     
     @property
@@ -88,7 +92,7 @@ class ClinVarVariant(MetaPubObject):
         strlist = []
         for hgvsdict in self.hgvs:
             if hgvsdict['Type'].find('protein') > -1:
-                strlist.append(hgvsdict['AccessionVersion'] + ':' + hgvsdict['Change'])
+                strlist = strlist + self._get_hgvs_or_empty_list(hgvsdict)
         return strlist
 
     ### VariationReport basic info
