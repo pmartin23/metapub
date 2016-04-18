@@ -12,7 +12,7 @@ from .pubmedcentral import get_pmid_for_otherid
 from .pubmed_clinicalqueries import *
 from .utils import kpick, parameterize, lowercase_keys
 from .text_mining import re_pmid
-from .exceptions import *
+from .exceptions import MetaPubError, EutilsRequestError, InvalidPMID
 from .base import Borg
 from .config import DEFAULT_EMAIL
 
@@ -86,14 +86,14 @@ class PubMedFetcher(Borg):
         pmid = str(pmid)
         try:
             result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
-        except EutilsBadRequestError:
+        except EutilsRequestError:
             raise MetaPubError('Invalid ID "%s" (rejected by Eutils); please check the number and try again.' % pmid)
 
         if result is None:
             return None
 
-        if result.find('ERROR') > -1:
-            raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle' % pmid)
+        #if result.find('ERROR') > -1:
+        #    raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle' % pmid)
 
         pma = PubMedArticle(result)
         if pma.pmid is None:
