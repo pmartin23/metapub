@@ -26,7 +26,7 @@ print(uids)
 # TODO: Term Hierarchy Children (only 1 tier below), Term Hierarchy Parents (only 1 tier above)
 
 headers = ['CUI', 'Hugo', 'Title', 'Semantic Type', 'MedGenUID', 
-           'OMIM ID', 'Modes of Inheritance', 'Assoc Genes', ]
+           'OMIM ID', 'Modes of Inheritance', 'Assoc Genes', 'PMIDS' ]
 
 table = []
 
@@ -51,6 +51,9 @@ for this_id in uids:
     line.append(_join_or_NA(concept.OMIM))
     line.append(_join_or_NA(concept.modes_of_inheritance, 'name'))
     line.append(_join_or_NA(concept.associated_genes, 'hgnc')) 
+
+    pmids = fetch.pubmeds_for_uid(this_id)
+    line.append(';'.join(pmids))
 
     table.append(line)
 

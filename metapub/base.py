@@ -13,8 +13,6 @@ def parse_elink_response(xmlstr):
     :param xmlstr:
     :return: list of IDs, or None if XML response empty
     """
-    if six.PY3 and type(xmlstr) == six.binary_type:
-        xmlstr = xmlstr.decode()
     dom = etree.fromstring(xmlstr)
     ids = []
     if dom.find('LinkSet/LinkSetDb/LinkName').text:
