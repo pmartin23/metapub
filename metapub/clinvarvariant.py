@@ -64,7 +64,13 @@ class ClinVarVariant(MetaPubObject):
         strlist = []
         for hgvsdict in self.hgvs:
             if hgvsdict['Type'].find('coding') > -1:
-                strlist.append(hgvsdict['AccessionVersion'] + ':' + hgvsdict['Change'])
+                accession = hgvsdict['AccessionVersion']
+                try:
+                    change = hgvsdict['Change']
+                    strlist.append(accession + ':' + change)
+                except KeyError:
+                    # example: ClinVar ID 409 ("NM_002111.6(HTT):c.53_55[(41_?)] (p.Gln40(41_?))")
+                    pass
         return strlist
 
     @property
@@ -156,8 +162,11 @@ class ClinVarVariant(MetaPubObject):
 
     def _get_hgvs_list(self):
         hgvs = []
-        for elem in self.content.find('Allele/HGVSlist').getchildren():
-            hgvs.append(dict(elem.items()))
+        try:
+            for elem in self.content.find('Allele/HGVSlist').getchildren():
+                hgvs.append(dict(elem.items()))
+        except AttributeError:
+            return []
         return hgvs
 
     def _get_xref_list(self):
@@ -168,14 +177,20 @@ class ClinVarVariant(MetaPubObject):
 
     def _get_molecular_consequence_list(self):
         molcons = []
-        for elem in self.content.find('Allele/MolecularConsequenceList').getchildren():
-            molcons.append(dict(elem.items()))
+        try:
+            for elem in self.content.find('Allele/MolecularConsequenceList').getchildren():
+                molcons.append(dict(elem.items()))
+        except AttributeError:
+            return []
         return molcons
 
     def _get_allele_frequency_list(self):
         freqs = []
-        for elem in self.content.find('Allele/AlleleFrequencyList').getchildren():
-            freqs.append(dict(elem.items()))
+        try: 
+            for elem in self.content.find('Allele/AlleleFrequencyList').getchildren():
+                freqs.append(dict(elem.items()))
+        except AttributeError:
+            return []
         return freqs
 
     ### OBSERVATIONS 
