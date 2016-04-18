@@ -8,7 +8,7 @@ from datetime import datetime
 from lxml import etree
 
 from .base import MetaPubObject
-from .exceptions import MetaPubError
+from .exceptions import MetaPubError, BaseXMLError
 
 logger = logging.getLogger()
 
@@ -18,13 +18,16 @@ class ClinVarVariant(MetaPubObject):
     def __init__(self, xmlstr, *args, **kwargs):
         super(ClinVarVariant, self).__init__(xmlstr, 'VariationReport', args, kwargs)
 
+        if self.content is None:
+            raise BaseXMLError('Empty XML document')
+
         if self._get('error'):
             raise MetaPubError('Supplied XML for ClinVarVariant contained explicit error: %s' % self._get('error'))
     
         # VariationReport basic details
-        self.id = self._get_variation_id()
-        self.name = self._get_variation_name()
-        self.type = self._get_variation_type()
+        self.variation_id = self._get_variation_id()
+        self.variation_name = self._get_variation_name()
+        self.variation_type = self._get_variation_type()
         self.date_created = self._get_date_created()
         self.date_last_updated = self._get_date_last_updated()
         self.submitter_count = self._get_submitter_count()
@@ -36,6 +39,16 @@ class ClinVarVariant(MetaPubObject):
         # Gene List
         self.genes = self._get_gene_list()
 
+        # Allele Info
+        self.cytogenic_location = self._get_cytogenic_location()
+        self.sequence_locations = self._get_sequence_locations()
+        self.hgvs = self._get_hgvs_list()
+        self.xrefs = self._get_xref_list()
+        self.molecular_consequences = self._get_molecular_consequence_list()
+        self.allele_frequencies = self._get_allele_frequency_list()
+
+        # Observations
+
 
     def to_dict(self):
         """ returns a dictionary composed of all extractable properties of this concept. """
@@ -43,22 +56,34 @@ class ClinVarVariant(MetaPubObject):
         outd.pop('content')
         return outd
 
-    ### convenience properties
+    ### HGVS string convenience properties
 
     @property
     def hgvs_c(self):
         """ Returns a list of all coding HGVS strings from the Allelle data. """
-        return []
+        strlist = []
+        for hgvsdict in self.hgvs:
+            if hgvsdict['Type'].find('coding') > -1:
+                strlist.append(hgvsdict['AccessionVersion'] + ':' + hgvsdict['Change'])
+        return strlist
 
     @property
     def hgvs_g(self):
         """ Returns a list of all genomic HGVS strings from the Allelle data. """
-        return []
+        strlist = []
+        for hgvsdict in self.hgvs:
+            if hgvsdict['Type'].find('genomic') > -1:
+                strlist.append(hgvsdict['AccessionVersion'] + ':' + hgvsdict['Change'])
+        return strlist
     
     @property
     def hgvs_p(self):
         """ Returns a list of all protein effect HGVS strings from the Allelle data. """
-        return []
+        strlist = []
+        for hgvsdict in self.hgvs:
+            if hgvsdict['Type'].find('protein') > -1:
+                strlist.append(hgvsdict['AccessionVersion'] + ':' + hgvsdict['Change'])
+        return strlist
 
     ### VariationReport basic info
 
@@ -118,9 +143,41 @@ class ClinVarVariant(MetaPubObject):
     ### ALLELE INFORMATION
 
     def _get_allele_id(self):
-        return self.content.get('AlleleID')
+        return self.content.find('Allele').get('AlleleID')
     
     def _get_cytogenic_location(self):
-        return self.content.get('Allele/CytogeneticLocation')
+        return self._get('Allele/CytogeneticLocation')
 
-    
+    def _get_sequence_locations(self):
+        seqlocs = []
+        for elem in self.content.findall('Allele/SequenceLocation'):
+            seqlocs.append(dict(elem.items()))
+        return seqlocs
+
+    def _get_hgvs_list(self):
+        hgvs = []
+        for elem in self.content.find('Allele/HGVSlist').getchildren():
+            hgvs.append(dict(elem.items()))
+        return hgvs
+
+    def _get_xref_list(self):
+        xrefs = []
+        for elem in self.content.find('Allele/XRefList').getchildren():
+            xrefs.append(dict(elem.items()))
+        return xrefs
+
+    def _get_molecular_consequence_list(self):
+        molcons = []
+        for elem in self.content.find('Allele/MolecularConsequenceList').getchildren():
+            molcons.append(dict(elem.items()))
+        return molcons
+
+    def _get_allele_frequency_list(self):
+        freqs = []
+        for elem in self.content.find('Allele/AlleleFrequencyList').getchildren():
+            freqs.append(dict(elem.items()))
+        return freqs
+
+    ### OBSERVATIONS 
+
+

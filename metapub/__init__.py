@@ -7,9 +7,11 @@ from .pubmedarticle import PubMedArticle
 from .pubmedfetcher import PubMedFetcher
 from .medgenfetcher import MedGenFetcher
 from .medgenconcept import MedGenConcept
+from .clinvarfetcher import ClinVarFetcher
+from .clinvarvariant import ClinVarVariant
 from .crossref import CrossRef
 from .findit import FindIt
 from .dx_doi import DxDOI
 
-__version__ = '0.4.0.1'
+__version__ = '0.4.1'
 

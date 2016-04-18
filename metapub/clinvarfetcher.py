@@ -5,7 +5,7 @@ from __future__ import absolute_import, unicode_literals
 from lxml import etree
 
 from .clinvarvariant import ClinVarVariant
-
+from .exceptions import MetaPubError, BaseXMLError
 from .eutils_common import get_eutils_client, get_cache_path
 from .base import Borg, parse_elink_response
 from .config import DEFAULT_EMAIL
@@ -79,7 +79,12 @@ class ClinVarFetcher(Borg):
         (This corresponds to the entry in the clinvar.variant_summary table.)
         """
         result = self.qs.efetch({'db': 'clinvar', 'id': accession_id, 'rettype': 'variation'})
-        return ClinVarVariant(result)
+        try:
+            return ClinVarVariant(result)
+        except BaseXMLError as error:
+            # empty XML document == invalid variant ID
+            print(error)
+            raise MetaPubError('Invalid ClinVar Variation ID')
 
     def _eutils_ids_by_gene(self, gene, single_gene=False):
         """
@@ -138,3 +143,4 @@ class ClinVarFetcher(Borg):
         for clinvar_id in ids:
             pmids.add(self._eutils_pmids_for_id(clinvar_id))
         return list(pmids)
+

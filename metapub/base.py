@@ -4,7 +4,7 @@ import six
 
 from lxml import etree
 
-from .exceptions import MetaPubError
+from .exceptions import MetaPubError, BaseXMLError
 
 
 def parse_elink_response(xmlstr):

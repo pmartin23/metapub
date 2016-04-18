@@ -6,6 +6,9 @@ from eutils.exceptions import *
 class MetaPubError(Exception):
     pass
 
+class BaseXMLError(MetaPubError):
+    """Raised when XML needed to instantiate an object fails at the most basic level."""
+
 class InvalidPMID(MetaPubError):
     """Raised when NCBI efetch of a pubmed ID results in "invalid" response."""
 
