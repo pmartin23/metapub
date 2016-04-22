@@ -39,7 +39,6 @@ jstage_journals = [
         'J Oleo Sci',
         'J Periodontol',
         'J Pharmacobio-dyn',
-        'J Pharmacol Sci',
         'J Reprod Dev',
         'J Toxicol Sci',
         'J Vet Med Sci',
