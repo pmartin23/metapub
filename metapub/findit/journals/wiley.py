@@ -110,6 +110,7 @@ wiley_journals = [
         'Cancer Sci',
         'Cardiovasc Drug Rev',
         'Cardiovasc Ther',
+        'Cas Lek Cesk',
         'Cathet Cardiovasc Diagn',
         'Catheter Cardiovasc Interv',
         'Cell Biochem Funct',

@@ -13,7 +13,6 @@ jstage_journals = [
         'Biol Pharm Bull',
         'Biomed Res',
         'Biosci Trends',
-        'Cas Lek Cesk',
         'Cell Struct Funct',
         'Chem Pharm Bull',
         'Circ J',
@@ -26,7 +25,6 @@ jstage_journals = [
         'Genes Genet Syst',
         'Int Heart J',
         'Intern Med',
-        'J Antibiot',
         'J Atheroscler Thromb',
         'J Biochem',
         'J Clin Exp Hematop',
@@ -37,13 +35,12 @@ jstage_journals = [
         'J Nutr Sci Vitaminol',
         'J Occup Health',
         'J Oleo Sci',
-        'J Periodontol',
-        'J Pharmacobio-dyn',
-        'J Reprod Dev',
-        'J Toxicol Sci',
-        'J Vet Med Sci',
-        'Jpn Circ J',
-        'Jpn Heart J',
+        'J Pharmacobio-dyn',# bpb1978
+        'J Reprod Dev',     # jrd
+        'J Toxicol Sci',    # jts
+        'J Vet Med Sci',    # jvms
+        'Jpn Circ J',       # jcj
+        'Jpn Heart J',      # jhj
         'Jpn J Infect Dis',
         'Jpn J Med',
         'Jpn J Med Sci Biol',

@@ -80,4 +80,5 @@ todo_journals = {
     'J Pediatr (Rio J)': {'example': '17102902 --> dx.doi.org/10.2223/JPED.1550 --> http://www.jped.com.br/conteudo/06-82-06-437/port.pdf'},
     'Teach Learn Med': {'example': '17144842 --> dx.doi.org/10.1207/s15328015tlm1804_13 --> pdf link?'},
     'Med Clin (Barc)': {'example': '17145028 --> http://www.elsevier.es/es-revista-medicina-clinica-2-linkresolver-alopecia-androgenica-prematura-un-varon-13094419 --> http://apps.elsevier.es/watermark/ctl_servlet?_f=10&pident_articulo=13094419&pident_usuario=0&pcontactid=&pident_revista=2&ty=94&accion=L&origen=zonadelectura&web=www.elsevier.es&lan=es&fichero=2v127n16a13094419pdf001.pdf'},
+    'J Periodontol': {'example': 'http://www.joponline.org/doi/10.1902/jop.2016.150733'},
 }

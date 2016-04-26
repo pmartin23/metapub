@@ -369,6 +369,7 @@ sciencedirect_journals = [
         'J Am Dent Assoc',
         'J Am Diet Assoc',
         'J Am Soc Echocardiogr',
+        'J Antibiot',
         'J Arthroplasty',
         'J Autoimmun',
         'J Auton Nerv Syst',
