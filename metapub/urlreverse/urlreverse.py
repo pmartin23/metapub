@@ -11,14 +11,15 @@ if six.PY2:
 else:
     from urllib.parse import urlparse
 
-from ..text_mining import (find_doi_in_string, get_nature_doi_from_link, 
-                           get_biomedcentral_doi_from_link, findall_dois_in_text)
+from ..text_mining import (find_doi_in_string, get_nature_doi_from_link, scrape_doi_from_article_page,
+                           get_biomedcentral_doi_from_link)
 from ..pubmedfetcher import PubMedFetcher
 from ..crossref import CrossRef
 from ..convert import doi2pmid, pmid2doi, interpret_pmids_for_citation_results
 from ..pubmedcentral import get_pmid_for_otherid
 
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
+from .hostname2doiprefix import HOSTNAME_TO_DOI_PREFIX_MAP
 
 # VIP (volume-issue-page)
 re_vip = re.compile('(?P<hostname>.*?)\/content(\/\w+)?\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)', re.I)
@@ -42,6 +43,9 @@ re_cell_old_style = re.compile('.*?(?P<hostname>cell\.com)\/(pdf|abstract|fullte
 re_jstage = re.compile('.*?(?P<hostname>jstage\.jst\.go\.jp)\/article\/(?P<journal_abbrev>.*?)\/(?P<volume>\d+)\/(?P<issue>.*?)\/(?P<info>).*?\/', re.I)
 re_jci = re.compile('.*?(?P<hostname>jci\.org)\/articles\/view\/(?P<jci_id>\d+)', re.I)
 re_karger = re.compile('.*?(?P<hostname>karger\.com)\/Article\/(Abstract|Pdf)\/(?P<kid>\d+)', re.I)
+
+# Early release formats
+re_early_release = re.compile('((http|https)(:\/\/))(?P<hostname>.*?)\/content\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf)')
 
 OFFICIAL_PII_FORMAT = '{pt1}-{pt2}({pt3}){pt4}-{pt5}'
 
@@ -71,15 +75,6 @@ def get_karger_doi_from_link(url):
         return None
 
 
-def _scrape_doi_from_page(url):
-    response = requests.get(url)
-    dois = findall_dois_in_text(response.text)
-    if dois:
-        return dois[0]
-    else:
-        return None
-
-
 def get_jstage_doi_from_link(url):
     """ Since the jstage urls are composed with some degree of unpredictability with respect to
     what's found in segment that ought to contain the first_page element, we have to load the _article
@@ -92,7 +87,7 @@ def get_jstage_doi_from_link(url):
     if match:
         if url.find('_pdf') > -1:
             url = url.replace('_pdf', '_article')
-        return _scrape_doi_from_page(url)
+        return scrape_doi_from_article_page(url)
 
 
 def get_sciencedirect_doi_from_link(url):
@@ -160,7 +155,7 @@ def get_cell_doi_from_link(url):
     if match:
         journal_abbrev = match.groupdict().get('journal_abbrev', None)
         if journal_abbrev and journal_abbrev in ['cancer-cell', 'current-biology']:
-            return _scrape_doi_from_page(url)
+            return scrape_doi_from_article_page(url)
 
         return out + pii
 
@@ -196,6 +191,25 @@ def get_ahajournals_doi_from_link(url):
     :param url: (str)
     :return: doi or None
     """
+
+
+def get_early_release_doi_from_link(url):
+    """
+
+    Examples:
+        http://cancerres.aacrjournals.org/content/early/2015/12/30/0008-5472.CAN-15-0295.full.pdf --> 10.1158/0008-5472.CAN-15-0295
+        http://ajcn.nutrition.org/content/early/2016/04/20/ajcn.115.123752.abstract --> 10.3945/ajcn.115.123752
+        http://www.mcponline.org/content/early/2016/04/25/mcp.O115.055467.full.pdf+html --> 10.1074/mcp.O115.055467
+
+    :param url: (str)
+    :return: doi or None
+    """
+
+    match = re_early_release.match(url)
+    if match:
+        if match['hostname'] in HOSTNAME_TO_DOI_PREFIX_MAP.keys():
+            return HOSTNAME_TO_DOI_PREFIX_MAP['hostname'] + '/' + match['doi']
+
 
 
 
@@ -242,11 +256,12 @@ def get_generic_doi_from_link(url):
 
 
 DOI_METHODS = [get_cell_doi_from_link,
+               get_jstage_doi_from_link,
+               get_early_release_doi_from_link,
                get_biomedcentral_doi_from_link,
                get_nature_doi_from_link,
                get_sciencedirect_doi_from_link,
                get_karger_doi_from_link,
-               get_jstage_doi_from_link,
                get_generic_doi_from_link,
                ]
 

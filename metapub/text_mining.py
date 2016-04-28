@@ -90,6 +90,24 @@ def find_doi_in_string(inp, whitespace=False):
     return _doi_pass_2(doi)
 
 
+def scrape_doi_from_article_page(url):
+    """ Takes an article link (url), loads its page, and searches its content for DOIs, returning
+    the first one it finds.
+
+    The first DOI found on the page being the correct one for the article at hand seems to be a
+    reasonable and workable assumption in general.
+
+    :param url: (str)
+    :return: doi or None
+    """
+    response = requests.get(url)
+    if response.ok:
+        dois = findall_dois_in_text(response.text)
+        if dois:
+            return dois[0]
+    return None
+
+
 def get_nature_doi_from_link(link):
     """ Custom method to get a DOI from a nature.com URL
 
@@ -134,12 +152,7 @@ def get_nature_doi_from_link(link):
     # dois for style3journals don't seem to be deducible from their URLs.
     if journal_abbrev in style3journals:
         link = link.replace('.pdf', '.html')
-        response = requests.get(link)
-        if response.ok:
-            dois = findall_dois_in_text(response.text)
-            if dois:
-                return dois[0]
-        return None
+        return scrape_doi_from_article_page(link)
 
     match = re.search(r'%s\.{0,1}\d+' % journal_abbrev, link)
     if match:
