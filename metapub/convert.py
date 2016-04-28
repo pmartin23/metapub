@@ -37,6 +37,8 @@ def interpret_pmids_for_citation_results(pmids):
     if len(pmids) == 1:
         if pmids[0] == 'NOT_FOUND':
             return None
+        elif pmids[0].startswith('AMBIGUOUS'):
+            return 'AMBIGUOUS'
         return str(pmids[0])
     elif len(pmids) == 0:
         return None

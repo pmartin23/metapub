@@ -19,23 +19,29 @@ from ..convert import doi2pmid, interpret_pmids_for_citation_results
 
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 
-pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\d{1})'
+# VIP (volume-issue-page)
+re_vip = re.compile('.*?\/content\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)')
 
-re_vip = re.compile('.*?\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)')
+# PMID in url
 re_pmid = re.compile('.*?\?pmid=(?P<pmid>\d+)')
-re_jstage = re.compile('.*?jstage.jst.go.jp\/article\/(?P<journal_abbrev>.*?)\/(?P<volume>\d+)\/(?P<issue>.*?)\/(?P<info>).*?\/')
+
+# PII
+pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\d{1})'
 re_sciencedirect_pii_simple = re.compile('.*?(sciencedirect|cell)\.com\/science\/article\/pii\/(?P<pii>S\d+)')
 re_sciencedirect_pii_official = re.compile('.*?(sciencedirect|cell)\.com\/science\/article\/pii\/' + pii_official)
-re_jci = re.compile('.*?jci\.org\/articles\/view\/(?P<jci_id>\d+)')
-re_karger = re.compile('.*?karger\.com\/Article\/(Abstract|Pdf|PDF)\/(?P<kid>\d+)')
-
 re_cell_pii_simple = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract)\/(?P<pii>S\d+)')
 re_cell_pii_official = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract)\/' + pii_official)
+
+# Unique
+re_jstage = re.compile('.*?jstage.jst.go.jp\/article\/(?P<journal_abbrev>.*?)\/(?P<volume>\d+)\/(?P<issue>.*?)\/(?P<info>).*?\/')
+re_jci = re.compile('.*?jci\.org\/articles\/view\/(?P<jci_id>\d+)')
+re_karger = re.compile('.*?karger\.com\/Article\/(Abstract|Pdf|PDF)\/(?P<kid>\d+)')
 
 OFFICIAL_PII_FORMAT = '{pt1}-{pt2}({pt3}){pt4}-{pt5}'
 
 FETCH = PubMedFetcher()
 CRX = CrossRef()
+
 
 def get_karger_doi_from_link(url):
     """ Karger IDs can be found in the URL after the "PDF" or "Abstract" piece, and used to 
@@ -168,7 +174,9 @@ def try_vip_methods(url):
 
     if match:
         jrnl = get_journal_name_from_url(url)
-        return match.groupdict().update({'format': 'vip', 'jtitle': jrnl})
+        vipdict = match.groupdict()
+        vipdict.update({'format': 'vip', 'jtitle': jrnl})
+        return vipdict
 
     return None
     
@@ -266,7 +274,7 @@ class UrlReverse(object):
             elif self.format == 'vip':
                 self._try_citation_methods(parts)
 
-    def to_dict():
+    def to_dict(self):
         return self.__dict__
 
     def _try_citation_methods(self, parts):
