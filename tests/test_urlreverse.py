@@ -23,6 +23,13 @@ vip_samples = {
     'http://jnci.oxfordjournals.org/content/100/4/277': '18270343',
     }
 
+early_samples = {
+    'http://cancerres.aacrjournals.org/content/early/2015/12/30/0008-5472.CAN-15-0295.full.pdf': '10.1158/0008-5472.CAN-15-0295',
+    'http://ajcn.nutrition.org/content/early/2016/04/20/ajcn.115.123752.abstract': '10.3945/ajcn.115.123752',
+    'http://www.mcponline.org/content/early/2016/04/25/mcp.O115.055467.full.pdf+html': '10.1074/mcp.O115.055467',
+    'http://www.jbc.org/content/early/2001/01/08/jbc.M011064200.full.pdf': '10.1074/jbc.M011064200',
+    }
+
 jstage_samples = { 
     'https://www.jstage.jst.go.jp/article/jat/16/3/16_E125/_pdf': '10.5551/jat.E125',
     'https://www.jstage.jst.go.jp/article/yoken/66/4/66_306/_pdf': '10.7883/yoken.66.306',
@@ -40,6 +47,10 @@ karger_samples = {
     'http://www.karger.com/Article/PDF/322318': '10.1159/000322318',
     'https://www.karger.com/Article/Abstract/329047': '10.1159/000329047',
     'https://www.karger.com/Article/Abstract/83388': '10.1159/000083388',
+    }
+
+ahajournals_samples = {
+    'http://circimaging.ahajournals.org/content/suppl/2013/04/02/CIRCIMAGING.112.000333.DC1/000333_Supplemental_Material.pdf': '10.1161/CIRCIMAGING.112.000333',
     }
 
 sciencedirect_samples = {
@@ -97,9 +108,15 @@ class TestUrlReverse(unittest.TestCase):
             urlrev = UrlReverse(url)
             assert urlrev.pmid == pmid
 
-    #def test_get_jstage_doi_from_link(self):
-    #    for url, doi in jstage_samples.items():
-    #        assert doi == get_jstage_doi_from_link(doi)
+    def test_early_samples(self):
+        for url, doi in early_samples.items():
+            urlrev = UrlReverse(url)
+            assert urlrev.doi == doi
+
+    def test_get_jstage_doi_from_link(self):
+        for url, doi in jstage_samples.items():
+            urlrev = UrlReverse(url)
+            assert doi == urlrev.doi
 
     def test_try_doi_methods_for_wiley_samples(self):
         for url, doi in wiley_samples.items():
@@ -113,6 +130,10 @@ class TestUrlReverse(unittest.TestCase):
         for url, doi in karger_samples.items():
             assert doi == get_karger_doi_from_link(url)
 
+    #def test_get_ahajournals_doi_from_link(self):
+    #    for url, doi in ahajournals_samples.items():
+    #        assert doi == get_ahajournals_doi_from_link(url)
+
     def test_get_sciencedirect_doi_from_link(self):
         for url, doi in sciencedirect_samples.items():
             assert doi == get_sciencedirect_doi_from_link(url)
@@ -121,10 +142,11 @@ class TestUrlReverse(unittest.TestCase):
         for url, doi in cell_samples.items():
             assert doi == get_cell_doi_from_link(url)
 
-    def test_get_vip_url_with_supplied_title(self):
-        url = 'http://www.clinsci.org/content/ppclinsci/130/11/871'
-        expected_doi = '10.1042/CS20150777',
-        urlrev = UrlReverse(url, title='High-fat diet increases O-GlcNAc levels in cerebral arteries')
+    #def test_get_vip_url_with_supplied_title(self):
+    #    url = 'http://www.clinsci.org/content/ppclinsci/130/11/871'
+    #    expected_doi = '10.1042/CS20150777',
+    #    urlrev = UrlReverse(url, title='High-fat diet increases O-GlcNAc levels in cerebral arteries')
+    #    assert urlrev.doi == expected_doi
 
     def test_urlreverse_on_tough_cases(self):
         for url, doi in tough_cases.items():

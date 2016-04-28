@@ -43,9 +43,11 @@ re_cell_old_style = re.compile('.*?(?P<hostname>cell\.com)\/(pdf|abstract|fullte
 re_jstage = re.compile('.*?(?P<hostname>jstage\.jst\.go\.jp)\/article\/(?P<journal_abbrev>.*?)\/(?P<volume>\d+)\/(?P<issue>.*?)\/(?P<info>).*?\/', re.I)
 re_jci = re.compile('.*?(?P<hostname>jci\.org)\/articles\/view\/(?P<jci_id>\d+)', re.I)
 re_karger = re.compile('.*?(?P<hostname>karger\.com)\/Article\/(Abstract|Pdf)\/(?P<kid>\d+)', re.I)
+#re_ahajournals = re.compile('\/(?P<doi_suffix>\w+\.\d+\.\d+\.\w+)', re.I)
+re_ahajournals = re.compile('\/(?P<doi_suffix>[a-z0-9]+\.\d+\.\d+\.[a-z0-9]+)', re.I)
 
 # Early release formats
-re_early_release = re.compile('((http|https)(:\/\/))(?P<hostname>.*?)\/content\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf)')
+re_early_release = re.compile('((http|https)(:\/\/))(?P<hostname>.*?)\/content\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract)')
 
 OFFICIAL_PII_FORMAT = '{pt1}-{pt2}({pt3}){pt4}-{pt5}'
 
@@ -191,6 +193,12 @@ def get_ahajournals_doi_from_link(url):
     :param url: (str)
     :return: doi or None
     """
+    out = '10.1161/'
+    if 'ahajournals.org' in url:
+        match = re_ahajournals.match(url)
+        if match:
+            return out + match.groupdict()['doi_suffix']
+    return None
 
 
 def get_early_release_doi_from_link(url):
@@ -207,10 +215,10 @@ def get_early_release_doi_from_link(url):
 
     match = re_early_release.match(url)
     if match:
-        if match['hostname'] in HOSTNAME_TO_DOI_PREFIX_MAP.keys():
-            return HOSTNAME_TO_DOI_PREFIX_MAP['hostname'] + '/' + match['doi']
-
-
+        resd = match.groupdict()
+        hostname = resd['hostname'].replace('www.', '')
+        if hostname in HOSTNAME_TO_DOI_PREFIX_MAP.keys():
+            return HOSTNAME_TO_DOI_PREFIX_MAP[hostname] + '/' + resd['doi_suffix']
 
 
 def try_vip_methods(url):
@@ -255,9 +263,11 @@ def get_generic_doi_from_link(url):
     return doi
 
 
+# == DOI search method registry... order matters! don't screw around with it unless you know what you're doing. :) == #
 DOI_METHODS = [get_cell_doi_from_link,
                get_jstage_doi_from_link,
                get_early_release_doi_from_link,
+               get_ahajournals_doi_from_link,
                get_biomedcentral_doi_from_link,
                get_nature_doi_from_link,
                get_sciencedirect_doi_from_link,
