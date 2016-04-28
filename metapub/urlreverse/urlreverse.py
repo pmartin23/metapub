@@ -1,30 +1,41 @@
 from __future__ import absolute_import, unicode_literals
 
 import re
+import six
 
 import requests
 
+#py3k / py2k compatibility
+if six.PY2:
+    from urlparse import urlparse
+else:
+    from urllib.parse import urlparse
+
 from ..text_mining import (find_doi_in_string, get_nature_doi_from_link, 
-                            get_biomedcentral_doi_from_link, findall_dois_in_text)
+                           get_biomedcentral_doi_from_link, findall_dois_in_text)
+from ..pubmedfetcher import PubMedFetcher
+from ..crossref import CrossRef
+from ..convert import doi2pmid, interpret_pmids_for_citation_results
 
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 
-pii_official = '(?P<pii>S\d+-\d+\(\d+\)\d+-\d)'
+pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\d{1})'
 
 re_vip = re.compile('.*?\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)')
 re_pmid = re.compile('.*?\?pmid=(?P<pmid>\d+)')
 re_jstage = re.compile('.*?jstage.jst.go.jp\/article\/(?P<journal_abbrev>.*?)\/(?P<volume>\d+)\/(?P<issue>.*?)\/(?P<info>).*?\/')
-re_sciencedirect_pii_simple = re.compile('.*?(sciencedirect|cell).com\/science\/article\/pii\/(?P<pii>S\d+)')
-re_sciencedirect_pii_official = re.compile('.*?(sciencedirect|cell).com\/science\/article\/pii\/' + pii_official)
-re_jci = re.compile('.*?jci.org\/articles\/view\/(?P<jci_id>\d+)')
-re_karger = re.compile('.*?karger.com\/Article\/(Abstract|Pdf|PDF)\/(?P<kid>\d+)')
+re_sciencedirect_pii_simple = re.compile('.*?(sciencedirect|cell)\.com\/science\/article\/pii\/(?P<pii>S\d+)')
+re_sciencedirect_pii_official = re.compile('.*?(sciencedirect|cell)\.com\/science\/article\/pii\/' + pii_official)
+re_jci = re.compile('.*?jci\.org\/articles\/view\/(?P<jci_id>\d+)')
+re_karger = re.compile('.*?karger\.com\/Article\/(Abstract|Pdf|PDF)\/(?P<kid>\d+)')
 
-re_cell_pii_simple = re.compile('.*?cell.com\/(\w+\/)?(pdf|abstract)\/(?P<pii>S\d+)')
-re_cell_pii_official = re.compile('.*?cell.com\/(\w+\/)?(pdf|abstract)\/' + pii_official)
+re_cell_pii_simple = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract)\/(?P<pii>S\d+)')
+re_cell_pii_official = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract)\/' + pii_official)
 
 OFFICIAL_PII_FORMAT = '{pt1}-{pt2}({pt3}){pt4}-{pt5}'
 
-
+FETCH = PubMedFetcher()
+CRX = CrossRef()
 
 def get_karger_doi_from_link(url):
     """ Karger IDs can be found in the URL after the "PDF" or "Abstract" piece, and used to 
@@ -109,16 +120,18 @@ def get_cell_doi_from_link(url):
     :return: doi or None
     """
     out = '10.1016/'
-    match = re_cell_pii_simple.match(url)
+    match = re_cell_pii_official.match(url)
     if match:
-        pii = OFFICIAL_PII_FORMAT.format(pt1=pii[:5], pt2=pii[5:9], pt3=pii[9:11], pt4=pii[11:16], pt5=pii[16])
+        pii = match.groupdict()['pii']
 
     else:
-        match = re_cell_pii_official.match(url)
+        match = re_cell_pii_simple.match(url)
         if match:
             pii = match.groupdict()['pii']
+            pii = OFFICIAL_PII_FORMAT.format(pt1=pii[:5], pt2=pii[5:9], pt3=pii[9:11], pt4=pii[11:16], pt5=pii[16])
         else:
             return None
+
     return out + pii
 
 
@@ -152,9 +165,11 @@ def try_vip_methods(url):
     :return: dict or None
     """
     match = re_vip.match(url)
+
     if match:
         jrnl = get_journal_name_from_url(url)
         return match.groupdict().update({'format': 'vip', 'jtitle': jrnl})
+
     return None
     
 
@@ -179,13 +194,10 @@ def try_doi_methods(url):
     doi = find_doi_in_string(url)
     if doi:
         # remove common addenda that may have come from the regular expression.
-        for addendum in ['/full', '/asset']:
+        for addendum in ['/full', '/asset', '/pdf', '.pdf']:
             place = doi.find(addendum)
             if place > -1:
                 doi = doi[:place]
-
-        doi = doi.replace('/full', '')
-
     else:
         for method in DOI_METHODS:
             doi = method(url)
@@ -235,29 +247,47 @@ def get_journal_name_from_url(url):
 
 class UrlReverse(object):
 
-    def __init__(self, url):
+    def __init__(self, url, title=None):
         self.url = url
+        self.title = title
 
         self.pmid = None
-        self.doi = find_doi_in_string(self.url)
-
-        self.url_format = None
-
-        self.citation = {'jtitle': None, 'volume': None, 'aulast': None,
-                         'year': None, 'first_page': None,
-                        }
+        self.doi = None
+        self.format = None
 
         if self.doi:
             self.pmid = doi2pmid(self.doi)
         else:
             parts = get_article_info_from_url(url)
-            if parts['format'] == 'pmid':
+            self.format = parts['format']
+
+            if self.format == 'pmid':
                 self.pmid = parts['pmid']
-            elif parts['format'] == 'vip':
-                self.citation['jtitle'] = jrnl
-                self.citation.update(parts)
+            elif self.format == 'vip':
+                self._try_citation_methods(parts)
 
     def to_dict():
         return self.__dict__
 
+    def _try_citation_methods(self, parts):
+        # 1) try pubmed citation match.
+        pmids = FETCH.pmids_for_citation(**parts)
+
+        pmid = interpret_pmids_for_citation_results(pmids)
+        if pmid != 'AMBIGUOUS':
+            self.pmid = pmid
+            return
+
+        #elif len(pmids) > 1:
+            # collect titles from each PMID to feed to CrossRef? dunno if it's worth doing...
+
+        # 2) try CrossRef
+        if self.title:
+            results = CRX.query(self.title, params=parts)
+            if results:
+                top_result = CRX.get_top_result(results, CRX.last_params)
+                pmids = FETCH.pmids_for_citation(**top_result['slugs'])
+                pmid = interpret_pmids_for_citation_results(pmids)
+                if pmid != 'AMBIGUOUS':
+                    self.pmid = pmid
 
