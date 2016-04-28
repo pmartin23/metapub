@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals, print_function
 
 import re
 import six
@@ -233,11 +233,14 @@ def get_article_info_from_url(url):
 
     match = re_pmid.match(url)
     if match:
-        return match.groupdict().update({'format': 'pmid'})
+        outd = match.groupdict()
+        outd['format'] = 'pmid'
+        return outd
 
     vipdict = try_vip_methods(url)
     if vipdict:
-        return vipdict.update({'format': 'vip'})
+        vipdict['format'] = 'vip'
+        return vipdict
 
     return {'format': 'unknown'}
 
@@ -283,6 +286,7 @@ class UrlReverse(object):
 
         pmid = interpret_pmids_for_citation_results(pmids)
         if pmid != 'AMBIGUOUS':
+            # print('got PMID from citation')
             self.pmid = pmid
             return
 
@@ -294,6 +298,7 @@ class UrlReverse(object):
             results = CRX.query(self.title, params=parts)
             if results:
                 top_result = CRX.get_top_result(results, CRX.last_params)
+                # print(top_result)
                 pmids = FETCH.pmids_for_citation(**top_result['slugs'])
                 pmid = interpret_pmids_for_citation_results(pmids)
                 if pmid != 'AMBIGUOUS':
