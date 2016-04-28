@@ -24,7 +24,8 @@ from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 re_vip = re.compile('(?P<hostname>.*?)\/content\/\w+?\/?(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)', re.I)
 
 # PMID in url
-re_pmid = re.compile('.*?\?pmid=(?P<pmid>\d+)', re.I)
+re_pmidlookup = re.compile('.*?\?|&pmid=(?P<pmid>\d+)', re.I)
+re_pubmed_pmid = re.compile('.*?ncbi.nlm.nih.gov\/pubmed\/(?P<pmid>\d+)')
 
 # PMCID in url
 re_pmcid = re.compile('.*?(?P<hostname>ncbi.nlm.nih.gov|europepmc.org)\/.*?(?P<pmcid>PMC\d+)', re.I)
@@ -158,7 +159,7 @@ def get_cell_doi_from_link(url):
 
     if match:
         journal_abbrev = match.groupdict().get('journal_abbrev', None)
-        if journal_abbrev and journal_abbrev in ['cancer-cell', 'molecular-cell']:
+        if journal_abbrev and journal_abbrev in ['cancer-cell', 'current-biology']:
             return _scrape_doi_from_page(url)
 
         return out + pii
@@ -184,6 +185,20 @@ def get_jci_doi_from_link(url):
         return None
 
 
+def get_ahajournals_doi_from_link(url):
+    """ If this is an ahajournals.org journal, we should be able to compose a DOI using the publisher base
+    of 10.1161 and pieces of the URL identifying the article.
+
+    Example:
+        http://circimaging.ahajournals.org/content/suppl/2013/04/02/CIRCIMAGING.112.000333.DC1/000333_Supplemental_Material.pdf
+                --> 10.1161/CIRCIMAGING.112.000333
+
+    :param url: (str)
+    :return: doi or None
+    """
+
+
+
 def try_vip_methods(url):
     """ Many URLs follow the "volume-issue-page" format. If this URL is one of them, this function will return
     a dictionary containing at least the volume, issue, and first_page aspects of this article. The 'jtitle'
@@ -204,15 +219,36 @@ def try_vip_methods(url):
         return vipdict
 
     return None
-    
 
-DOI_METHODS = [get_biomedcentral_doi_from_link, 
+
+def get_generic_doi_from_link(url):
+    """ Covers many publisher URLs such as wiley and springer.
+
+    Examples:
+        http://onlinelibrary.wiley.com/doi/10.1111/j.1582-4934.2011.01476.x/full --> 10.1111/j.1582-4934.2011.01476.x
+        link.springer.com/article/10.1186/1471-2164-7-243 --> 10.1186/1471-2164-7-243
+
+    :param url: (str)
+    :return: doi or None
+    """
+    doi = find_doi_in_string(url)
+    if doi:
+        # remove common addenda that may have come from the regular expression.
+        for addendum in ['/full', '/asset', '/pdf', '.pdf']:
+            place = doi.find(addendum)
+            if place > -1:
+                doi = doi[:place]
+    return doi
+
+
+DOI_METHODS = [get_cell_doi_from_link,
+               get_biomedcentral_doi_from_link,
                get_nature_doi_from_link,
                get_sciencedirect_doi_from_link,
                get_karger_doi_from_link,
                get_jstage_doi_from_link,
-               get_cell_doi_from_link,
-              ]
+               get_generic_doi_from_link,
+               ]
 
 
 def try_doi_methods(url):
@@ -221,20 +257,32 @@ def try_doi_methods(url):
     where the DOI can be parsed directly out of the URL.
 
     :param url: (str)
-    :return: doi or None
+    :return: {'doi': <doi>, 'method': <method>} or None
     """
+    for method in DOI_METHODS:
+        doi = method(url)
+        if doi:
+            return {'doi': doi, 'method': method}
+    return None
 
-    doi = find_doi_in_string(url)
-    if doi:
-        # remove common addenda that may have come from the regular expression.
-        for addendum in ['/full', '/asset', '/pdf', '.pdf']:
-            place = doi.find(addendum)
-            if place > -1:
-                doi = doi[:place]
-    else:
-        for method in DOI_METHODS:
-            doi = method(url)
-    return doi
+
+def try_pmid_methods(url):
+    """ Attempts to get the PMID directly out of the URL.
+
+    Examples:
+        http://www.ncbi.nlm.nih.gov/pubmed/22253870 --> 22253870
+        http://aac.asm.org/cgi/pmidlookup?view=long&pmid=7689822 --> 7689822
+
+    :param url: (str)
+    :return: pmid or None
+    """
+    match = re_pmidlookup.match(url)
+    if match:
+        return match.groupdict()['pmid']
+
+    match = re_pubmed_pmid.match(url)
+    if match:
+        return match.groupdict()['pmid']
 
 
 def get_article_info_from_url(url):
@@ -243,8 +291,9 @@ def get_article_info_from_url(url):
 
     Possible results:
         'vip': volume-issue-page --> {'format': 'vip', 'volume': <V>, 'issue': <I>, 'first_page': <P>, 'jtitle': <jrnl>}
-        'doi': has doi in the url --> {'format': 'doi', 'doi': <DOI>}
+        'doi': has doi in the url --> {'format': 'doi', 'doi': <DOI>, 'method': <get_doi_function>}
         'pmid': has pmid in the url --> {'format': 'pmid', 'pmid': <PMID>}
+        'pmcid': has PMC id in the url --> {'format': 'pmcid': 'pmcid': <PMCID>}
 
     If none of the available methods work to parse the URL, the result dictionary will be:
         {'format': 'unknown'}
@@ -253,15 +302,15 @@ def get_article_info_from_url(url):
     :return: result dictionary (see above)
     """
     # maybe the DOI is deducible from the URL:
-    doi = try_doi_methods(url)
-    if doi:
-        return {'format': 'doi', 'doi': doi}
+    doidict = try_doi_methods(url)
+    if doidict:
+        doidict['format'] = 'doi'
+        return doidict
 
     # maybe the pubmed ID is in the URL:
-    match = re_pmid.match(url)
-    if match:
-        outd = match.groupdict()
-        outd['format'] = 'pmid'
+    pmid = try_pmid_methods(url)
+    if pmid:
+        outd = {'pmid': pmid, 'format': 'pmid'}
         return outd
 
     # maybe the PubmedCentral ID is in the URL:

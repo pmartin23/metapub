@@ -188,6 +188,9 @@ def get_biomedcentral_doi_from_link(link):
     # http://www.biomedcentral.com/1471-2164/14/S1/S11 doi:10.1186/1471-2164-14-S1-S11
     # http://www.biomedcentral.com/1471-230X/11/31 doi:10.1186/1471-230X-11-31
 
+    if 'biomedcentral.com' not in link:
+        return None
+
     # first, try to use the filename
     if '/content/' in link:
         filename = link.split('/')[-1]

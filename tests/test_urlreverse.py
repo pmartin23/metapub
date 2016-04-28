@@ -8,6 +8,11 @@ import unittest
 
 
 # "fixtures"
+pmid_samples = {
+    'http://www.ncbi.nlm.nih.gov/pubmed/22253870': '22253870',
+    'http://aac.asm.org/cgi/pmidlookup?view=long&pmid=7689822': '7689822',
+    }
+
 vip_samples = {
     'http://www.jbc.org/content/266/17/10880.full.pdf': '2040605',
     'http://cardiovascres.oxfordjournals.org/content/75/1/69': '17449018',
@@ -43,6 +48,7 @@ cell_samples = {
     'http://www.cell.com/cancer-cell/pdf/S1535610806002844.pdf': '10.1016/j.ccr.2006.09.010',
     'http://www.cell.com/molecular-cell/abstract/S1097-2765(00)80321-4': '10.1016/S1097-2765(00)80321-4',
     'http://www.cell.com/biophysj/abstract/S0006-3495(15)01407-1': '10.1016/S0006-3495(15)01407-1',
+    'http://www.cell.com/current-biology/fulltext/S0960-9822(16)30170-1': '10.1016/j.cub.2016.03.002',
     }
 
 pmc_samples = {
@@ -79,17 +85,22 @@ class TestUrlReverse(unittest.TestCase):
             urlrev = UrlReverse(url)
             assert urlrev.pmid == pmid
 
-    def test_get_jstage_doi_from_link(self):
-        for url, doi in jstage_samples.items():
-            assert doi == get_jstage_doi_from_link(doi)
+    def test_get_pmids_for_pmid_links(self):
+        for url, pmid in pmid_samples.items():
+            urlrev = UrlReverse(url)
+            assert urlrev.pmid == pmid
+
+    #def test_get_jstage_doi_from_link(self):
+    #    for url, doi in jstage_samples.items():
+    #        assert doi == get_jstage_doi_from_link(doi)
 
     def test_try_doi_methods_for_wiley_samples(self):
         for url, doi in wiley_samples.items():
-            assert doi == try_doi_methods(url)
+            assert doi == try_doi_methods(url)['doi']
 
     def test_try_doi_methods_for_springer_samples(self):
         for url, doi in springer_samples.items():
-            assert doi == try_doi_methods(url)
+            assert doi == try_doi_methods(url)['doi']
 
     def test_get_karger_doi_from_link(self):
         for url, doi in karger_samples.items():
