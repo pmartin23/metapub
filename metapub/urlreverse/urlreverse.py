@@ -33,9 +33,9 @@ re_pmcid = re.compile('.*?(?P<hostname>ncbi.nlm.nih.gov|europepmc.org)\/.*?(?P<p
 pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\d{1})'
 re_sciencedirect_pii_simple = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/(?P<pii>S\d+)', re.I)
 re_sciencedirect_pii_official = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/' + pii_official, re.I)
-re_cell_pii_simple = re.compile('.*?(?P<hostname>cell\.com)\/(?P<journal_abbrev>.*?)\/(pdf|abstract)\/(?P<pii>S\d+)', re.I)
-re_cell_pii_official = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract)\/' + pii_official, re.I)
-re_cell_old_style = re.compile('.*?(?P<hostname>cell\.com)\/(pdf|abstract)\/(?P<pii>\d+)', re.I)
+re_cell_pii_simple = re.compile('.*?(?P<hostname>cell\.com)\/(?P<journal_abbrev>.*?)\/(pdf|abstract|fulltext)\/(?P<pii>S\d+)', re.I)
+re_cell_pii_official = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract|fulltext)\/' + pii_official, re.I)
+re_cell_old_style = re.compile('.*?(?P<hostname>cell\.com)\/(pdf|abstract|fulltext)\/(?P<pii>\d+)', re.I)
 
 # Unique
 re_jstage = re.compile('.*?(?P<hostname>jstage\.jst\.go\.jp)\/article\/(?P<journal_abbrev>.*?)\/(?P<volume>\d+)\/(?P<issue>.*?)\/(?P<info>).*?\/', re.I)
@@ -70,6 +70,15 @@ def get_karger_doi_from_link(url):
         return None
 
 
+def _scrape_doi_from_page(url):
+    response = requests.get(url)
+    dois = findall_dois_in_text(response.text)
+    if dois:
+        return dois[0]
+    else:
+        return None
+
+
 def get_jstage_doi_from_link(url):
     """ Since the jstage urls are composed with some degree of unpredictability with respect to
     what's found in segment that ought to contain the first_page element, we have to load the _article
@@ -82,13 +91,7 @@ def get_jstage_doi_from_link(url):
     if match:
         if url.find('_pdf') > -1:
             url = url.replace('_pdf', '_article')
-
-        response = requests.get(url)
-        dois = findall_dois_in_text(response.text)
-        if dois:
-            return dois[0]
-        else:
-            return None
+        return _scrape_doi_from_page(url)
 
 
 def get_sciencedirect_doi_from_link(url):
@@ -126,6 +129,7 @@ def get_cell_doi_from_link(url):
         http://www.cell.com/pdf/0092867480906212.pdf --> 10.1016/0092-8674(80)90621-2
         http://www.cell.com/cancer-cell/pdf/S1535610806002844.pdf --> 10.1016/j.ccr.2006.09.010
         http://www.cell.com/molecular-cell/abstract/S1097-2765(00)80321-4 --> 10.1016/S1097-2765(00)80321-4
+        http://www.cell.com/current-biology/fulltext/S0960-9822%2816%2930170-1 --> 10.1016/j.cub.2016.03.002
 
     :param url: (str)
     :return: doi or None
@@ -137,21 +141,26 @@ def get_cell_doi_from_link(url):
     match = re_cell_pii_official.match(url)
     if match:
         pii = match.groupdict()['pii']
-        return out + pii
-
-    # Try "simple" (no punctuation) pii formats.
-    match = re_cell_pii_simple.match(url)
-    if match:
-        pii = match.groupdict()['pii']
-        pii = OFFICIAL_PII_FORMAT.format(pt1=pii[:5], pt2=pii[5:9], pt3=pii[9:11], pt4=pii[11:16], pt5=pii[16])
 
     else:
-        match = re_cell_old_style.match(url)
+        # Try "simple" (no punctuation) pii formats.
+        match = re_cell_pii_simple.match(url)
         if match:
             pii = match.groupdict()['pii']
-            pii = OFFICIAL_PII_FORMAT.format(pt1=pii[:4], pt2=pii[4:8], pt3=pii[8:10], pt4=pii[10:15], pt5=pii[15])
+            pii = OFFICIAL_PII_FORMAT.format(pt1=pii[:5], pt2=pii[5:9], pt3=pii[9:11], pt4=pii[11:16], pt5=pii[16])
 
-    if pii:
+        else:
+            # Try "old style" (has no "S" in front).
+            match = re_cell_old_style.match(url)
+            if match:
+                pii = match.groupdict()['pii']
+                pii = OFFICIAL_PII_FORMAT.format(pt1=pii[:4], pt2=pii[4:8], pt3=pii[8:10], pt4=pii[10:15], pt5=pii[15])
+
+    if match:
+        journal_abbrev = match.groupdict().get('journal_abbrev', None)
+        if journal_abbrev and journal_abbrev in ['cancer-cell', 'molecular-cell']:
+            return _scrape_doi_from_page(url)
+
         return out + pii
 
     return None
