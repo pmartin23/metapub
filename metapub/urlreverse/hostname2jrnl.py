@@ -106,6 +106,8 @@ HOSTNAME_TO_JOURNAL_MAP = {
 		'emboj.embopress.org': 'EMBO J',
 		'ajpcell.physiology.org': 'Am J Physiol, Cell Physiol',
 		'joe.endocrinology-journals.org': 'J Endocrinol',
+		'bmj.com': 'BMJ',
+		'bloodjournal.org': 'Blood',
 		'jmd.amjpathol.org': 'J Mol Diagn',
 		'heartrhythmjournal.com': 'Heart Rhythm',
 		'ajconline.org': 'Am J Cardiol',

@@ -28,6 +28,11 @@ def write_one_mapping(hostname, jrnl):
 for jrnl, value in misc_vip.vip_journals.items():
     write_one_mapping(value['host'], jrnl)
 
+# Nonstandard VIP format
+for jrnl, url in misc_vip.vip_journals_nonstandard.items():
+    hostname = urlparse(url).hostname
+    write_one_mapping(hostname, jrnl)
+
 # PII based
 for jrnl, url in misc_pii.simple_formats_pii.items():
     hostname = urlparse(url).hostname
