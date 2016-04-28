@@ -15,27 +15,32 @@ from ..text_mining import (find_doi_in_string, get_nature_doi_from_link,
                            get_biomedcentral_doi_from_link, findall_dois_in_text)
 from ..pubmedfetcher import PubMedFetcher
 from ..crossref import CrossRef
-from ..convert import doi2pmid, interpret_pmids_for_citation_results
+from ..convert import doi2pmid, pmid2doi, interpret_pmids_for_citation_results
+from ..pubmedcentral import get_pmid_for_otherid
 
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 
 # VIP (volume-issue-page)
-re_vip = re.compile('.*?\/content\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)')
+re_vip = re.compile('(?P<hostname>.*?)\/content\/\w+?\/?(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)', re.I)
 
 # PMID in url
-re_pmid = re.compile('.*?\?pmid=(?P<pmid>\d+)')
+re_pmid = re.compile('.*?\?pmid=(?P<pmid>\d+)', re.I)
+
+# PMCID in url
+re_pmcid = re.compile('.*?(?P<hostname>ncbi.nlm.nih.gov|europepmc.org)\/.*?(?P<pmcid>PMC\d+)', re.I)
 
 # PII
 pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\d{1})'
-re_sciencedirect_pii_simple = re.compile('.*?(sciencedirect|cell)\.com\/science\/article\/pii\/(?P<pii>S\d+)')
-re_sciencedirect_pii_official = re.compile('.*?(sciencedirect|cell)\.com\/science\/article\/pii\/' + pii_official)
-re_cell_pii_simple = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract)\/(?P<pii>S\d+)')
-re_cell_pii_official = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract)\/' + pii_official)
+re_sciencedirect_pii_simple = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/(?P<pii>S\d+)', re.I)
+re_sciencedirect_pii_official = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/' + pii_official, re.I)
+re_cell_pii_simple = re.compile('.*?(?P<hostname>cell\.com)\/(?P<journal_abbrev>.*?)\/(pdf|abstract)\/(?P<pii>S\d+)', re.I)
+re_cell_pii_official = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract)\/' + pii_official, re.I)
+re_cell_old_style = re.compile('.*?(?P<hostname>cell\.com)\/(pdf|abstract)\/(?P<pii>\d+)', re.I)
 
 # Unique
-re_jstage = re.compile('.*?jstage.jst.go.jp\/article\/(?P<journal_abbrev>.*?)\/(?P<volume>\d+)\/(?P<issue>.*?)\/(?P<info>).*?\/')
-re_jci = re.compile('.*?jci\.org\/articles\/view\/(?P<jci_id>\d+)')
-re_karger = re.compile('.*?karger\.com\/Article\/(Abstract|Pdf|PDF)\/(?P<kid>\d+)')
+re_jstage = re.compile('.*?(?P<hostname>jstage\.jst\.go\.jp)\/article\/(?P<journal_abbrev>.*?)\/(?P<volume>\d+)\/(?P<issue>.*?)\/(?P<info>).*?\/', re.I)
+re_jci = re.compile('.*?(?P<hostname>jci\.org)\/articles\/view\/(?P<jci_id>\d+)', re.I)
+re_karger = re.compile('.*?(?P<hostname>karger\.com)\/Article\/(Abstract|Pdf)\/(?P<kid>\d+)', re.I)
 
 OFFICIAL_PII_FORMAT = '{pt1}-{pt2}({pt3}){pt4}-{pt5}'
 
@@ -126,19 +131,30 @@ def get_cell_doi_from_link(url):
     :return: doi or None
     """
     out = '10.1016/'
+    pii = ''
+
+    # Try "official" pii format first
     match = re_cell_pii_official.match(url)
     if match:
         pii = match.groupdict()['pii']
+        return out + pii
+
+    # Try "simple" (no punctuation) pii formats.
+    match = re_cell_pii_simple.match(url)
+    if match:
+        pii = match.groupdict()['pii']
+        pii = OFFICIAL_PII_FORMAT.format(pt1=pii[:5], pt2=pii[5:9], pt3=pii[9:11], pt4=pii[11:16], pt5=pii[16])
 
     else:
-        match = re_cell_pii_simple.match(url)
+        match = re_cell_old_style.match(url)
         if match:
             pii = match.groupdict()['pii']
-            pii = OFFICIAL_PII_FORMAT.format(pt1=pii[:5], pt2=pii[5:9], pt3=pii[9:11], pt4=pii[11:16], pt5=pii[16])
-        else:
-            return None
+            pii = OFFICIAL_PII_FORMAT.format(pt1=pii[:4], pt2=pii[4:8], pt3=pii[8:10], pt4=pii[10:15], pt5=pii[15])
 
-    return out + pii
+    if pii:
+        return out + pii
+
+    return None
 
 
 def get_jci_doi_from_link(url):
@@ -241,7 +257,11 @@ def get_article_info_from_url(url):
 
     # maybe the PubmedCentral ID is in the URL:
     #if 'nih.gov' in url or 'europepmc.org' in url:
-    #   match = re_
+    match = re_pmcid.match(url)
+    if match:
+        outd = match.groupdict()
+        outd['format'] = 'pmcid'
+        return outd
 
     # maybe this is a volume-issue-page formatted link and we can look it up by citation or CrossRef:
     vipdict = try_vip_methods(url)
@@ -256,7 +276,7 @@ def get_journal_name_from_url(url):
 
     if not url.startswith('http'):
         url = 'http://' + url
-    
+
     hostname = urlparse(url).hostname
     if hostname.startswith('www'):
         hostname = hostname.replace('www.', '')
@@ -269,49 +289,53 @@ def get_journal_name_from_url(url):
 
 class UrlReverse(object):
 
-    def __init__(self, url, title=None):
+    def __init__(self, url, title=''):
         self.url = url
         self.title = title
 
         self.pmid = None
         self.doi = None
-        self.format = None
 
-        if self.doi:
+        self.info = get_article_info_from_url(url)
+        self.format = self.info['format']
+
+        if self.format == 'pmid':
+            self.pmid = self.info['pmid']
+            self.doi = pmid2doi(self.pmid)
+
+        elif self.format == 'doi':
+            self.doi = self.info['doi']
             self.pmid = doi2pmid(self.doi)
-        else:
-            parts = get_article_info_from_url(url)
-            self.format = parts['format']
 
-            if self.format == 'pmid':
-                self.pmid = parts['pmid']
-            elif self.format == 'vip':
-                self._try_citation_methods(parts)
+        elif self.format == 'vip':
+            self._try_citation_methods()
+
+        elif self.format == 'pmcid':
+            self.pmid = get_pmid_for_otherid(self.info['pmcid'])
+            self.doi = doi2pmid(self.pmid)
 
     def to_dict(self):
         return self.__dict__
 
-    def _try_citation_methods(self, parts):
+    def _try_citation_methods(self):
         # 1) try pubmed citation match.
-        pmids = FETCH.pmids_for_citation(**parts)
-
+        pmids = FETCH.pmids_for_citation(**self.info)
         pmid = interpret_pmids_for_citation_results(pmids)
-        if pmid != 'AMBIGUOUS':
+        if pmid and pmid != 'AMBIGUOUS':
             # print('got PMID from citation')
             self.pmid = pmid
+            self.doi = pmid2doi(pmid)
             return
 
-        #elif len(pmids) > 1:
-            # collect titles from each PMID to feed to CrossRef? dunno if it's worth doing...
+        # 2) try CrossRef -- most effective when title available, but may work without it.
+        results = CRX.query(self.title, params=self.info)
+        if results:
+            top_result = CRX.get_top_result(results, CRX.last_params)
 
-        # 2) try CrossRef
-        if self.title:
-            results = CRX.query(self.title, params=parts)
-            if results:
-                top_result = CRX.get_top_result(results, CRX.last_params)
-                # print(top_result)
-                pmids = FETCH.pmids_for_citation(**top_result['slugs'])
-                pmid = interpret_pmids_for_citation_results(pmids)
-                if pmid != 'AMBIGUOUS':
-                    self.pmid = pmid
-
+        # we may have disqualified all the results at this point as being irrelevant, so we have to test here.
+        if top_result:
+            pmids = FETCH.pmids_for_citation(**top_result['slugs'])
+            pmid = interpret_pmids_for_citation_results(pmids)
+            if pmid and pmid != 'AMBIGUOUS':
+                self.pmid = pmid
+                self.doi = find_doi_in_string(top_result['doi'])

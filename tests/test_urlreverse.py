@@ -9,9 +9,10 @@ import unittest
 
 # "fixtures"
 vip_samples = {
-    'http://www.jbc.org/content/266/17/10880.full.pdf': 'INSERT',
-    'http://cardiovascres.oxfordjournals.org/content/75/1/69': 'INSERT',
-    'http://www.jbc.org/content/285/5/3076.full': 'INSERT',
+    'http://www.jbc.org/content/266/17/10880.full.pdf': '2040605',
+    'http://cardiovascres.oxfordjournals.org/content/75/1/69': '17449018',
+    'http://www.jbc.org/content/285/5/3076.full': '19920148',
+    'http://www.bloodjournal.org/content/127/16/1967.full.pdf': '26932803', 
     }
 
 jstage_samples = { 
@@ -44,10 +45,13 @@ cell_samples = {
     'http://www.cell.com/biophysj/abstract/S0006-3495(15)01407-1': '10.1016/S0006-3495(15)01407-1',
     }
 
-europepmc_samples = {
+pmc_samples = {
     'http://europepmc.org/articles/pmc4103182': '24070655',
     'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC3296117&blobtype=pdf': '21801150',
     'europepmc.org/articles/PMC360379/pdf/molcellb00133-0293.pdf': '1406642',
+    'http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4382744/': '25833843',
+    'http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3256213/': '22253870',
+    'http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3256213/pdf/pone.0030042.pdf': '22253870',
     }
 
 jci_samples = {
@@ -69,6 +73,11 @@ class TestUrlReverse(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def test_get_pmids_for_pmc_links(self):
+        for url, pmid in pmc_samples.items():
+            urlrev = UrlReverse(url)
+            assert urlrev.pmid == pmid
 
     def test_get_jstage_doi_from_link(self):
         for url, doi in jstage_samples.items():
@@ -94,4 +103,8 @@ class TestUrlReverse(unittest.TestCase):
         for url, doi in cell_samples.items():
             assert doi == get_cell_doi_from_link(url)
 
+    def test_get_vip_url_with_supplied_title(self):
+        url = 'http://www.clinsci.org/content/ppclinsci/130/11/871'
+        expected_doi = '10.1042/CS20150777',
+        urlrev = UrlReverse(url, title='High-fat diet increases O-GlcNAc levels in cerebral arteries')
 
