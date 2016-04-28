@@ -89,6 +89,12 @@ class TestFindDOIs(unittest.TestCase):
         doi = get_nature_doi_from_link('http://www.nature.com/articles/ng.2223')
         assert doi == '10.1038/ng.2223'
 
+        doi = get_nature_doi_from_link('http://www.nature.com/pr/journal/v49/n1/abs/pr200116a.html')
+        assert doi == '10.1203/00006450-200101000-00016'
+
+        #doi = get_nature_doi_from_link('http://www.nature.com/pr/journal/v49/n1/full/pr200126a.pdf')
+        #assert doi == '10.1203/00006450-200102000-00001'
+
     def test_get_biomedcentral_doi_from_link(self):
         doi = get_biomedcentral_doi_from_link('http://www.biomedcentral.com/content/pdf/bcr1282.pdf')
         assert doi == '10.1186/bcr1282'

@@ -21,10 +21,10 @@ from ..pubmedcentral import get_pmid_for_otherid
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 
 # VIP (volume-issue-page)
-re_vip = re.compile('(?P<hostname>.*?)\/content\/\w+?\/?(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)', re.I)
+re_vip = re.compile('(?P<hostname>.*?)\/content(\/\w+)?\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)', re.I)
 
 # PMID in url
-re_pmidlookup = re.compile('.*?\?|&pmid=(?P<pmid>\d+)', re.I)
+re_pmidlookup = re.compile('.*?(\?|&)pmid=(?P<pmid>\d+)', re.I)
 re_pubmed_pmid = re.compile('.*?ncbi.nlm.nih.gov\/pubmed\/(?P<pmid>\d+)')
 
 # PMCID in url
@@ -359,7 +359,7 @@ class UrlReverse(object):
 
         if self.format == 'pmid':
             self.pmid = self.info['pmid']
-            self.doi = pmid2doi(self.pmid)
+            #self.doi = pmid2doi(self.pmid)
 
         elif self.format == 'doi':
             self.doi = self.info['doi']

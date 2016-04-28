@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import re
 
+import requests
+
 try:
     from urlparse import urlparse
 except ImportError:
@@ -93,6 +95,9 @@ def get_nature_doi_from_link(link):
 
     For example, http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx
 
+    A very different example (notice DOI result) from the Pediatric Research journal:
+        http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
+
     :param link: the URL
     :return: a string containing a DOI, if one was resolved, or None
     """
@@ -106,7 +111,12 @@ def get_nature_doi_from_link(link):
     # example: link:http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx
     #          doi:10.1038/modpathol.2014.160
     style2journals = ['aps', 'bjc', 'cddis', 'cr', 'ejhg', 'gim', 'jcbfm', 'jhg', 'jid', 'labinvest', 'leu',
-                      'modpathol', 'mp', 'onc', 'oncsis', 'pr']
+                      'modpathol', 'mp', 'onc', 'oncsis']
+
+
+    # Needs to have its page loaded and doi scraped.
+    # example: http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
+    style3journals = ['pr']
 
     match = re.search(r'nature.com/[a-zA-z]+/', link)
 
@@ -120,6 +130,16 @@ def get_nature_doi_from_link(link):
     # Example: http://www.nature.com/neuro/journal/v13/n11/abs/nn.2662.html
     if journal_abbrev == 'neuro':
         journal_abbrev = 'nn'
+
+    # dois for style3journals don't seem to be deducible from their URLs.
+    if journal_abbrev in style3journals:
+        link = link.replace('.pdf', '.html')
+        response = requests.get(link)
+        if response.ok:
+            dois = findall_dois_in_text(response.text)
+            if dois:
+                return dois[0]
+        return None
 
     match = re.search(r'%s\.{0,1}\d+' % journal_abbrev, link)
     if match:

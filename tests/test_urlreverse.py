@@ -11,6 +11,7 @@ import unittest
 pmid_samples = {
     'http://www.ncbi.nlm.nih.gov/pubmed/22253870': '22253870',
     'http://aac.asm.org/cgi/pmidlookup?view=long&pmid=7689822': '7689822',
+    'http://science.sciencemag.org/lookup/pmidlookup?view=long&pmid=25143362.pdf': '25143362',
     }
 
 vip_samples = {
@@ -18,6 +19,8 @@ vip_samples = {
     'http://cardiovascres.oxfordjournals.org/content/75/1/69': '17449018',
     'http://www.jbc.org/content/285/5/3076.full': '19920148',
     'http://www.bloodjournal.org/content/127/16/1967.full.pdf': '26932803', 
+    'https://hmg.oxfordjournals.org/content/20/10/2048.full.pdf': '21378393',
+    'http://jnci.oxfordjournals.org/content/100/4/277': '18270343',
     }
 
 jstage_samples = { 
@@ -72,6 +75,10 @@ springer_samples = {
     'http://link.springer.com/content/pdf/10.1007/s004390000422.pdf': '10.1007/s004390000422',
     }
 
+tough_cases = {
+    'http://www.nature.com/pr/journal/v49/n2/full/pr200126a.html': '10.1203/00006450-200102000-00001',
+    }
+
 class TestUrlReverse(unittest.TestCase):
 
     def setUp(self):
@@ -118,4 +125,9 @@ class TestUrlReverse(unittest.TestCase):
         url = 'http://www.clinsci.org/content/ppclinsci/130/11/871'
         expected_doi = '10.1042/CS20150777',
         urlrev = UrlReverse(url, title='High-fat diet increases O-GlcNAc levels in cerebral arteries')
+
+    def test_urlreverse_on_tough_cases(self):
+        for url, doi in tough_cases.items():
+            urlrev = UrlReverse(url)
+            assert urlrev.doi == doi
 
