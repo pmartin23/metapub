@@ -227,16 +227,23 @@ def get_article_info_from_url(url):
     :param url:
     :return: result dictionary (see above)
     """
+    # maybe the DOI is deducible from the URL:
     doi = try_doi_methods(url)
     if doi:
         return {'format': 'doi', 'doi': doi}
 
+    # maybe the pubmed ID is in the URL:
     match = re_pmid.match(url)
     if match:
         outd = match.groupdict()
         outd['format'] = 'pmid'
         return outd
 
+    # maybe the PubmedCentral ID is in the URL:
+    #if 'nih.gov' in url or 'europepmc.org' in url:
+    #   match = re_
+
+    # maybe this is a volume-issue-page formatted link and we can look it up by citation or CrossRef:
     vipdict = try_vip_methods(url)
     if vipdict:
         vipdict['format'] = 'vip'
@@ -246,6 +253,10 @@ def get_article_info_from_url(url):
 
 
 def get_journal_name_from_url(url):
+
+    if not url.startswith('http'):
+        url = 'http://' + url
+    
     hostname = urlparse(url).hostname
     if hostname.startswith('www'):
         hostname = hostname.replace('www.', '')
