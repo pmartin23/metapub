@@ -208,6 +208,7 @@ def get_early_release_doi_from_link(url):
         http://cancerres.aacrjournals.org/content/early/2015/12/30/0008-5472.CAN-15-0295.full.pdf --> 10.1158/0008-5472.CAN-15-0295
         http://ajcn.nutrition.org/content/early/2016/04/20/ajcn.115.123752.abstract --> 10.3945/ajcn.115.123752
         http://www.mcponline.org/content/early/2016/04/25/mcp.O115.055467.full.pdf+html --> 10.1074/mcp.O115.055467
+        http://nar.oxfordjournals.org/content/early/2013/11/21/nar.gkt1163.full.pdf -->
 
     :param url: (str)
     :return: doi or None
@@ -217,14 +218,20 @@ def get_early_release_doi_from_link(url):
     if match:
         resd = match.groupdict()
         hostname = resd['hostname'].replace('www.', '')
+        root_domain = '.'.join(resd['hostname'].split('.')[-2:])
+
+        # special treatment for oxfordjournals.org
+        if root_domain in 'oxfordjournals.org':
+            doi_pt1, doi_pt2 = resd['doi_suffix'].split('.', 2)
+            doi_suffix = '%s/%s' % (doi_pt1, doi_pt2)
+            return HOSTNAME_TO_DOI_PREFIX_MAP['*.oxfordjournals.org'] + '/' + doi_suffix
+
         if hostname in HOSTNAME_TO_DOI_PREFIX_MAP.keys():
             return HOSTNAME_TO_DOI_PREFIX_MAP[hostname] + '/' + resd['doi_suffix']
 
-        elif len(hostname.split('.')) > 2:
+        elif '*.%s' % root_domain in HOSTNAME_TO_DOI_PREFIX_MAP.keys():
             # create a "wildcard" subdomain lookup in case that's an option in the hostname-doi map.
-            hostname = '*.' + '.'.join(hostname.split('.')[-2:])
-            if hostname in HOSTNAME_TO_DOI_PREFIX_MAP.keys():
-                return HOSTNAME_TO_DOI_PREFIX_MAP[hostname] + '/' + resd['doi_suffix']
+            return HOSTNAME_TO_DOI_PREFIX_MAP['*.%s' % root_domain] + '/' + resd['doi_suffix']
 
 
 def try_vip_methods(url):
