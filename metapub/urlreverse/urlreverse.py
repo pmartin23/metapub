@@ -220,6 +220,12 @@ def get_early_release_doi_from_link(url):
         if hostname in HOSTNAME_TO_DOI_PREFIX_MAP.keys():
             return HOSTNAME_TO_DOI_PREFIX_MAP[hostname] + '/' + resd['doi_suffix']
 
+        elif len(hostname.split('.')) > 2:
+            # create a "wildcard" subdomain lookup in case that's an option in the hostname-doi map.
+            hostname = '*.' + '.'.join(hostname.split('.')[-2:])
+            if hostname in HOSTNAME_TO_DOI_PREFIX_MAP.keys():
+                return HOSTNAME_TO_DOI_PREFIX_MAP[hostname] + '/' + resd['doi_suffix']
+
 
 def try_vip_methods(url):
     """ Many URLs follow the "volume-issue-page" format. If this URL is one of them, this function will return
