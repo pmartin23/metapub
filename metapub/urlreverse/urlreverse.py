@@ -1,22 +1,18 @@
 from __future__ import absolute_import, unicode_literals, print_function
 
 import re
-import six
 
 import requests
 
-#py3k / py2k compatibility
-if six.PY2:
-    from urlparse import urlparse
-else:
-    from urllib.parse import urlparse
-
 from ..text_mining import (find_doi_in_string, get_nature_doi_from_link, scrape_doi_from_article_page,
                            get_biomedcentral_doi_from_link)
+from ..pubmedcentral import get_pmid_for_otherid
 from ..pubmedfetcher import PubMedFetcher
 from ..crossref import CrossRef
+from ..dx_doi import DxDOI
 from ..convert import doi2pmid, pmid2doi, interpret_pmids_for_citation_results
-from ..pubmedcentral import get_pmid_for_otherid
+from ..exceptions import MetaPubError
+from ..utils import kpick, hostname_of, rootdomain_of
 
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 from .hostname2doiprefix import HOSTNAME_TO_DOI_PREFIX_MAP
@@ -53,6 +49,7 @@ OFFICIAL_PII_FORMAT = '{pt1}-{pt2}({pt3}){pt4}-{pt5}'
 
 FETCH = PubMedFetcher()
 CRX = CrossRef()
+DXDOI = DxDOI()
 
 
 def get_karger_doi_from_link(url):
@@ -216,8 +213,8 @@ def get_early_release_doi_from_link(url):
     match = re_early_release.match(url)
     if match:
         resd = match.groupdict()
-        hostname = resd['hostname'].replace('www.', '')
-        root_domain = '.'.join(resd['hostname'].split('.')[-2:])
+        hostname = hostname_of(resd['hostname'])
+        root_domain = rootdomain_of(hostname)
 
         # special treatment for oxfordjournals.org
         if root_domain in 'oxfordjournals.org':
@@ -372,9 +369,7 @@ def get_journal_name_from_url(url):
     if not url.startswith('http'):
         url = 'http://' + url
 
-    hostname = urlparse(url).hostname
-    if hostname.startswith('www'):
-        hostname = hostname.replace('www.', '')
+    hostname = hostname_of(url)
 
     if hostname in HOSTNAME_TO_JOURNAL_MAP.keys():
         return HOSTNAME_TO_JOURNAL_MAP[hostname]
@@ -384,9 +379,16 @@ def get_journal_name_from_url(url):
 
 class UrlReverse(object):
 
-    def __init__(self, url, title=''):
+    def __init__(self, url, verify=True, **kwargs):
         self.url = url
-        self.title = title
+        self.reason = None
+
+        self.known_info = {'title': kwargs.get('title', None),
+                           'jtitle': kpick(kwargs, ['jtitle', 'journal', 'TA'], None),
+                           'aulast': kpick(kwargs, ['author1_last_fm', 'aulast'], None),
+                           'volume': kwargs.get('volume', None),
+                           'issue': kwargs.get('issue', None),
+                           }
 
         self.pmid = None
         self.doi = None
@@ -408,6 +410,15 @@ class UrlReverse(object):
         elif self.format == 'pmcid':
             self.pmid = get_pmid_for_otherid(self.info['pmcid'])
             self.doi = doi2pmid(self.pmid)
+
+        if verify and self.doi:
+            try:
+                # reasonable to test against more than just hostname?
+                urlres = DXDOI.resolve(self.url)
+                if not hostname_of(self.url) == hostname_of(urlres):
+                    raise MetaPubError('Mismatched hostname from inferred DOI %s (url: %s -- dx.doi.org lookup: %s)' % (self.doi, self.url, urlres))
+            except DxDOIError:
+                self.doi = None
 
     def to_dict(self):
         return self.__dict__
