@@ -28,7 +28,7 @@ early_samples = {
     'http://ajcn.nutrition.org/content/early/2016/04/20/ajcn.115.123752.abstract': '10.3945/ajcn.115.123752',
     'http://www.mcponline.org/content/early/2016/04/25/mcp.O115.055467.full.pdf+html': '10.1074/mcp.O115.055467',
     'http://www.jbc.org/content/early/2001/01/08/jbc.M011064200.full.pdf': '10.1074/jbc.M011064200',
-    'http://nar.oxfordjournals.org/content/early/2013/11/21/nar.gkt1163.full.pdf': '10.1093/nar.gkt1163',
+    'http://nar.oxfordjournals.org/content/early/2013/11/21/nar.gkt1163.full.pdf': '10.1093/nar/gkt1163',
     }
 
 jstage_samples = { 
@@ -55,7 +55,8 @@ ahajournals_samples = {
     }
 
 sciencedirect_samples = {
-    
+    'http://www.sciencedirect.com/science/article/pii/S1386142500004509': '10.1016/S1386-1425(00)00450-9',
+    'http://www.sciencedirect.com/science/article/pii/S131901641000071X': '10.1016/j.jsps.2010.07.008',
     }
 
 cell_samples = {

@@ -1,9 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 
-# CrossRef publisher -> DOI prefixes:  http://www.crossref.org/06members/50go-live.html
-# independent CSV map of same (3 years ago): https://gist.github.com/hubgit/5974843
-
 HOSTNAME_TO_JOURNAL_MAP = {
 		'molbiolcell.org': 'Mol Biol Cell',
 		'ndt.oxfordjournals.org': 'Nephrol Dial Transplant',

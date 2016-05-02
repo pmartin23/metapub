@@ -203,7 +203,6 @@ def get_ahajournals_doi_from_link(url):
 
 def get_early_release_doi_from_link(url):
     """
-
     Examples:
         http://cancerres.aacrjournals.org/content/early/2015/12/30/0008-5472.CAN-15-0295.full.pdf --> 10.1158/0008-5472.CAN-15-0295
         http://ajcn.nutrition.org/content/early/2016/04/20/ajcn.115.123752.abstract --> 10.3945/ajcn.115.123752
