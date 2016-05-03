@@ -11,7 +11,7 @@ from ..pubmedfetcher import PubMedFetcher
 from ..crossref import CrossRef
 from ..dx_doi import DxDOI
 from ..convert import doi2pmid, pmid2doi, interpret_pmids_for_citation_results
-from ..exceptions import MetaPubError
+from ..exceptions import MetaPubError, DxDOIError, BadDOI
 from ..utils import kpick, hostname_of, rootdomain_of
 
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
@@ -43,7 +43,8 @@ re_karger = re.compile('.*?(?P<hostname>karger\.com)\/Article\/(Abstract|Pdf)\/(
 re_ahajournals = re.compile('\/(?P<doi_suffix>[a-z0-9]+\.\d+\.\d+\.[a-z0-9]+)', re.I)
 
 # Early release formats
-re_early_release = re.compile('((http|https)(:\/\/))(?P<hostname>.*?)\/content\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract)')
+#re_early_release = re.compile('((http|https)(:\/\/))(?P<hostname>.*?)\/content\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract)?')
+re_early_release = re.compile('((http|https)(:\/\/))(?P<hostname>.*?)\/content\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract|$)')
 
 OFFICIAL_PII_FORMAT = '{pt1}-{pt2}({pt3}){pt4}-{pt5}'
 
@@ -204,7 +205,8 @@ def get_early_release_doi_from_link(url):
         http://cancerres.aacrjournals.org/content/early/2015/12/30/0008-5472.CAN-15-0295.full.pdf --> 10.1158/0008-5472.CAN-15-0295
         http://ajcn.nutrition.org/content/early/2016/04/20/ajcn.115.123752.abstract --> 10.3945/ajcn.115.123752
         http://www.mcponline.org/content/early/2016/04/25/mcp.O115.055467.full.pdf+html --> 10.1074/mcp.O115.055467
-        http://nar.oxfordjournals.org/content/early/2013/11/21/nar.gkt1163.full.pdf -->
+        http://nar.oxfordjournals.org/content/early/2013/11/21/nar.gkt1163.full.pdf --> 10.1093/nar/gkt1163
+        http://jmg.bmj.com/content/early/2008/07/08/jmg.2008.058297 --> 10.1136/jmg.2008.058297
 
     :param url: (str)
     :return: doi or None
@@ -383,12 +385,12 @@ class UrlReverse(object):
         self.url = url
         self.reason = None
 
-        self.known_info = {'title': kwargs.get('title', None),
-                           'jtitle': kpick(kwargs, ['jtitle', 'journal', 'TA'], None),
-                           'aulast': kpick(kwargs, ['author1_last_fm', 'aulast'], None),
-                           'volume': kwargs.get('volume', None),
-                           'issue': kwargs.get('issue', None),
-                           }
+        self.supplied_info = {'title': kwargs.get('title', None),
+                              'jtitle': kpick(kwargs, ['jtitle', 'journal', 'TA'], None),
+                              'aulast': kpick(kwargs, ['author1_last_fm', 'aulast'], None),
+                              'volume': kwargs.get('volume', None),
+                              'issue': kwargs.get('issue', None),
+                              }
 
         self.pmid = None
         self.doi = None
@@ -414,10 +416,10 @@ class UrlReverse(object):
         if verify and self.doi:
             try:
                 # reasonable to test against more than just hostname?
-                urlres = DXDOI.resolve(self.url)
+                urlres = DXDOI.resolve(self.doi)
                 if not hostname_of(self.url) == hostname_of(urlres):
                     raise MetaPubError('Mismatched hostname from inferred DOI %s (url: %s -- dx.doi.org lookup: %s)' % (self.doi, self.url, urlres))
-            except DxDOIError:
+            except (DxDOIError, BadDOI) as error:
                 self.doi = None
 
     def to_dict(self):
@@ -434,7 +436,8 @@ class UrlReverse(object):
             return
 
         # 2) try CrossRef -- most effective when title available, but may work without it.
-        results = CRX.query(self.title, params=self.info)
+        title = self.supplied_info['title'] or ''
+        results = CRX.query(title, params=self.info)
         if results:
             top_result = CRX.get_top_result(results, CRX.last_params)
 
@@ -445,3 +448,4 @@ class UrlReverse(object):
             if pmid and pmid != 'AMBIGUOUS':
                 self.pmid = pmid
                 self.doi = find_doi_in_string(top_result['doi'])
+

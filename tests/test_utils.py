@@ -36,5 +36,5 @@ class TestUtils(unittest.TestCase):
 
     def test_rootdomain_of(self):
         for sample, result in list(ROOTDOMAIN_SAMPLES.items()):
-            assert hostname_of(sample) == result
+            assert rootdomain_of(sample) == result
 

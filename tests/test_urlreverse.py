@@ -29,6 +29,7 @@ early_samples = {
     'http://www.mcponline.org/content/early/2016/04/25/mcp.O115.055467.full.pdf+html': '10.1074/mcp.O115.055467',
     'http://www.jbc.org/content/early/2001/01/08/jbc.M011064200.full.pdf': '10.1074/jbc.M011064200',
     'http://nar.oxfordjournals.org/content/early/2013/11/21/nar.gkt1163.full.pdf': '10.1093/nar/gkt1163',
+    'http://jmg.bmj.com/content/early/2008/07/08/jmg.2008.058297': '10.1136/jmg.2008.058297',
     }
 
 jstage_samples = { 
