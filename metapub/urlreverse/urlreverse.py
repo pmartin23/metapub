@@ -413,14 +413,14 @@ class UrlReverse(object):
             self.pmid = get_pmid_for_otherid(self.info['pmcid'])
             self.doi = doi2pmid(self.pmid)
 
-        if verify and self.doi:
-            try:
+        #if verify and self.doi:
+        #    try:
                 # reasonable to test against more than just hostname?
-                urlres = DXDOI.resolve(self.doi)
-                if not hostname_of(self.url) == hostname_of(urlres):
-                    raise MetaPubError('Mismatched hostname from inferred DOI %s (url: %s -- dx.doi.org lookup: %s)' % (self.doi, self.url, urlres))
-            except (DxDOIError, BadDOI) as error:
-                self.doi = None
+        #        urlres = DXDOI.resolve(self.doi)
+        #        if not hostname_of(self.url) == hostname_of(urlres):
+        #            raise MetaPubError('Mismatched hostname from inferred DOI %s (url: %s -- dx.doi.org lookup: %s)' % (self.doi, self.url, urlres))
+        #    except (DxDOIError, BadDOI) as error:
+        #        self.doi = None
 
     def to_dict(self):
         return self.__dict__
