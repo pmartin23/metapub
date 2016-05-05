@@ -407,7 +407,10 @@ class UrlReverse(object):
             self.pmid = doi2pmid(self.doi)
 
         elif self.format == 'vip':
-            self._try_citation_methods()
+            try:
+                self._try_citation_methods()
+            except MetaPubError as error:
+                self.pmid = None
 
         elif self.format == 'pmcid':
             self.pmid = get_pmid_for_otherid(self.info['pmcid'])
