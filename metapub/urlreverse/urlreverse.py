@@ -53,6 +53,24 @@ CRX = CrossRef()
 DXDOI = DxDOI()
 
 
+re_pnas_supplement = re.compile('.*?pnas.org\/content\/suppl\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<ident>.*?)\/', re.I)
+
+def get_pnas_doi_from_link(url):
+    """ PNAS (proceedings of the national academy of sciences of the USA)
+
+    Examples:
+        http://www.pnas.org/content/suppl/2013/07/08/1305207110.DCSupplemental/sapp.pdf --> 10.1073/pnas.1305207110
+
+    :param url: (str)
+    :return: doi (str) or None
+    """
+    out = '10.1073/pnas.'
+    match = re_pnas_supplement.match(url)
+    if match:
+        doi_suffix = match.groupdict()['ident'].split('.')[0]
+        return out + doi_suffix 
+
+
 def get_spandidos_doi_from_link(url):
     """ Spandidos urls follow several different conventions and their website seems to be undergoing
     some changes recently. For now, let's just scrape the page for the first available DOI.
@@ -146,6 +164,12 @@ def get_cell_doi_from_link(url):
         http://www.cell.com/molecular-cell/abstract/S1097-2765(00)80321-4 --> 10.1016/S1097-2765(00)80321-4
         http://www.cell.com/current-biology/fulltext/S0960-9822%2816%2930170-1 --> 10.1016/j.cub.2016.03.002
         http://www.cell.com/cell-reports/pdfExtended/S2211-1247(15)01030-X --> 10.1016/j.celrep.2015.09.019
+        http://www.cell.com/ajhg/pdfExtended/S0002-9297(16)30051-9 --> 10.1016/j.ajhg.2016.03.016
+        http://www.cell.com/ajhg/pdf/S0002-9297(16)00050-1.pdf --> 10.1016/j.ajhg.2016.03.016
+
+
+    Unsolved cases:
+        http://www.cell.com/cms/attachment/2020150130/2039963519/mmc1.pdf
 
     :param url: (str)
     :return: doi or None
@@ -177,7 +201,7 @@ def get_cell_doi_from_link(url):
 
     if match:
         journal_abbrev = match.groupdict().get('journal_abbrev', None)
-        if journal_abbrev and journal_abbrev in ['cancer-cell', 'current-biology', 'cell-reports']:
+        if journal_abbrev and journal_abbrev in ['cancer-cell', 'current-biology', 'cell-reports', 'ajhg']:
             url = url.replace('pdfExtended', 'abstract')
             url = url.replace('/pdf/', '/abstract/')
             url = url.replace('.pdf', '')
