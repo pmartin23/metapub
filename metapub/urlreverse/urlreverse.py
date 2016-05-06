@@ -53,6 +53,25 @@ CRX = CrossRef()
 DXDOI = DxDOI()
 
 
+def get_spandidos_doi_from_link(url):
+    """ Spandidos urls follow several different conventions and their website seems to be undergoing
+    some changes recently. For now, let's just scrape the page for the first available DOI.
+
+    Examples:
+        http://www.spandidos-publications.com/or/30/2/553 --> 10.3892/or.2013.2535
+        https://www.spandidos-publications.com/10.3892/or.2016.4700 --> 10.3892/or.2013.2535
+        https://www.spandidos-publications.com/10.3892/or.2013.2535/abstract --> 10.3892/or.2013.2535
+
+    :param url: (str)
+    :return: doi (str) or None
+    """
+    if not url.find('spandidos-publications.com'):
+        return None
+
+    url = url.replace('download', 'abstract')
+    return scrape_doi_from_article_page(url) 
+
+
 def get_karger_doi_from_link(url):
     """ Karger IDs can be found in the URL after the "PDF" or "Abstract" piece, and used to 
     compose a DOI by prepending enough zeroes to make a 9-digit number. The Karger publisher
@@ -63,7 +82,7 @@ def get_karger_doi_from_link(url):
        https://www.karger.com/Article/Abstract/83388 --> 10.1159/000083388
 
     :param url: (str)
-    :return: doi or None
+    :return: doi (str) or None
     """
     out = '10.1159/'
     match = re_karger.match(url)
@@ -283,6 +302,7 @@ DOI_METHODS = [get_cell_doi_from_link,
                get_nature_doi_from_link,
                get_sciencedirect_doi_from_link,
                get_karger_doi_from_link,
+               get_spandidos_doi_from_link,
                get_generic_doi_from_link,
                ]
 

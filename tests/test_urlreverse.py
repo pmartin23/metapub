@@ -84,6 +84,11 @@ jci_samples = {
     'https://www.jci.org/articles/view/31080/figure/1': '10.1172/JCI31080',
     }
 
+spandidos_samples = {
+    'http://www.spandidos-publications.com/or/30/2/553': '10.3892/or.2013.2535',
+    'https://www.spandidos-publications.com/10.3892/or.2013.2535/abstract': '10.3892/or.2013.2535',
+}
+
 springer_samples = {
     'link.springer.com/article/10.1186/1471-2164-7-243': '10.1186/1471-2164-7-243',
     'http://link.springer.com/content/pdf/10.1007/s004390000422.pdf': '10.1007/s004390000422',
@@ -132,6 +137,10 @@ class TestUrlReverse(unittest.TestCase):
     def test_get_karger_doi_from_link(self):
         for url, doi in karger_samples.items():
             assert doi == get_karger_doi_from_link(url)
+
+    def test_get_spandidos_doi_from_link(self):
+        for url, doi in spandidos_samples.items():
+            assert doi == get_spandidos_doi_from_link(url)
 
     #def test_get_ahajournals_doi_from_link(self):
     #    for url, doi in ahajournals_samples.items():
