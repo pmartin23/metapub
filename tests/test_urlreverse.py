@@ -128,11 +128,13 @@ class TestUrlReverse(unittest.TestCase):
 
     def test_try_doi_methods_for_wiley_samples(self):
         for url, doi in wiley_samples.items():
-            assert doi == try_doi_methods(url)['doi']
+            urlrev = UrlReverse(url)
+            assert urlrev.doi == doi
 
     def test_try_doi_methods_for_springer_samples(self):
         for url, doi in springer_samples.items():
-            assert doi == try_doi_methods(url)['doi']
+            urlrev = UrlReverse(url)
+            assert urlrev.doi == doi
 
     def test_get_karger_doi_from_link(self):
         for url, doi in karger_samples.items():

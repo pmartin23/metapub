@@ -387,8 +387,7 @@ def get_article_info_from_url(url):
 
 
 def get_journal_name_from_url(url):
-
-    if not url.startswith('http'):
+    if not url.lower().startswith('http'):
         url = 'http://' + url
 
     hostname = hostname_of(url)
@@ -402,6 +401,9 @@ def get_journal_name_from_url(url):
 class UrlReverse(object):
 
     def __init__(self, url, verify=True, **kwargs):
+        if not url.lower().startswith('http'):
+            url = 'http://' + url
+
         self.url = url
         self.reason = None
 
