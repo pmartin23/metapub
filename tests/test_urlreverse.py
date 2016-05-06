@@ -61,6 +61,7 @@ sciencedirect_samples = {
     }
 
 cell_samples = {
+    'http://www.cell.com/cell-reports/pdfExtended/S2211-1247(15)01030-X': '10.1016/j.celrep.2015.09.019',
     'http://www.cell.com/pdf/0092867480906212.pdf': '10.1016/0092-8674(80)90621-2',
     'http://www.cell.com/cancer-cell/pdf/S1535610806002844.pdf': '10.1016/j.ccr.2006.09.010',
     'http://www.cell.com/molecular-cell/abstract/S1097-2765(00)80321-4': '10.1016/S1097-2765(00)80321-4',

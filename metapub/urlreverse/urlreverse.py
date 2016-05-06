@@ -28,11 +28,11 @@ re_pubmed_pmid = re.compile('.*?ncbi.nlm.nih.gov\/pubmed\/(?P<pmid>\d+)')
 re_pmcid = re.compile('.*?(?P<hostname>ncbi.nlm.nih.gov|europepmc.org)\/.*?(?P<pmcid>PMC\d+)', re.I)
 
 # PII
-pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\d{1})'
+pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\w{1})'
 re_sciencedirect_pii_simple = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/(?P<pii>S\d+)', re.I)
 re_sciencedirect_pii_official = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/' + pii_official, re.I)
-re_cell_pii_simple = re.compile('.*?(?P<hostname>cell\.com)\/(?P<journal_abbrev>.*?)\/(pdf|abstract|fulltext)\/(?P<pii>S\d+)', re.I)
-re_cell_pii_official = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract|fulltext)\/' + pii_official, re.I)
+re_cell_pii_simple = re.compile('.*?(?P<hostname>cell\.com)\/(?P<journal_abbrev>.*?)\/(pdf|abstract|fulltext|pdfExtended)\/(?P<pii>S\d+)', re.I)
+re_cell_pii_official = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract|fulltext|pdfExtended)\/' + pii_official, re.I)
 re_cell_old_style = re.compile('.*?(?P<hostname>cell\.com)\/(pdf|abstract|fulltext)\/(?P<pii>\d+)', re.I)
 
 # Unique
@@ -145,12 +145,16 @@ def get_cell_doi_from_link(url):
         http://www.cell.com/cancer-cell/pdf/S1535610806002844.pdf --> 10.1016/j.ccr.2006.09.010
         http://www.cell.com/molecular-cell/abstract/S1097-2765(00)80321-4 --> 10.1016/S1097-2765(00)80321-4
         http://www.cell.com/current-biology/fulltext/S0960-9822%2816%2930170-1 --> 10.1016/j.cub.2016.03.002
+        http://www.cell.com/cell-reports/pdfExtended/S2211-1247(15)01030-X --> 10.1016/j.celrep.2015.09.019
 
     :param url: (str)
     :return: doi or None
     """
     out = '10.1016/'
     pii = ''
+
+    if not 'cell.com' in url:
+        return None
 
     # Try "official" pii format first
     match = re_cell_pii_official.match(url)
@@ -173,7 +177,10 @@ def get_cell_doi_from_link(url):
 
     if match:
         journal_abbrev = match.groupdict().get('journal_abbrev', None)
-        if journal_abbrev and journal_abbrev in ['cancer-cell', 'current-biology']:
+        if journal_abbrev and journal_abbrev in ['cancer-cell', 'current-biology', 'cell-reports']:
+            url = url.replace('pdfExtended', 'abstract')
+            url = url.replace('/pdf/', '/abstract/')
+            url = url.replace('.pdf', '')
             return scrape_doi_from_article_page(url)
 
         return out + pii
