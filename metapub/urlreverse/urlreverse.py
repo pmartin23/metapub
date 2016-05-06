@@ -416,6 +416,8 @@ class UrlReverse(object):
             self.pmid = get_pmid_for_otherid(self.info['pmcid'])
             self.doi = doi2pmid(self.pmid)
 
+        if self.doi and not self.pmid:
+            self._try_backup_doi2pmid_methods()
         #if verify and self.doi:
         #    try:
                 # reasonable to test against more than just hostname?
@@ -444,11 +446,39 @@ class UrlReverse(object):
         if results:
             top_result = CRX.get_top_result(results, CRX.last_params)
 
-        # we may have disqualified all the results at this point as being irrelevant, so we have to test here.
-        if top_result:
-            pmids = FETCH.pmids_for_citation(**top_result['slugs'])
-            pmid = interpret_pmids_for_citation_results(pmids)
-            if pmid and pmid != 'AMBIGUOUS':
-                self.pmid = pmid
+            # we may have disqualified all the results at this point as being irrelevant, so we have to test here.
+            if top_result:
                 self.doi = find_doi_in_string(top_result['doi'])
+                pmids = FETCH.pmids_for_citation(**top_result['slugs'])
+                pmid = interpret_pmids_for_citation_results(pmids)
+                if pmid and pmid != 'AMBIGUOUS':
+                    self.pmid = pmid
+
+    def _try_backup_doi2pmid_methods(self):
+        # 1) if CrossRef can gave us a citation result, try pubmed advanced query
+        results = CRX.query(self.doi)
+        if results:
+            top_result = CRX.get_top_result(results, CRX.last_params)
+
+            coins = top_result['slugs'].copy()
+
+            # make sure start page ('spage') is a number
+            if coins.get('spage', 'no') == 'no':
+                coins['spage'] = None
+
+            pmids = []
+            if coins.get('volume') and coins.get('issue'):
+                pmids = FETCH.pmids_for_query(coins['atitle'], VI=coins['volume'], IP=coins['issue'])
+            elif coins.get('volume') and coins.get('aulast'):
+                pmids = FETCH.pmids_for_query(coins['atitle'], VI=coins['volume'], AU=coins['aulast'])
+            elif coins.get('spage') and coins.get('aulast'):
+                pmids = FETCH.pmids_for_query(coins['atitle'], PG=coins['spage'], AU=coins['aulast'])
+            else:
+                # last resort...
+                pmids = FETCH.pmids_for_query(coins['atitle'])
+            # that should have narrowed the field substantially. we should give up if it's still ambiguous.
+            if len(pmids) == 1:
+                self.pmid = pmids[0]
+            else:
+                print(coins)
 
