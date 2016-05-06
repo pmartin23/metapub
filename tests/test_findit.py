@@ -34,6 +34,11 @@ class TestFindIt(unittest.TestCase):
         
         assert cached_src.url == fresh_src.url
 
+    def test_backup_url(self):
+        src = FindIt(18048598)  # from journal "Tobacco Control"
+        assert 'europepmc.org' in src.url
+        assert 'bmj.com' in src.backup_url
+
     # def test_embargoed_pmid(self):
         # use a currently PMC embargoed pmid, since its status is bound to change (eventually)
     #    src = FindIt(pmid=SAMPLE_PMIDS['embargoed'][0], cachedir=None)

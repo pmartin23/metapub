@@ -49,6 +49,8 @@ simple_formats_doi = {
     'Langmuir': doi_templates['acs'],
     'Nano Lett': doi_templates['acs'],
 
+    'BMJ Open Gastroenterol': 'http://bmjopengastro.bmj.com/doi/pdf/{a.doi}',
+
     # http://www.bioone.org/action/showPublications?type=byAlphabet
     # TODO: 'http://www.bioone.org/doi/pdf/{a.doi}',
 

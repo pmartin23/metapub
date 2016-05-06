@@ -27,7 +27,7 @@ re_pubmed_pmid = re.compile('.*?ncbi.nlm.nih.gov\/pubmed\/(?P<pmid>\d+)')
 # PMCID in url
 re_pmcid = re.compile('.*?(?P<hostname>ncbi.nlm.nih.gov|europepmc.org)\/.*?(?P<pmcid>PMC\d+)', re.I)
 
-# PII
+# PII -- see https://en.wikipedia.org/wiki/Publisher_Item_Identifier
 pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\w{1})'
 re_sciencedirect_pii_simple = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/(?P<pii>S\d+)', re.I)
 re_sciencedirect_pii_official = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/' + pii_official, re.I)
@@ -69,6 +69,33 @@ def get_pnas_doi_from_link(url):
     if match:
         doi_suffix = match.groupdict()['ident'].split('.')[0]
         return out + doi_suffix 
+
+
+def get_bmj_doi_from_link(url):
+    """ BMJ and subsidiaries use a VIP format that can *sometimes* be mapped to their real 
+    DOIs. In the case that this process fails, use of the VIP->citation routines should work.
+
+    List of BMJ Journals: http://journals.bmj.com/
+
+    Examples:
+        http://jmg.bmj.com/content/39/6/e31.full --> 10.1136/jmg.39.6.e31
+        http://www.bmj.com/content/353/bmj.i2195 --> 10.1136/bmj.i2195
+        http://www.bmj.com/content/353/bmj.i2139 --> 10.1136/bmj.i2139
+        http://bmjopengastro.bmj.com/doi/full/10.1136/bmjgast-2015-000075 --> 10.1136/bmjgast-2015-000075
+
+    Non-DOI-returning examples (must use VIP->citation routines):
+        http://gut.bmj.com/content/65/5/767.abstract --> 10.1136/gutjnl-2015-311246
+
+    :param url: (str)
+    :return: doi (str) or None
+    """
+
+    vip_weird = {'bmj.com': 'http://www.bmj.com/content/bmj/{volume}/bmj.{first_page}.full.pdf'}
+
+    # journals for which DOIs can be constructed from their URLS.
+    BMJ_SPECIAL = ['bmjopen.bmj.com', 'jmg.bmj.com', 'bmj.com']
+    
+
 
 
 def get_spandidos_doi_from_link(url):
@@ -469,6 +496,10 @@ class UrlReverse(object):
         elif self.format == 'pmcid':
             self.pmid = get_pmid_for_otherid(self.info['pmcid'])
             self.doi = doi2pmid(self.pmid)
+
+        if self.pmid and self.pmid.startswith('NOT_FOUND'):
+            self.reason = 'PMID citation lookup resulted in "NOT_FOUND"'
+            self.pmid = None
 
         if self.doi and not self.pmid:
             self._try_backup_doi2pmid_methods()
