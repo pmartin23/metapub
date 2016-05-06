@@ -390,6 +390,7 @@ class UrlReverse(object):
                               'aulast': kpick(kwargs, ['author1_last_fm', 'aulast'], None),
                               'volume': kwargs.get('volume', None),
                               'issue': kwargs.get('issue', None),
+                              'doi': kwargs.get('doi', None),
                               }
 
         self.pmid = None
@@ -418,14 +419,12 @@ class UrlReverse(object):
 
         if self.doi and not self.pmid:
             self._try_backup_doi2pmid_methods()
-        #if verify and self.doi:
-        #    try:
-                # reasonable to test against more than just hostname?
-        #        urlres = DXDOI.resolve(self.doi)
-        #        if not hostname_of(self.url) == hostname_of(urlres):
-        #            raise MetaPubError('Mismatched hostname from inferred DOI %s (url: %s -- dx.doi.org lookup: %s)' % (self.doi, self.url, urlres))
-        #    except (DxDOIError, BadDOI) as error:
-        #        self.doi = None
+
+        if verify and self.doi:
+            try:
+                urlres = DXDOI.resolve(self.doi)
+            except (DxDOIError, BadDOI) as error:
+                self.doi = None
 
     def to_dict(self):
         return self.__dict__

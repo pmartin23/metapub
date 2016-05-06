@@ -9,6 +9,8 @@ try:
 except ImportError:
     # assume python3
     from urllib.parse import urlparse
+
+from .utils import remove_html_markup
     
 
 # examples of real DOIs: 
@@ -104,7 +106,7 @@ def scrape_doi_from_article_page(url):
     if response.ok:
         dois = findall_dois_in_text(response.text)
         if dois:
-            return dois[0]
+            return remove_html_markup(dois[0])
     return None
 
 
