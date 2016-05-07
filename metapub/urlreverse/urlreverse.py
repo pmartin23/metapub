@@ -12,13 +12,13 @@ from ..crossref import CrossRef
 from ..dx_doi import DxDOI
 from ..convert import doi2pmid, pmid2doi, interpret_pmids_for_citation_results
 from ..exceptions import MetaPubError, DxDOIError, BadDOI
-from ..utils import kpick, hostname_of, rootdomain_of, remove_chars
+from ..utils import kpick, hostname_of, rootdomain_of, remove_chars, asciify
 
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 from .hostname2doiprefix import HOSTNAME_TO_DOI_PREFIX_MAP
 
 # VIP (volume-issue-page)
-re_vip = re.compile('(?P<hostname>.*?)\/content(\/\w+)?\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\w+)', re.I)
+re_vip = re.compile('(?P<hostname>.*?)\/content(\/\w+)?\/(?P<volume>\d+)\/(?P<issue>\w+)\/(?P<first_page>\w+)', re.I)
 
 # PMID in url
 re_pmidlookup = re.compile('.*?(\?|&)pmid=(?P<pmid>\d+)', re.I)
@@ -45,9 +45,15 @@ re_ahajournals = re.compile('\/(?P<doi_suffix>[a-z0-9]+\.\d+\.\d+\.[a-z0-9]+)', 
 re_bmj = re.compile('(^|https?:\/\/)(?P<subdomain>\w+)\.bmj.com\/content\/(?P<volume>\d+)\/(?P<doi_suffix>bmj.\w+)', re.I)
 re_bmj_vip_to_doi = re.compile('(^|https?:\/\/)(?P<subdomain>\w+).bmj.com\/content\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\w+)', re.I)
 
+# TODO: Common supplement URL format
+#re_supplement_common = re.compile() 
+# http://jmg.bmj.com/content/suppl/2012/05/09/jmedgenet-2012-100892.DC1/Otocephaly_Supplementary_Table_3.pdf
+# http://www.pnas.org/content/suppl/2013/07/08/1305207110.DCSupplemental/sapp.pdf
+# http://jmg.bmj.com/content/suppl/2015/07/17/jmedgenet-2015-103132.DC1/jmedgenet-2015-103132supp.pdf
+
+
 # Early release formats
-#re_early_release = re.compile('((http|https)(:\/\/))(?P<hostname>.*?)\/content\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract)?')
-re_early_release = re.compile('((http|https)(:\/\/))(?P<hostname>.*?)\/content\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract|$)')
+re_early_release = re.compile('(^|(https?):\/\/)(?P<hostname>.*?)\/content(\/\w+)?\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract|$)')
 
 OFFICIAL_PII_FORMAT = '{pt1}-{pt2}({pt3}){pt4}-{pt5}'
 
@@ -578,6 +584,13 @@ class UrlReverse(object):
                     self.pmid = pmid
 
     def _try_backup_doi2pmid_methods(self):
+        # 0) Try doing a DOI lookup right in an advanced query string. Sometimes works.
+        #pmids = FETCH.pmids_for_query(self.doi)
+        #if len(pmids) == 1:
+        #    self.pmid = pmids[0]
+         #   self.reason += 'FOUND via Pubmed advanced query (search for doi).'
+         #   return 
+
         # 1) if CrossRef can gave us a citation result, try pubmed advanced query
         results = CRX.query(self.doi)
         if results:
@@ -590,7 +603,7 @@ class UrlReverse(object):
                 coins['spage'] = None
 
             # bowlderize the title (remove urlencoded chars and punctuation)
-            title = remove_chars(coins['atitle'], urldecode=True).strip()
+            title = asciify(remove_chars(coins['atitle'], urldecode=True).strip())
 
             pmids = []
 
@@ -603,11 +616,12 @@ class UrlReverse(object):
 
             elif len(pmids) == 0:
                 self.pmid = None
-                self.reason += 'NO results for title in Pubmed. (Title search string: %s);' % title
+                self.reason += 'NO results for title "%s" in Pubmed, attempting coordinate match;' % title
                 title = ''
 
             elif len(pmids) > 1 and len(title.split(' ')) < 3:
                 # title could be something like "Abstract" or "Pituitary" or "Endocrinology Yearbook" -- too vague.
+                self.reason += 'Title "%s" TOO VAGUE, attempting coordinate match;' % title
                 title = ''
 
             # we have ambiguous results -- let's try to narrow the field based on whether we have a viable
@@ -621,9 +635,9 @@ class UrlReverse(object):
                           'IP': coins.get('issue', None),
                           'AU': coins.get('aulast', None),
                           'PG': coins.get('spage', None),
+                          'DP': coins.get('year', None),
                          }
-                print('No results for title; trying strict coordinates. (%r)' % params)
-                pmids = FETCH.pmids_for_query(title, **params)
+                pmids = FETCH.pmids_for_query(coins['jtitle'], **params)
 
             else:
                 print('Ambiguous for title: %s' % title)

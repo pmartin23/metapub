@@ -168,6 +168,13 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     except:
         pass
 
+    # Try doing a DOI lookup right in an advanced query string. Sometimes works and has
+    # benefit of being a cached query so it is quick to do again, should we need.
+    pmids = pm_fetch.pmids_for_query(doi)
+    if len(pmids) == 1:
+        return pmids[0]
+
+    # Look up the DOI in CrossRef, then feed results to pubmed citation query tool.
     try:
         results = crossref.query(doi)
     except CrossRefConnectionError:
