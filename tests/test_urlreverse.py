@@ -95,6 +95,12 @@ springer_samples = {
     'http://link.springer.com/content/pdf/10.1007/s004390000422.pdf': '10.1007/s004390000422',
     }
 
+bmj_samples = {
+    'http://jmg.bmj.com/content/39/6/e31.full': '10.1136/jmg.39.6.e31',
+    'http://www.bmj.com/content/353/bmj.i2195': '10.1136/bmj.i2195',
+    'http://www.bmj.com/content/353/bmj.i2139': '10.1136/bmj.i2139',
+    }
+
 tough_cases = {
     'http://www.nature.com/pr/journal/v49/n2/full/pr200126a.html': '10.1203/00006450-200102000-00001',
     }
@@ -156,6 +162,10 @@ class TestUrlReverse(unittest.TestCase):
     def test_get_cell_doi_from_link(self):
         for url, doi in cell_samples.items():
             assert doi == get_cell_doi_from_link(url)
+
+    def test_get_bmj_doi_from_link(self):
+        for url, doi in bmj_samples.items():
+            assert doi == get_bmj_doi_from_link(url)
 
     #def test_get_vip_url_with_supplied_title(self):
     #    url = 'http://www.clinsci.org/content/ppclinsci/130/11/871'

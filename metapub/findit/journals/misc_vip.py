@@ -157,7 +157,7 @@ vip_journals = {
     'Inj Prev': {'host': 'injuryprevention.bmj.com'},
     'In Pract': {'host': 'inpractice.bmj.com'},
     'J Clin Pathol': {'host': 'jcp.bmj.com'},
-    'J Epidemiol Community Health': {'jech.bmj.com'},
+    'J Epidemiol Community Health': {'host': 'jech.bmj.com'},
     'J Fam Plann Reprod Health Care': {'host': 'jfprhc.bmj.com'},
     'J Investig Med': {'host': 'jim.bmj.com'},
     'J ISAKOS': {'host': 'jisakos.bmj.com'},

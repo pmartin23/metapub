@@ -8,8 +8,9 @@ from unidecode import unidecode
 #py3k / py2k compatibility
 if six.PY2:
     from urlparse import urlparse
+    from urllib2 import unquote
 else:
-    from urllib.parse import urlparse
+    from urllib.parse import urlparse, unquote
 
 PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\"&"
 
@@ -21,7 +22,16 @@ def kpick(args, options, default=None):
     return default
 
 
-def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE):
+def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE, urldecode=False):
+    """ Remove target characters from input string.
+
+    :param inp: (str)
+    :param chars: (str) characters to remove [default: utils.PUNCS_WE_DONT_LIKE]
+    :param urldecode: (bool) whether to first urldecode the input string [default: False]
+    """
+    if urldecode:
+        inp = unquote(inp)
+
     for char in chars:
         inp = inp.replace(char, '')
     return inp

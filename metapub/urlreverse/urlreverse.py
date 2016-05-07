@@ -12,13 +12,13 @@ from ..crossref import CrossRef
 from ..dx_doi import DxDOI
 from ..convert import doi2pmid, pmid2doi, interpret_pmids_for_citation_results
 from ..exceptions import MetaPubError, DxDOIError, BadDOI
-from ..utils import kpick, hostname_of, rootdomain_of
+from ..utils import kpick, hostname_of, rootdomain_of, remove_chars
 
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 from .hostname2doiprefix import HOSTNAME_TO_DOI_PREFIX_MAP
 
 # VIP (volume-issue-page)
-re_vip = re.compile('(?P<hostname>.*?)\/content(\/\w+)?\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\d+)', re.I)
+re_vip = re.compile('(?P<hostname>.*?)\/content(\/\w+)?\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\w+)', re.I)
 
 # PMID in url
 re_pmidlookup = re.compile('.*?(\?|&)pmid=(?P<pmid>\d+)', re.I)
@@ -29,7 +29,7 @@ re_pmcid = re.compile('.*?(?P<hostname>ncbi.nlm.nih.gov|europepmc.org)\/.*?(?P<p
 
 # PII -- see https://en.wikipedia.org/wiki/Publisher_Item_Identifier
 pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\w{1})'
-re_sciencedirect_pii_simple = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/(?P<pii>S\d+)', re.I)
+re_sciencedirect_pii_simple = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/(?P<pii>S\d+\w?)', re.I)
 re_sciencedirect_pii_official = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/' + pii_official, re.I)
 re_cell_pii_simple = re.compile('.*?(?P<hostname>cell\.com)\/(?P<journal_abbrev>.*?)\/(pdf|abstract|fulltext|pdfExtended)\/(?P<pii>S\d+)', re.I)
 re_cell_pii_official = re.compile('.*?cell.com\/((?P<journal_abbrev>.*?)\/)?(pdf|abstract|fulltext|pdfExtended)\/' + pii_official, re.I)
@@ -41,6 +41,9 @@ re_jci = re.compile('.*?(?P<hostname>jci\.org)\/articles\/view\/(?P<jci_id>\d+)'
 re_karger = re.compile('.*?(?P<hostname>karger\.com)\/Article\/(Abstract|Pdf)\/(?P<kid>\d+)', re.I)
 #re_ahajournals = re.compile('\/(?P<doi_suffix>\w+\.\d+\.\d+\.\w+)', re.I)
 re_ahajournals = re.compile('\/(?P<doi_suffix>[a-z0-9]+\.\d+\.\d+\.[a-z0-9]+)', re.I)
+
+re_bmj = re.compile('(^|https?:\/\/)(?P<subdomain>\w+)\.bmj.com\/content\/(?P<volume>\d+)\/(?P<doi_suffix>bmj.\w+)', re.I)
+re_bmj_vip_to_doi = re.compile('(^|https?:\/\/)(?P<subdomain>\w+).bmj.com\/content\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\w+)', re.I)
 
 # Early release formats
 #re_early_release = re.compile('((http|https)(:\/\/))(?P<hostname>.*?)\/content\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract)?')
@@ -69,10 +72,11 @@ def get_pnas_doi_from_link(url):
     if match:
         doi_suffix = match.groupdict()['ident'].split('.')[0]
         return out + doi_suffix 
+    return None
 
 
 def get_bmj_doi_from_link(url):
-    """ BMJ and subsidiaries use a VIP format that can *sometimes* be mapped to their real 
+    """ BMJ and subsidiaries use a VIP-ish format that can *sometimes* be mapped to their real 
     DOIs. In the case that this process fails, use of the VIP->citation routines should work.
 
     List of BMJ Journals: http://journals.bmj.com/
@@ -81,21 +85,32 @@ def get_bmj_doi_from_link(url):
         http://jmg.bmj.com/content/39/6/e31.full --> 10.1136/jmg.39.6.e31
         http://www.bmj.com/content/353/bmj.i2195 --> 10.1136/bmj.i2195
         http://www.bmj.com/content/353/bmj.i2139 --> 10.1136/bmj.i2139
+
+    Returns None (should be caught by find_doi_in_string):
         http://bmjopengastro.bmj.com/doi/full/10.1136/bmjgast-2015-000075 --> 10.1136/bmjgast-2015-000075
 
-    Non-DOI-returning examples (must use VIP->citation routines):
+    Returns None (must use VIP->citation routines):
         http://gut.bmj.com/content/65/5/767.abstract --> 10.1136/gutjnl-2015-311246
 
     :param url: (str)
     :return: doi (str) or None
     """
 
-    vip_weird = {'bmj.com': 'http://www.bmj.com/content/bmj/{volume}/bmj.{first_page}.full.pdf'}
+    out = '10.1136/'
 
-    # journals for which DOIs can be constructed from their URLS.
-    BMJ_SPECIAL = ['bmjopen.bmj.com', 'jmg.bmj.com', 'bmj.com']
-    
+    BMG_VIP_TO_DOI_DOMAINS = ['jmg']
+    match = re_bmj_vip_to_doi.match(url)
+    if match:
+        parts = match.groupdict()
+        if parts['subdomain'] in BMG_VIP_TO_DOI_DOMAINS:
+            return out + '{subdomain}.{volume}.{issue}.{first_page}'.format(**parts)
 
+    match = re_bmj.match(url)
+    if match:
+        parts = match.groupdict()
+        return out + parts['doi_suffix']
+
+    return None
 
 
 def get_spandidos_doi_from_link(url):
@@ -178,7 +193,16 @@ def get_sciencedirect_doi_from_link(url):
             pii = re_sciencedirect_pii_official.match(url).groupdict()['pii']
         except AttributeError:
             return None    
-    return out + pii
+    doi = out + pii
+    try:
+        DXDOI.resolve(doi)
+        return doi
+    except DxDOIError:
+        #print('sciencedirect recomposed DOI %s is not a real DOI' % doi)
+        pass
+
+    # use URL scrape
+    return scrape_doi_from_article_page('http://www.sciencedirect.com/science/article/pii/%s' % pii)
 
 
 def get_cell_doi_from_link(url):
@@ -354,6 +378,7 @@ def get_generic_doi_from_link(url):
 # == DOI search method registry... order matters! don't screw around with it unless you know what you're doing. :) == #
 DOI_METHODS = [get_cell_doi_from_link,
                get_jstage_doi_from_link,
+               get_pnas_doi_from_link,
                get_early_release_doi_from_link,
                get_ahajournals_doi_from_link,
                get_biomedcentral_doi_from_link,
@@ -463,7 +488,7 @@ class UrlReverse(object):
             url = 'http://' + url
 
         self.url = url
-        self.reason = None
+        self.reason = ''
 
         self.supplied_info = {'title': kwargs.get('title', None),
                               'jtitle': kpick(kwargs, ['jtitle', 'journal', 'TA'], None),
@@ -482,23 +507,32 @@ class UrlReverse(object):
         if self.format == 'pmid':
             self.pmid = self.info['pmid']
             #self.doi = pmid2doi(self.pmid)
+            if self.pmid:
+                self.reason += 'FOUND result from inferred PMID in URL;'
 
         elif self.format == 'doi':
             self.doi = self.info['doi']
             self.pmid = doi2pmid(self.doi)
+            if self.pmid:
+                self.reason += 'FOUND via inferred doi + doi2pmid;'
+            else:
+                self.reason += 'NO result from inferred doi + doi2pmid;'
 
         elif self.format == 'vip':
             try:
                 self._try_citation_methods()
             except MetaPubError as error:
                 self.pmid = None
+                self.reason += 'NO result from VIP info + citation methods;'
 
         elif self.format == 'pmcid':
             self.pmid = get_pmid_for_otherid(self.info['pmcid'])
             self.doi = doi2pmid(self.pmid)
+            if self.pmid:
+                self.reason += 'FOUND result from PMCID -> PMID lookup;'
 
         if self.pmid and self.pmid.startswith('NOT_FOUND'):
-            self.reason = 'PMID citation lookup resulted in "NOT_FOUND"'
+            self.reason += 'NO result: PMID citation lookup resulted in "%s";' % self.pmid
             self.pmid = None
 
         if self.doi and not self.pmid:
@@ -509,6 +543,11 @@ class UrlReverse(object):
                 urlres = DXDOI.resolve(self.doi)
             except (DxDOIError, BadDOI) as error:
                 self.doi = None
+                self.reason += 'Problem with DOI: %r;' % error
+
+        # Finally: ADMIT DEFEAT
+        if not self.doi and not self.pmid:
+            self.reason += 'NO result -- END OF LINE.'
 
     def to_dict(self):
         return self.__dict__
@@ -521,6 +560,7 @@ class UrlReverse(object):
             # print('got PMID from citation')
             self.pmid = pmid
             self.doi = pmid2doi(pmid)
+            self.reason += 'FOUND via PubmedFetcher.pmids_for_citation'
             return
 
         # 2) try CrossRef -- most effective when title available, but may work without it.
@@ -546,22 +586,68 @@ class UrlReverse(object):
             coins = top_result['slugs'].copy()
 
             # make sure start page ('spage') is a number
-            if coins.get('spage', 'no') == 'no':
+            if coins.get('spage', 'no') in ['no', 'n%2Fa']:
                 coins['spage'] = None
 
+            # bowlderize the title (remove urlencoded chars and punctuation)
+            title = remove_chars(coins['atitle'], urldecode=True).strip()
+
             pmids = []
-            if coins.get('volume') and coins.get('issue'):
-                pmids = FETCH.pmids_for_query(coins['atitle'], VI=coins['volume'], IP=coins['issue'])
-            elif coins.get('volume') and coins.get('aulast'):
-                pmids = FETCH.pmids_for_query(coins['atitle'], VI=coins['volume'], AU=coins['aulast'])
-            elif coins.get('spage') and coins.get('aulast'):
-                pmids = FETCH.pmids_for_query(coins['atitle'], PG=coins['spage'], AU=coins['aulast'])
+
+            # try this first. If we get one single result, that's probably it.
+            pmids = FETCH.pmids_for_query(title)
+            if len(pmids) == 1:
+                self.pmid = pmids[0]
+                self.reason += 'FOUND via Pubmed Advanced Query;'
+                return
+
+            elif len(pmids) == 0:
+                self.pmid = None
+                self.reason += 'NO results for title in Pubmed. (Title search string: %s);' % title
+                title = ''
+
+            elif len(pmids) > 1 and len(title.split(' ')) < 3:
+                # title could be something like "Abstract" or "Pituitary" or "Endocrinology Yearbook" -- too vague.
+                title = ''
+
+            # we have ambiguous results -- let's try to narrow the field based on whether we have a viable
+            # title or not.
+
+            # Two paths diverged in a wood, and I...
+
+            if title=='':
+                # strict coordinates
+                params = {'VI': coins.get('volume', None),
+                          'IP': coins.get('issue', None),
+                          'AU': coins.get('aulast', None),
+                          'PG': coins.get('spage', None),
+                         }
+                print('No results for title; trying strict coordinates. (%r)' % params)
+                pmids = FETCH.pmids_for_query(title, **params)
+
             else:
-                # last resort...
-                pmids = FETCH.pmids_for_query(coins['atitle'])
+                print('Ambiguous for title: %s' % title)
+                if coins.get('volume') and coins.get('issue'):
+                    print('trying volume/issue')
+                    pmids = FETCH.pmids_for_query(title, VI=coins['volume'], IP=coins['issue'])
+                elif coins.get('volume') and coins.get('aulast'):
+                    print('trying aulast')
+                    pmids = FETCH.pmids_for_query(title, AU=coins['aulast'])
+                elif coins.get('spage') and coins.get('aulast'):
+                    print('trying spage')
+                    pmids = FETCH.pmids_for_query(title, PG=coins['spage'])     #, AU=coins['aulast'])
+                elif coins.get('volume'):
+                    print('trying volume')
+                    pmids = FETCH.pmids_for_query(title, VI=coins['volume'])
+
             # that should have narrowed the field substantially. we should give up if it's still ambiguous.
             if len(pmids) == 1:
                 self.pmid = pmids[0]
+                self.reason += 'FOUND via Pubmed Advanced Query;'
+            elif len(pmids) == 0:
+                self.pmid = None
+                self.reason += 'NO results from pubmed advanced query.  (Data from CrossRef was: %r);' % (coins)
             else:
-                print(coins)
+                self.pmid = None
+                self.reason += 'AMBIGUOUS results from pubmed advanced query (%i possibilities).  (Data from CrossRef was: %r)' % (len(pmids), coins)
 
