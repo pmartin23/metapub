@@ -104,11 +104,11 @@ def get_bmj_doi_from_link(url):
 
     out = '10.1136/'
 
-    BMG_VIP_TO_DOI_DOMAINS = ['jmg']
+    BMJ_VIP_TO_DOI_DOMAINS = ['jmg']
     match = re_bmj_vip_to_doi.match(url)
     if match:
         parts = match.groupdict()
-        if parts['subdomain'] in BMG_VIP_TO_DOI_DOMAINS:
+        if parts['subdomain'] in BMJ_VIP_TO_DOI_DOMAINS:
             return out + '{subdomain}.{volume}.{issue}.{first_page}'.format(**parts)
 
     match = re_bmj.match(url)
@@ -383,9 +383,10 @@ def get_generic_doi_from_link(url):
 
 # == DOI search method registry... order matters! don't screw around with it unless you know what you're doing. :) == #
 DOI_METHODS = [get_cell_doi_from_link,
+               get_early_release_doi_from_link,
                get_jstage_doi_from_link,
                get_pnas_doi_from_link,
-               get_early_release_doi_from_link,
+               get_bmj_doi_from_link,
                get_ahajournals_doi_from_link,
                get_biomedcentral_doi_from_link,
                get_nature_doi_from_link,
