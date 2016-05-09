@@ -9,10 +9,12 @@ from ..text_mining import (find_doi_in_string, get_nature_doi_from_link, scrape_
 from ..pubmedcentral import get_pmid_for_otherid
 from ..pubmedfetcher import PubMedFetcher
 from ..crossref import CrossRef
+from ..eutils_common import SQLiteCache, get_cache_path
 from ..dx_doi import DxDOI
 from ..convert import doi2pmid, pmid2doi, interpret_pmids_for_citation_results
 from ..exceptions import MetaPubError, DxDOIError, BadDOI
 from ..utils import kpick, hostname_of, rootdomain_of, remove_chars, asciify
+from ..cache_utils import datetime_to_timestamp
 
 from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 from .hostname2doiprefix import HOSTNAME_TO_DOI_PREFIX_MAP
@@ -487,28 +489,47 @@ def get_journal_name_from_url(url):
     else:
         return None
 
+def _get_urlreverse_cache(cachedir=DEFAULT_CACHE_DIR):
+    global URLREVERSE_CACHE
+    if not URLREVERSE_CACHE:
+        _cache_path = get_cache_path(cachedir, CACHE_FILENAME)
+        URLREVERSE_CACHE = SQLiteCache(_cache_path)
+    return FINDIT_CACHE
+
 
 class UrlReverse(object):
 
-    def __init__(self, url, verify=True, **kwargs):
+    def __init__(self, url, verify=True, skip_cache=False, **kwargs):
         if not url.lower().startswith('http'):
             url = 'http://' + url
 
         self.url = url
         self.reason = ''
 
-        self.supplied_info = {'title': kwargs.get('title', None),
-                              'jtitle': kpick(kwargs, ['jtitle', 'journal', 'TA'], None),
-                              'aulast': kpick(kwargs, ['author1_last_fm', 'aulast'], None),
-                              'volume': kwargs.get('volume', None),
-                              'issue': kwargs.get('issue', None),
-                              'doi': kwargs.get('doi', None),
-                              }
+        # TODO: UrlReverse.supplied_info 
+        # self.supplied_info = {'title': kwargs.get('title', None),
+        #                      'jtitle': kpick(kwargs, ['jtitle', 'journal', 'TA'], None),
+        #                      'aulast': kpick(kwargs, ['author1_last_fm', 'aulast'], None),
+        #                      'volume': kwargs.get('volume', None),
+        #                      'issue': kwargs.get('issue', None),
+        #                      'doi': kwargs.get('doi', None),
+        #                      }
+
+        cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
+        self._cache = None if cachedir is None else _get_urlreverse_cache(cachedir)
 
         self.pmid = None
         self.doi = None
+        self.info = None
 
-        self.info = get_article_info_from_url(url)
+        if self._cache:
+            self._load_from_cache(verify)
+        else:
+            self._urlreverse(verify)
+
+
+    def _urlreverse(self, verify=verify):
+        self.info = get_article_info_from_url(self.url)
         self.format = self.info['format']
 
         if self.format == 'pmid':
@@ -556,23 +577,93 @@ class UrlReverse(object):
         if not self.doi and not self.pmid:
             self.reason += 'NO result -- END OF LINE.'
 
-    def to_dict(self):
-        return self.__dict__
+    def _store_cache(self, verify):
+        """ Store this object in cache by explicitly choosing variables to store as
+        values, using self.url as the cache key.
+
+        A time.time() timestamp will be added to the value dictionary when stored.
+
+        There is no return from this function. Exceptions from the SQLiteCache 
+        object may be raised.
+        """
+        cache_value = self.to_dict()
+        cache_value['timestamp'] = time.time()
+        self._cache[self._make_cache_key(self.url)] = cache_value
+
+    def _load_from_cache(self, verify=True):
+        cache_result = self._query_cache(self.url)
+
+        if cache_result:
+            self.pmid = cache_result['pmid']
+            self.doi = cache_result['doi']
+            self.reason = cache_result['reason']
+            self.info = cache_result['info']
+            self.supplied_info = cache_result['supplied_info']
+
+        else:
+            self._urlreverse(self, verify=verify)    
+            self._store_cache(self, verify=verify)
+
+    def _make_cache_key(self, url):
+        """ Returns url normalized via str() function for hash lookup / store. """
+        return str(url)
+
+    def _query_cache(self, cache_key, expiry_date=None):
+        """ Return results of a lookup from the cache, if available.
+        Return None if not available.
+
+        Cache results are stored with a time.time() timestamp.
+
+        When expiry_date is supplied, results from the cache past their
+        sell-by date will be expunged from the cache and return will be None.
+
+        expiry_date can be either a python datetime or a timestamp. 
+
+        :param: cache_key: (required)
+        :param: expiry_date (optional, default None)
+        :return: (dict) result of cache lookup
+        :rtype: dict or None
+        """
+
+        if hasattr(expiry_date, 'strftime'):
+            # convert to timestamp
+            sellby = datetime_to_timestamp(expiry_date)
+        else:
+            # make sure sellby is a number, not None
+            sellby = expiry_date if expiry_date else 0
+
+        if self._cache:
+            cache_key = self._make_cache_key(url)
+            try:
+                res = self._cache[cache_key]
+                timestamp = res['timestamp']
+                if timestamp < sellby:
+                    self._log.debug('Cache: expunging result for %s (%i)', cache_key, timestamp)
+                else:
+                    self._log.debug('Cache: returning result for %s (%i)', cache_key, timestamp)
+                return res
+
+            except KeyError:
+                self._log.debug('Cache: no result for key %s', cache_key)
+                return None
+        else:
+            self._log.debug('Cache disabled (self._cache is None)')
+            return None
 
     def _try_citation_methods(self):
         # 1) try pubmed citation match.
         pmids = FETCH.pmids_for_citation(**self.info)
         pmid = interpret_pmids_for_citation_results(pmids)
         if pmid and pmid != 'AMBIGUOUS':
-            # print('got PMID from citation')
             self.pmid = pmid
             self.doi = pmid2doi(pmid)
-            self.reason += 'FOUND via PubmedFetcher.pmids_for_citation'
+            self.reason += 'FOUND via PubmedFetcher.pmids_for_citation;'
             return
 
         # 2) try CrossRef -- most effective when title available, but may work without it.
-        title = self.supplied_info['title'] or ''
-        results = CRX.query(title, params=self.info)
+        # TODO: UrlReverse.supplied_info 
+        # title = self.supplied_info['title'] or ''
+        results = CRX.query('', params=self.info)
         if results:
             top_result = CRX.get_top_result(results, CRX.last_params)
 
@@ -585,84 +676,89 @@ class UrlReverse(object):
                     self.pmid = pmid
 
     def _try_backup_doi2pmid_methods(self):
-        # 0) Try doing a DOI lookup right in an advanced query string. Sometimes works.
-        #pmids = FETCH.pmids_for_query(self.doi)
-        #if len(pmids) == 1:
-        #    self.pmid = pmids[0]
-         #   self.reason += 'FOUND via Pubmed advanced query (search for doi).'
-         #   return 
+        """ Uses CrossRef and Pubmed Advanced Query combinations to try to get an 
+        unambiguous PMID result. Mutates self.pmid (if found unambigously) and self.reason 
+        (concatenating strings documenting the process by which PMID was(n't) acquired).
+        """
 
-        # 1) if CrossRef can gave us a citation result, try pubmed advanced query
+        # All hinges on whether CrossRef can give us a good result. If not, fail out early.
         results = CRX.query(self.doi)
+        coins = None
+
         if results:
             top_result = CRX.get_top_result(results, CRX.last_params)
+            if top_result:
+                coins = top_result['slugs'].copy()
 
-            coins = top_result['slugs'].copy()
+        if not coins:
+            return
 
-            # make sure start page ('spage') is a number
-            if coins.get('spage', 'no') in ['no', 'n%2Fa']:
-                coins['spage'] = None
+        # normalize start page ('spage') to None in case of "no" or "n/a"
+        if coins.get('spage', 'no').lower() in ['no', 'n%2Fa']:
+            coins['spage'] = None
 
-            # bowlderize the title (remove urlencoded chars and punctuation)
-            title = asciify(remove_chars(coins['atitle'], urldecode=True).strip())
+        # bowlderize the title (remove urlencoded chars and punctuation)
+        title = asciify(remove_chars(coins['atitle'], urldecode=True).strip())
 
-            pmids = []
+        pmids = []
 
-            # try this first. If we get one single result, that's probably it.
-            pmids = FETCH.pmids_for_query(title)
-            if len(pmids) == 1:
-                self.pmid = pmids[0]
-                self.reason += 'FOUND via Pubmed Advanced Query;'
-                return
+        # try this first. If we get one single result, that should be it.
+        pmids = FETCH.pmids_for_query(title)
+        if len(pmids) == 1:
+            self.pmid = pmids[0]
+            self.reason += 'FOUND via Pubmed Advanced Query;'
+            return
 
-            elif len(pmids) == 0:
-                self.pmid = None
-                self.reason += 'NO results for title "%s" in Pubmed, attempting coordinate match;' % title
-                title = ''
+        elif len(pmids) == 0:
+            self.pmid = None
+            self.reason += 'NO results for title "%s" in Pubmed, attempting coordinate match;' % title
+            title = ''
 
-            elif len(pmids) > 1 and len(title.split(' ')) < 3:
-                # title could be something like "Abstract" or "Pituitary" or "Endocrinology Yearbook" -- too vague.
-                self.reason += 'Title "%s" TOO VAGUE, attempting coordinate match;' % title
-                title = ''
+        elif len(pmids) > 1 and len(title.split(' ')) < 3:
+            # title could be something like "Abstract" or "Pituitary" or "Endocrinology Yearbook" -- too vague.
+            self.reason += 'Title "%s" TOO VAGUE, attempting coordinate match;' % title
+            title = ''
 
-            # we have ambiguous results -- let's try to narrow the field based on whether we have a viable
-            # title or not.
+        # we have ambiguous results -- let's try to narrow the field based on whether we have a viable
+        # title or not.
 
-            # Two paths diverged in a wood, and I...
+        # Two paths diverged in a wood, and I...
 
-            if title=='':
-                # strict coordinates
-                params = {'VI': coins.get('volume', None),
-                          'IP': coins.get('issue', None),
-                          'AU': coins.get('aulast', None),
-                          'PG': coins.get('spage', None),
-                          'DP': coins.get('year', None),
-                         }
-                pmids = FETCH.pmids_for_query(coins['jtitle'], **params)
+        if title=='':
+            # strict coordinates
+            params = {'VI': coins.get('volume', None),
+                      'IP': coins.get('issue', None),
+                      'AU': coins.get('aulast', None),
+                      'PG': coins.get('spage', None),
+                      'DP': coins.get('year', None),
+                     }
+            pmids = FETCH.pmids_for_query(coins['jtitle'], **params)
 
-            else:
-                print('Ambiguous for title: %s' % title)
-                if coins.get('volume') and coins.get('issue'):
-                    print('trying volume/issue')
-                    pmids = FETCH.pmids_for_query(title, VI=coins['volume'], IP=coins['issue'])
-                elif coins.get('volume') and coins.get('aulast'):
-                    print('trying aulast')
-                    pmids = FETCH.pmids_for_query(title, AU=coins['aulast'])
-                elif coins.get('spage') and coins.get('aulast'):
-                    print('trying spage')
-                    pmids = FETCH.pmids_for_query(title, PG=coins['spage'])     #, AU=coins['aulast'])
-                elif coins.get('volume'):
-                    print('trying volume')
-                    pmids = FETCH.pmids_for_query(title, VI=coins['volume'])
+        else:
+            if coins.get('volume') and coins.get('issue'):
+                self.reason += 'Ambiguous results for title "%s", trying with volume/issue;'
+                pmids = FETCH.pmids_for_query(title, VI=coins['volume'], IP=coins['issue'])
+            elif coins.get('volume') and coins.get('aulast'):
+                self.reason += 'Ambiguous results for title "%s", trying with aulast;'
+                pmids = FETCH.pmids_for_query(title, AU=coins['aulast'])
+            elif coins.get('spage') and coins.get('aulast'):
+                self.reason += 'Ambiguous results for title "%s", trying with first_page;'
+                pmids = FETCH.pmids_for_query(title, PG=coins['spage'])     #, AU=coins['aulast'])
+            elif coins.get('volume'):
+                self.reason += 'Ambiguous results for title "%s", trying with volume;'
+                pmids = FETCH.pmids_for_query(title, VI=coins['volume'])
 
-            # that should have narrowed the field substantially. we should give up if it's still ambiguous.
-            if len(pmids) == 1:
-                self.pmid = pmids[0]
-                self.reason += 'FOUND via Pubmed Advanced Query;'
-            elif len(pmids) == 0:
-                self.pmid = None
-                self.reason += 'NO results from pubmed advanced query.  (Data from CrossRef was: %r);' % (coins)
-            else:
-                self.pmid = None
-                self.reason += 'AMBIGUOUS results from pubmed advanced query (%i possibilities).  (Data from CrossRef was: %r)' % (len(pmids), coins)
+        # that should have narrowed the field substantially. we should give up if it's still ambiguous.
+        if len(pmids) == 1:
+            self.pmid = pmids[0]
+            self.reason += 'FOUND via Pubmed Advanced Query;'
+        elif len(pmids) == 0:
+            self.pmid = None
+            self.reason += 'NO results from pubmed advanced query.  (Data from CrossRef was: %r);' % (coins)
+        else:
+            self.pmid = None
+            self.reason += 'AMBIGUOUS results from pubmed advanced query (%i possibilities).  (Data from CrossRef was: %r)' % (len(pmids), coins)
+
+    def to_dict(self):
+        return self.__dict__
 

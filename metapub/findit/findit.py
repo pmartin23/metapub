@@ -24,7 +24,7 @@ from ..eutils_common import SQLiteCache, get_cache_path
 
 from .logic import find_article_from_pma
 from .dances import the_sciencedirect_disco, the_doi_2step, the_wiley_shuffle, the_wolterskluwer_volta
-from .cache_utils import datetime_to_timestamp
+from ..cache_utils import datetime_to_timestamp
 
 """ findit/findit.py
 
@@ -373,3 +373,4 @@ class FindIt(object):
         else:
             self._log.debug('Cache disabled (self._cache is None)')
             return None
+
