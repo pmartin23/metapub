@@ -436,6 +436,7 @@ def get_jci_doi_from_link(url):
 
     Example:
         https://www.jci.org/articles/view/32496 --> 10.1172/JCI32496
+        https://www.jci.org/articles/view/8154/version/1/pdf/render --> 10.1172/JCI8154
 
     :param url: (str)
     :return: doi or None
@@ -534,6 +535,7 @@ def get_generic_doi_from_link(url):
 # == DOI search method registry... order matters! don't screw around with it unless you know what you're doing. :) == #
 DOI_METHODS = [get_cell_doi_from_link,
                get_early_release_doi_from_link,
+               get_jci_doi_from_link,
                get_jstage_doi_from_link,
                get_pnas_doi_from_link,
                get_bmj_doi_from_link,
