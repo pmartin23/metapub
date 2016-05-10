@@ -50,6 +50,7 @@ simple_formats_doi = {
     'Nano Lett': doi_templates['acs'],
 
     'BMJ Open Gastroenterol': 'http://bmjopengastro.bmj.com/doi/pdf/{a.doi}',
+    'Microbiol Spectr': 'http://www.asmscience.org/content/journal/microbiolspec/{a.doi}', #10.1128/microbiolspec.VMBF-0028-2015
 
     # http://www.bioone.org/action/showPublications?type=byAlphabet
     # TODO: 'http://www.bioone.org/doi/pdf/{a.doi}',

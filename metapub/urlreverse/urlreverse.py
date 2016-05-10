@@ -127,31 +127,37 @@ class UrlReverse(object):
             self.pmid = self.info['pmid']
             #self.doi = pmid2doi(self.pmid)
             if self.pmid:
-                self.steps.append('FOUND result from inferred PMID in URL;')
+                self.steps.append('FOUND PMID from inferred PMID in URL;')
 
         elif self.format == 'doi':
             self.doi = self.info['doi']
+            self.steps.append('FOUND DOI via inferred doi;')
             self.pmid = doi2pmid(self.doi)
             if self.pmid:
-                self.steps.append('FOUND via inferred doi + doi2pmid;')
+                try:
+                    int(self.pmid)
+                    self.steps.append('FOUND PMID via doi2pmid;')
+                except:
+                    # we'll log this further down (avoiding repeated code).
+                    pass
             else:
-                self.steps.append('NO result from inferred doi + doi2pmid;')
+                self.steps.append('NO PMID from doi2pmid;')
 
         elif self.format == 'vip':
             try:
                 self._try_citation_methods()
             except MetaPubError as error:
                 self.pmid = None
-                self.steps.append('NO result from VIP info + citation methods;')
+                self.steps.append('NO PMID from VIP info + citation methods;')
 
         elif self.format == 'pmcid':
             self.pmid = get_pmid_for_otherid(self.info['pmcid'])
             self.doi = doi2pmid(self.pmid)
             if self.pmid:
-                self.steps.append('FOUND result from PMCID -> PMID lookup;')
+                self.steps.append('FOUND PMID from PMCID -> PMID lookup;')
 
         if self.pmid and self.pmid.startswith('NOT_FOUND'):
-            self.steps.append('NO result: PMID citation lookup resulted in "%s";' % self.pmid)
+            self.steps.append('NO PMID: PMID citation lookup resulted in "%s";' % self.pmid)
             self.pmid = None
 
         if self.doi and not self.pmid:
@@ -167,7 +173,7 @@ class UrlReverse(object):
 
         # Finally: ADMIT DEFEAT
         if not self.doi and not self.pmid:
-            self.steps.append('NO result -- END OF LINE.')
+            self.steps.append('NO DOI. NO PMID. All methods failed. END OF LINE.')
 
     def _store_cache(self):
         """ Store this object in cache by explicitly choosing variables to store as
@@ -191,7 +197,7 @@ class UrlReverse(object):
             self.steps = cache_result['steps']
             self.info = cache_result['info']
             self.verify = cache_result['verify']
-            # TODO             self.supplied_info = cache_result['supplied_info']
+            # TODO self.supplied_info = cache_result['supplied_info']
 
         else:
             self._urlreverse()
@@ -250,7 +256,9 @@ class UrlReverse(object):
         if pmid and pmid != 'AMBIGUOUS':
             self.pmid = pmid
             self.doi = pmid2doi(pmid)
-            self.steps.append('FOUND via PubmedFetcher.pmids_for_citation;')
+            self.steps.append('FOUND PMID via PubmedFetcher.pmids_for_citation;')
+            if self.doi:
+                self.steps.append('FOUND DOI via pmid2doi;')
             return
 
         # 2) try CrossRef -- most effective when title available, but may work without it.
@@ -267,6 +275,10 @@ class UrlReverse(object):
                 pmid = interpret_pmids_for_citation_results(pmids)
                 if pmid and pmid != 'AMBIGUOUS':
                     self.pmid = pmid
+                else:
+                    self.steps.append('NO PMID: AMBIGUOUS results from citation lookup (CrossRef result was %r);' % top_result)
+            else:
+                self.steps.append('NO PMID: Zero results from CrossRef while trying citation methods;')
 
     def _try_backup_doi2pmid_methods(self):
         """ Uses CrossRef and Pubmed Advanced Query combinations to try to get an 
@@ -308,17 +320,17 @@ class UrlReverse(object):
 
             if len(pmids) == 1:
                 self.pmid = pmids[0]
-                self.steps.append('FOUND via Pubmed Advanced Query;')
+                self.steps.append('FOUND PMID via Pubmed Advanced Query;')
                 return
 
             elif len(pmids) == 0:
                 self.pmid = None
-                self.steps.append('NO results for title "%s" in Pubmed, attempting coordinate match;' % title)
+                self.steps.append('Zero results for title "%s" in Pubmed, attempting coordinate match;' % title)
                 title = ''
 
             elif len(pmids) > 1 and len(title.split(' ')) < 3:
                 # title could be something like "Abstract" or "Pituitary" or "Endocrinology Yearbook" -- too vague.
-                self.steps.append('Title "%s" TOO VAGUE, attempting coordinate match;' % title)
+                self.steps.append('Title "%s" too VAGUE, attempting coordinate match;' % title)
                 title = ''
 
         # we have ambiguous results (or no title at all) -- let's try to narrow the field based on
@@ -338,7 +350,7 @@ class UrlReverse(object):
                 pmids = FETCH.pmids_for_query(coins['jtitle'], **params)
             except KeyError:
                 # hrm, no title and no jtitle, eh... let's bail.
-                self.steps.append('NO result. CrossRef data unworkable (no jtitle). END OF LINE.')
+                self.steps.append('NO PMID. CrossRef data unworkable (no jtitle). END OF LINE.')
                 return 
 
         else:
@@ -358,13 +370,13 @@ class UrlReverse(object):
         # that should have narrowed the field substantially. we should give up if it's still ambiguous.
         if len(pmids) == 1:
             self.pmid = pmids[0]
-            self.steps.append('FOUND via Pubmed Advanced Query;')
+            self.steps.append('FOUND PMID via Pubmed Advanced Query;')
         elif len(pmids) == 0:
             self.pmid = None
-            self.steps.append('NO results from pubmed advanced query.  (Data from CrossRef was: %r);' % (coins))
+            self.steps.append('NO PMID, zero results from pubmed advanced query. (Data from CrossRef was: %r);' % (coins))
         else:
             self.pmid = None
-            self.steps.append('AMBIGUOUS results from pubmed advanced query (%i possibilities).  (Data from CrossRef was: %r)' % (len(pmids), coins))
+            self.steps.append('NO PMID, AMBIGUOUS results from pubmed advanced query (%i possibilities). (Data from CrossRef was: %r)' % (len(pmids), coins))
 
     def to_dict(self):
         """ Returns a dictionary containing all public object attributes (i.e. not starting with an underscore). """

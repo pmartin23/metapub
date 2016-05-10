@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 import re
 
 from ..dx_doi import DxDOI
-from ..exceptions import DxDOIError
+from ..exceptions import DxDOIError, BadDOI
 from ..text_mining import find_doi_in_string, scrape_doi_from_article_page
 from ..utils import hostname_of, rootdomain_of
 
@@ -285,6 +285,7 @@ def get_nature_doi_from_link(link):
     Examples:
         http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx -->
         http://www.nature.com/onc/journal/v26/n57/full/1210594a.html --> 10.1038/sj.onc.1210594
+        http://www.nature.com/pr/journal/v79/n5/full/pr201635a.html --> 10.1038/pr.2016.35
 
     Older articles may have very different DOIs, so at the tail end of this process we do a lookup
     in dx.doi.org.  If the DOI is invalid, we should use scrape_doi_from_article_page and return
@@ -296,6 +297,10 @@ def get_nature_doi_from_link(link):
     :param link: the URL
     :return: a string containing a DOI, if one was resolved, or None
     """
+    # TODO: check validity of DOI before returning.
+    # Some older articles need to have their pages loaded and doi scraped.
+    # example: http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
+
     if 'nature.com' not in link:
         return None
 
@@ -306,12 +311,8 @@ def get_nature_doi_from_link(link):
     # example: link:http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx
     #          doi:10.1038/modpathol.2014.160
     style2journals = ['aps', 'bjc', 'cddis', 'cr', 'ejhg', 'gim', 'jcbfm', 'jhg', 'jid', 'labinvest', 'leu',
-                      'modpathol', 'mp', 'onc', 'oncsis']
+                      'modpathol', 'mp', 'onc', 'oncsis', 'pr']
 
-
-    # Needs to have its page loaded and doi scraped.
-    # example: http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
-    style3journals = ['pr']
 
     match = re.search(r'nature.com/[a-zA-z]+/', link)
 
@@ -325,11 +326,6 @@ def get_nature_doi_from_link(link):
     # Example: http://www.nature.com/neuro/journal/v13/n11/abs/nn.2662.html
     if journal_abbrev == 'neuro':
         journal_abbrev = 'nn'
-
-    # dois for style3journals don't seem to be deducible from their URLs.
-    if journal_abbrev in style3journals:
-        link = link.replace('.pdf', '.html')
-        return scrape_doi_from_article_page(link)
 
     match = re.search(r'%s\.{0,1}\d+' % journal_abbrev, link)
     if match:
@@ -369,6 +365,11 @@ def get_nature_doi_from_link(link):
     if match:
         num = match.group(0).split('/')[1]
         return '10.1038/sj.{}.{}'.format(journal_abbrev, num)
+
+    # nothing? try scraping the page.
+
+    link = link.replace('.pdf', '.html')
+    return scrape_doi_from_article_page(link)
 
 
 def get_biomedcentral_doi_from_link(link):
@@ -505,6 +506,7 @@ def get_generic_doi_from_link(url):
     Examples:
         http://onlinelibrary.wiley.com/doi/10.1111/j.1582-4934.2011.01476.x/full --> 10.1111/j.1582-4934.2011.01476.x
         link.springer.com/article/10.1186/1471-2164-7-243 --> 10.1186/1471-2164-7-243
+        http://link.springer.com/article/10.1007/s004399900122 --> 10.1007/s004399900122
 
     :param url: (str)
     :return: doi or None
@@ -515,8 +517,14 @@ def get_generic_doi_from_link(url):
         for addendum in ['/full', '/asset', '/pdf', '.pdf']:
             place = doi.find(addendum)
             if place > -1:
-                doi = doi[:place]
-    return doi
+               doi = doi[:place]
+
+    # we had better check ourselves before we wreck ourselves.
+    try:
+        DXDOI.resolve(doi)
+        return doi
+    except (BadDOI, DxDOIError):
+        return None
 
 
 # == DOI search method registry... order matters! don't screw around with it unless you know what you're doing. :) == #

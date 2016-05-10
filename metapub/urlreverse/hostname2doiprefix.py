@@ -19,5 +19,6 @@ HOSTNAME_TO_DOI_PREFIX_MAP = {'cancerres.aacrjournals.org': '10.1158',  #TODO: *
                               '*.oxfordjournals.org': '10.1093',
                               'eje-online.org': '10.1530',
                               'jimmunol.org': '10.4049',
+                              'asm.org': '10.1128',
                               }
 
