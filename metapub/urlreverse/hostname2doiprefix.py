@@ -11,7 +11,7 @@ HOSTNAME_TO_DOI_PREFIX_MAP = {'cancerres.aacrjournals.org': '10.1158',  #TODO: *
                               'ajcn.nutrition.org': '10.3945',
                               'mcponline.org': '10.1074',
                               'karger.com': '10.1159',
-                              '*.biomedcentral.com': '10.1186',       #TODO: confirm all subdomains conform.
+                              '*.biomedcentral.com': '10.1186',
                               'haematologica.org': '10.3324',
                               'genesdev.cshlp.org': '10.1101',
                               '*.bmj.com': '10.1136',
@@ -19,6 +19,6 @@ HOSTNAME_TO_DOI_PREFIX_MAP = {'cancerres.aacrjournals.org': '10.1158',  #TODO: *
                               '*.oxfordjournals.org': '10.1093',
                               'eje-online.org': '10.1530',
                               'jimmunol.org': '10.4049',
-                              'asm.org': '10.1128',
+                              '*.asm.org': '10.1128',
                               }
 

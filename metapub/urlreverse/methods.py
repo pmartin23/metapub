@@ -35,7 +35,7 @@ re_cell_old_style = re.compile('.*?(?P<hostname>cell\.com)\/(pdf|abstract|fullte
 
 # Unique
 re_jstage = re.compile('.*?(?P<hostname>jstage\.jst\.go\.jp)\/article\/(?P<journal_abbrev>.*?)\/(?P<volume>\d+)\/(?P<issue>.*?)\/(?P<info>).*?\/', re.I)
-re_jci = re.compile('.*?(?P<hostname>jci\.org)\/articles\/view\/(?P<jci_id>\d+)', re.I)
+re_jci = re.compile('.*?jci\.org\/articles\/view\/(?P<jci_id>\d+)', re.I)
 re_karger = re.compile('.*?(?P<hostname>karger\.com)\/Article\/(Abstract|Pdf)\/(?P<kid>\d+)', re.I)
 #re_ahajournals = re.compile('\/(?P<doi_suffix>\w+\.\d+\.\d+\.\w+)', re.I)
 re_ahajournals = re.compile('\/(?P<doi_suffix>[a-z0-9]+\.\d+\.\d+\.[a-z0-9]+)', re.I)
@@ -279,6 +279,7 @@ def get_cell_doi_from_link(url):
     return None
 
 
+# TODO: nature function needs improvement (Older articles, mostly).
 def get_nature_doi_from_link(link):
     """ Custom method to get a DOI from a nature.com URL
 
@@ -375,10 +376,8 @@ def get_nature_doi_from_link(link):
 def get_biomedcentral_doi_from_link(link):
     """ Custom method to get a DOI from a biomedcentral.com URL
 
-    For example, http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx
-
-    :param link: the URL
-    :return: a string containing a DOI, if one was resolved, or None
+    :param link: (str) the URL
+    :return: doi (str) or None
     """
     # style 1:
     # http://www.biomedcentral.com/content/pdf/bcr1282.pdf : doi:10.1186/bcr1282
@@ -461,15 +460,16 @@ def get_ahajournals_doi_from_link(url):
     :param url: (str)
     :return: doi or None
     """
-    out = '10.1161/'
-    if 'ahajournals.org' in url:
-        match = re_ahajournals.match(url)
-        if match:
-            return out + match.groupdict()['doi_suffix']
+    if not 'ahajournals.org' in url:
+        return None
 
-        url = url.replace('.pdf', '')
-        return scrape_doi_from_article_page(url)
-    return None
+    out = '10.1161/'
+    match = re_ahajournals.match(url)
+    if match:
+        return out + match.groupdict()['doi_suffix']
+
+    url = url.replace('.pdf', '')
+    return scrape_doi_from_article_page(url)
 
 
 def get_early_release_doi_from_link(url):
@@ -532,20 +532,55 @@ def get_generic_doi_from_link(url):
         return None
 
 
+def get_plos_doi_from_link(url):
+    """ PLOS one (almost?) always has the DOI in the link, with a twist -- some of 
+    the links we run across are DOIs pointing straight to article supplements.
+
+    For example:
+
+        Supplement doi: 10.1371/journal.pone.0094554.s002
+        Article doi: 10.1371/journal.pone.0094554
+
+    Since we always want the article DOI for PMID gathering purposes, the DOI 
+    returned from this function should be the one pointing to the parent article.
+
+    Examples:
+        http://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0154075 --> 10.1371/journal.pone.0154075
+        http://journals.plos.org/plosone/article?id=info%3Adoi%2F10.1371%2Fjournal.pone.0153994 --> 10.1371/journal.pone.0153994
+        http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0152441#pone-0152441-t002 --> 10.1371/journal.pone.0152441
+        http://journals.plos.org/plosone/article/asset?unique&id=info:doi/10.1371/journal.pone.0094554.s002 --> 10.1371/journal.pone.0094554
+
+    :param url: (str)
+    :return: doi (str) or None
+    """
+    if not 'plos.org' in url:
+        return None
+
+    doi = find_doi_in_string(url)
+    if doi:
+        if '#' in doi:
+            doi = doi[:doi.find('#')]
+
+        parts = doi.split('.')
+        return '.'.join(parts[:4])
+    return None
+
+
 # == DOI search method registry... order matters! don't screw around with it unless you know what you're doing. :) == #
-DOI_METHODS = [get_cell_doi_from_link,
+DOI_METHODS = [get_plos_doi_from_link,
                get_early_release_doi_from_link,
+               get_cell_doi_from_link,
                get_jci_doi_from_link,
-               get_jstage_doi_from_link,
+               get_jstage_doi_from_link,            # uses scrape (1st)
                get_pnas_doi_from_link,
                get_bmj_doi_from_link,
-               get_ahajournals_doi_from_link,
+               get_ahajournals_doi_from_link,       # uses scrape (2nd)
                get_biomedcentral_doi_from_link,
                get_nature_doi_from_link,
-               get_sciencedirect_doi_from_link,
+               get_sciencedirect_doi_from_link,     # uses scrape (last) and DxDOI
                get_karger_doi_from_link,
-               get_spandidos_doi_from_link,
-               get_generic_doi_from_link,
+               get_spandidos_doi_from_link,         # uses scrape (1st)
+               get_generic_doi_from_link,           # uses DxDOI 
                ]
 
 
