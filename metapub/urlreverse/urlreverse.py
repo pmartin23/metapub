@@ -3,6 +3,8 @@ from __future__ import absolute_import, unicode_literals, print_function
 import time
 import logging
 
+import six
+
 from ..pubmedcentral import get_pmid_for_otherid
 from ..pubmedfetcher import PubMedFetcher
 from ..crossref import CrossRef
@@ -288,10 +290,13 @@ class UrlReverse(object):
         if coins.get('spage', 'no').lower() in ['no', 'n%2Fa']:
             coins['spage'] = None
 
-        # bowlderize the title (remove urlencoded chars and punctuation)
+        # bowlderize the title (remove urlencoded chars, unicode-only chars, and punctuation).
         # ps. some entries have no title (really!)
         try:
-            title = remove_chars(coins.get('atitle', ''), urldecode=True).strip()
+            if six.PY2:
+                title = remove_chars(coins.get('atitle', ''), urldecode=True).strip().encode('ascii', errors='ignore')
+            else:
+                title = remove_chars(coins.get('atitle', ''), urldecode=True).strip()
         except KeyError:
             self.steps.append('CrossRef result has no title. This bodes not well. (CrossRef result was %r)' % top_result)
 
