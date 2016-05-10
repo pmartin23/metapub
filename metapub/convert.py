@@ -138,7 +138,7 @@ def pmid2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
     return PubMedArticle2doi_with_score(pma, use_best_guess, min_score=2.0)
 
 
-def doi2pmid(doi, use_best_guess=False, min_score=2.0):
+def doi2pmid(doi, use_best_guess=False, min_score=2.0, debug=False):
     '''uses CrossRef and PubMed eutils to lookup a PMID given a known doi.
 
     Warning: NO validation of input DOI performed here. Use
@@ -164,6 +164,8 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     doi = doi.strip()
     try:
         pma = pm_fetch.article_by_doi(doi)
+        if debug:
+            print('Found PubMedArticle via eutils fetch')
         return pma.pmid
     except:
         pass
@@ -172,7 +174,17 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     # benefit of being a cached query so it is quick to do again, should we need.
     pmids = pm_fetch.pmids_for_query(doi)
     if len(pmids) == 1:
-        return pmids[0]
+        # we need to cross-check; pubmed sometimes screws us over by giving us an article
+        # with a SIMILAR doi. *facepalm*
+        pma = pm_fetch.article_by_pmid(pmids[0])
+        if pma.doi == doi:
+            if debug:
+                print('Found PMID via PubMed advanced query for DOI')
+            return pma.pmid
+        if debug:
+            print('PubMed advanced query gave us a wonky result:')
+            print('     Search: %s' % doi)
+            print('     Return: %s' % pma.doi)
 
     # Look up the DOI in CrossRef, then feed results to pubmed citation query tool.
     try:
@@ -183,7 +195,9 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     if results:
         top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
         pmids = pm_fetch.pmids_for_citation(**top_result['slugs'])
-
+        if debug:
+            print('CrossRef results: %r' % top_result)
+            print('PMIDs: %r' % pmids)
         return interpret_pmids_for_citation_results(pmids)
     else:
         return None
