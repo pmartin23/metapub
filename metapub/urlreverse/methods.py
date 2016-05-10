@@ -449,12 +449,13 @@ def get_jci_doi_from_link(url):
 
 
 def get_ahajournals_doi_from_link(url):
-    """ If this is an ahajournals.org journal, we should be able to compose a DOI using the publisher base
+    """ If this is an ahajournals.org journal, we might be able to compose a DOI using the publisher base
     of 10.1161 and pieces of the URL identifying the article.
 
     Example:
         http://circimaging.ahajournals.org/content/suppl/2013/04/02/CIRCIMAGING.112.000333.DC1/000333_Supplemental_Material.pdf
                 --> 10.1161/CIRCIMAGING.112.000333
+        http://jaha.ahajournals.org/content/4/12/e002395.full.pdf --> 10.1161/JAHA.115.002395 
 
     :param url: (str)
     :return: doi or None
@@ -464,6 +465,9 @@ def get_ahajournals_doi_from_link(url):
         match = re_ahajournals.match(url)
         if match:
             return out + match.groupdict()['doi_suffix']
+
+        url = url.replace('.pdf', '')
+        return scrape_doi_from_article_page(url)
     return None
 
 
