@@ -139,7 +139,7 @@ def get_spandidos_doi_from_link(url):
     :param url: (str)
     :return: doi (str) or None
     """
-    if not url.find('spandidos-publications.com'):
+    if 'spandidos-publications.com' not in url:
         return None
 
     url = url.replace('download', 'abstract')
