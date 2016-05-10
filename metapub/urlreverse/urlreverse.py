@@ -100,7 +100,7 @@ class UrlReverse(object):
             url = 'http://' + url
 
         self.url = url
-        self.path = []
+        self.steps = []
         self.verify = verify
 
         # TODO: UrlReverse.supplied_info 
@@ -138,31 +138,31 @@ class UrlReverse(object):
             self.pmid = self.info['pmid']
             #self.doi = pmid2doi(self.pmid)
             if self.pmid:
-                self.reason += 'FOUND result from inferred PMID in URL;'
+                self.steps.append('FOUND result from inferred PMID in URL;')
 
         elif self.format == 'doi':
             self.doi = self.info['doi']
             self.pmid = doi2pmid(self.doi)
             if self.pmid:
-                self.reason += 'FOUND via inferred doi + doi2pmid;'
+                self.steps.append('FOUND via inferred doi + doi2pmid;')
             else:
-                self.reason += 'NO result from inferred doi + doi2pmid;'
+                self.steps.append('NO result from inferred doi + doi2pmid;')
 
         elif self.format == 'vip':
             try:
                 self._try_citation_methods()
             except MetaPubError as error:
                 self.pmid = None
-                self.reason += 'NO result from VIP info + citation methods;'
+                self.steps.append('NO result from VIP info + citation methods;')
 
         elif self.format == 'pmcid':
             self.pmid = get_pmid_for_otherid(self.info['pmcid'])
             self.doi = doi2pmid(self.pmid)
             if self.pmid:
-                self.reason += 'FOUND result from PMCID -> PMID lookup;'
+                self.steps.append('FOUND result from PMCID -> PMID lookup;')
 
         if self.pmid and self.pmid.startswith('NOT_FOUND'):
-            self.reason += 'NO result: PMID citation lookup resulted in "%s";' % self.pmid
+            self.steps.append('NO result: PMID citation lookup resulted in "%s";' % self.pmid)
             self.pmid = None
 
         if self.doi and not self.pmid:
@@ -171,14 +171,14 @@ class UrlReverse(object):
         if verify and self.doi:
             try:
                 urlres = DXDOI.resolve(self.doi)
-                self.reason += 'VERIFY dx.doi.org: %s;' % urlres
+                self.steps.append('VERIFY dx.doi.org: %s;' % urlres)
             except (DxDOIError, BadDOI) as error:
                 self.doi = None
-                self.reason += 'VERIFY dx.doi.org: problem with DOI: %r;' % error
+                self.steps.append('VERIFY dx.doi.org: problem with DOI: %r;' % error)
 
         # Finally: ADMIT DEFEAT
         if not self.doi and not self.pmid:
-            self.reason += 'NO result -- END OF LINE.'
+            self.steps.append('NO result -- END OF LINE.')
 
     def _store_cache(self):
         """ Store this object in cache by explicitly choosing variables to store as
@@ -199,7 +199,7 @@ class UrlReverse(object):
         if cache_result:
             self.pmid = cache_result['pmid']
             self.doi = cache_result['doi']
-            self.reason = cache_result['reason']
+            self.steps = cache_result['steps']
             self.info = cache_result['info']
             self.verify = cache_result['verify']
             # TODO             self.supplied_info = cache_result['supplied_info']
@@ -261,7 +261,7 @@ class UrlReverse(object):
         if pmid and pmid != 'AMBIGUOUS':
             self.pmid = pmid
             self.doi = pmid2doi(pmid)
-            self.path('FOUND via PubmedFetcher.pmids_for_citation;')
+            self.steps.append('FOUND via PubmedFetcher.pmids_for_citation;')
             return
 
         # 2) try CrossRef -- most effective when title available, but may work without it.
@@ -281,7 +281,7 @@ class UrlReverse(object):
 
     def _try_backup_doi2pmid_methods(self):
         """ Uses CrossRef and Pubmed Advanced Query combinations to try to get an 
-        unambiguous PMID result. Mutates self.pmid (if found unambigously) and self.path
+        unambiguous PMID result. Mutates self.pmid (if found unambigously) and self.steps
         (appending strings documenting the process by which PMID was(n't) acquired).
         """
 
@@ -310,17 +310,17 @@ class UrlReverse(object):
         pmids = FETCH.pmids_for_query(title)
         if len(pmids) == 1:
             self.pmid = pmids[0]
-            self.path.append('FOUND via Pubmed Advanced Query;')
+            self.steps.append('FOUND via Pubmed Advanced Query;')
             return
 
         elif len(pmids) == 0:
             self.pmid = None
-            self.path.append('NO results for title "%s" in Pubmed, attempting coordinate match;' % title)
+            self.steps.append('NO results for title "%s" in Pubmed, attempting coordinate match;' % title)
             title = ''
 
         elif len(pmids) > 1 and len(title.split(' ')) < 3:
             # title could be something like "Abstract" or "Pituitary" or "Endocrinology Yearbook" -- too vague.
-            self.path.append('Title "%s" TOO VAGUE, attempting coordinate match;' % title)
+            self.steps.append('Title "%s" TOO VAGUE, attempting coordinate match;' % title)
             title = ''
 
         # we have ambiguous results -- let's try to narrow the field based on whether we have a viable
@@ -340,28 +340,28 @@ class UrlReverse(object):
 
         else:
             if coins.get('volume') and coins.get('issue'):
-                self.path.append('AMBIGUOUS results for title "%s", trying with volume/issue;')
+                self.steps.append('AMBIGUOUS results for title "%s", trying with volume/issue;')
                 pmids = FETCH.pmids_for_query(title, VI=coins['volume'], IP=coins['issue'])
             elif coins.get('volume') and coins.get('aulast'):
-                self.path.append('AMBIGUOUS results for title "%s", trying with aulast;')
+                self.steps.append('AMBIGUOUS results for title "%s", trying with aulast;')
                 pmids = FETCH.pmids_for_query(title, AU=coins['aulast'])
             elif coins.get('spage') and coins.get('aulast'):
-                self.path.append('AMBIGOUS results for title "%s", trying with first_page;')
+                self.steps.append('AMBIGOUS results for title "%s", trying with first_page;')
                 pmids = FETCH.pmids_for_query(title, PG=coins['spage'])     #, AU=coins['aulast'])
             elif coins.get('volume'):
-                self.path.append('AMBIGOUS results for title "%s", trying with volume;')
+                self.steps.append('AMBIGOUS results for title "%s", trying with volume;')
                 pmids = FETCH.pmids_for_query(title, VI=coins['volume'])
 
         # that should have narrowed the field substantially. we should give up if it's still ambiguous.
         if len(pmids) == 1:
             self.pmid = pmids[0]
-            self.path.append('FOUND via Pubmed Advanced Query;')
+            self.steps.append('FOUND via Pubmed Advanced Query;')
         elif len(pmids) == 0:
             self.pmid = None
-            self.path.append('NO results from pubmed advanced query.  (Data from CrossRef was: %r);' % (coins))
+            self.steps.append('NO results from pubmed advanced query.  (Data from CrossRef was: %r);' % (coins))
         else:
             self.pmid = None
-            self.path('AMBIGUOUS results from pubmed advanced query (%i possibilities).  (Data from CrossRef was: %r)' % (len(pmids), coins))
+            self.steps.append('AMBIGUOUS results from pubmed advanced query (%i possibilities).  (Data from CrossRef was: %r)' % (len(pmids), coins))
 
     def to_dict(self):
         """ Returns a dictionary containing all public object attributes (i.e. not starting with an underscore). """
