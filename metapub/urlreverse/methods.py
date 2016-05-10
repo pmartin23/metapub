@@ -2,11 +2,12 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 
+from ..dx_doi import DxDOI
 from ..exceptions import DxDOIError
-from ..text_mining import (find_doi_in_string, get_nature_doi_from_link, scrape_doi_from_article_page,
-                           get_biomedcentral_doi_from_link)
+from ..text_mining import find_doi_in_string, scrape_doi_from_article_page
 from ..utils import hostname_of, rootdomain_of
 
+from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 from .hostname2doiprefix import HOSTNAME_TO_DOI_PREFIX_MAP
 
 
@@ -53,6 +54,22 @@ re_early_release = re.compile('(^|(https?):\/\/)(?P<hostname>.*?)\/content(\/\w+
 # http://jmg.bmj.com/content/suppl/2015/07/17/jmedgenet-2015-103132.DC1/jmedgenet-2015-103132supp.pdf
 
 re_pnas_supplement = re.compile('.*?pnas.org\/content\/suppl\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<ident>.*?)\/', re.I)
+
+# dx.doi.org self-cacheing lookup engine.
+DXDOI = DxDOI()
+
+
+
+def get_journal_name_from_url(url):
+    if not url.lower().startswith('http'):
+        url = 'http://' + url
+
+    hostname = hostname_of(url)
+
+    if hostname in HOSTNAME_TO_JOURNAL_MAP.keys():
+        return HOSTNAME_TO_JOURNAL_MAP[hostname]
+    else:
+        return None
 
 
 def get_pnas_doi_from_link(url):
@@ -195,7 +212,7 @@ def get_sciencedirect_doi_from_link(url):
         DXDOI.resolve(doi)
         return doi
     except DxDOIError:
-        #print('sciencedirect recomposed DOI %s is not a real DOI' % doi)
+        # some
         pass
 
     # use URL scrape
@@ -215,9 +232,11 @@ def get_cell_doi_from_link(url):
         http://www.cell.com/ajhg/pdfExtended/S0002-9297(16)30051-9 --> 10.1016/j.ajhg.2016.03.016
         http://www.cell.com/ajhg/pdf/S0002-9297(16)00050-1.pdf --> 10.1016/j.ajhg.2016.03.016
 
-
     Unsolved cases:
-        http://www.cell.com/cms/attachment/2020150130/2039963519/mmc1.pdf
+        http://www.cell.com/cms/attachment/2020150130/2039963519/mmc1.pdf --> 10.1016/j.neuron.2014.09.027
+        http://www.cell.com/cms/attachment/2024895080/2044576473/mmc1.pdf --> 10.1016/j.ajhg.2009.01.009
+        http://www.cell.com/cms/attachment/2030360419/2047969851/mmc1.xlsx --> ?
+        http://www.cell.com/cms/attachment/2030360419/2047969852/mmc2.xlsx --> ?
 
     :param url: (str)
     :return: doi or None
@@ -258,6 +277,156 @@ def get_cell_doi_from_link(url):
         return out + pii
 
     return None
+
+
+def get_nature_doi_from_link(link):
+    """ Custom method to get a DOI from a nature.com URL
+
+    Examples:
+        http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx -->
+        http://www.nature.com/onc/journal/v26/n57/full/1210594a.html --> 10.1038/sj.onc.1210594
+
+    Older articles may have very different DOIs, so at the tail end of this process we do a lookup
+    in dx.doi.org.  If the DOI is invalid, we should use scrape_doi_from_article_page and return
+    that instead.
+
+    Example of older-style DOI from Pediatric Research journal ('pr'):
+        http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
+
+    :param link: the URL
+    :return: a string containing a DOI, if one was resolved, or None
+    """
+    if 'nature.com' not in link:
+        return None
+
+    # this is a non-comprehensive list of nature journals
+    style1journals = ['gimo', 'nature', 'nbt', 'ncb', 'nchembio', 'ncomms', 'ng', 'nm', 'nn',
+                      'nrc', 'nrm', 'nsmb', 'srep']
+
+    # example: link:http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx
+    #          doi:10.1038/modpathol.2014.160
+    style2journals = ['aps', 'bjc', 'cddis', 'cr', 'ejhg', 'gim', 'jcbfm', 'jhg', 'jid', 'labinvest', 'leu',
+                      'modpathol', 'mp', 'onc', 'oncsis']
+
+
+    # Needs to have its page loaded and doi scraped.
+    # example: http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
+    style3journals = ['pr']
+
+    match = re.search(r'nature.com/[a-zA-z]+/', link)
+
+    if match:
+        try:
+            journal_abbrev = match.group(0).split('/')[1]
+        except:
+            print('Warning: Unable to extract journal abbrev from link {}'.format(link))
+            journal_abbrev = None
+
+    # Example: http://www.nature.com/neuro/journal/v13/n11/abs/nn.2662.html
+    if journal_abbrev == 'neuro':
+        journal_abbrev = 'nn'
+
+    # dois for style3journals don't seem to be deducible from their URLs.
+    if journal_abbrev in style3journals:
+        link = link.replace('.pdf', '.html')
+        return scrape_doi_from_article_page(link)
+
+    match = re.search(r'%s\.{0,1}\d+' % journal_abbrev, link)
+    if match:
+        doi_suffix = match.group(0)
+        if doi_suffix.endswith('.'):  # strip off a trailing period
+            doi_suffix = doi_suffix[:-1]
+
+        # the DOI suffix can be taken directly for these journals
+        if journal_abbrev in style1journals:
+            return '10.1038/{}'.format(doi_suffix)
+
+        # style2journals are the default
+        else:
+            year = doi_suffix[len(journal_abbrev):len(journal_abbrev)+4]
+            num = doi_suffix[len(journal_abbrev)+4:]
+            return '10.1038/{}.{}.{}'.format(journal_abbrev, year, num)
+
+    # http://www.nature.com/articles/cr2009141 :
+    # http://www.nature.com/articles/cddis201475
+    # http://www.nature.com/articles/nature03404
+    # http://www.nature.com/articles/ng.2223
+    # http://www.nature.com/articles/nsmb.2666
+    match = re.search(r'articles/(([a-z]+)\.{0,1}(\d+))', link)
+    if match:
+        full_match = match.group(0)
+        suffix = match.group(1)
+        journal_abbrev = match.group(2)
+        num = match.group(3)
+        if journal_abbrev in style1journals:
+            return '10.1038/{}'.format(suffix)
+        else:
+            return '10.1038/{}.{}.{}'.format(journal_abbrev, num[:4], num[4:])
+
+    # http://www.nature.com/leu/journal/v19/n11/abs/2403943a.html : 10.1038/sj.leu.2403943
+    # http://www.nature.com/onc/journal/v26/n57/full/1210594a.html :  doi:10.1038/sj.onc.1210594
+    match = re.search(r'full/\d+|abs/\d+', link)
+    if match:
+        num = match.group(0).split('/')[1]
+        return '10.1038/sj.{}.{}'.format(journal_abbrev, num)
+
+
+def get_biomedcentral_doi_from_link(link):
+    """ Custom method to get a DOI from a biomedcentral.com URL
+
+    For example, http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx
+
+    :param link: the URL
+    :return: a string containing a DOI, if one was resolved, or None
+    """
+    # style 1:
+    # http://www.biomedcentral.com/content/pdf/bcr1282.pdf : doi:10.1186/bcr1282
+    # http://www.biomedcentral.com/content/pdf/1465-9921-12-49.pdf : doi:10.1186/1465-9921-12-49
+    # http://www.biomedcentral.com/content/pdf/1471-2164-16-S1-S3.pdf : doi:10.1186/1471-2164-16-S1-S3
+    # http://www.biomedcentral.com/content/pdf/1753-6561-4-s2-o22.pdf : doi:10.1186/1753-6561-4-S2-O22
+    # http://genomebiology.com/content/pdf/gb-2013-14-10-r108.pdf : doi:10.1186/gb-2013-14-10-r108
+    # for supplementary, must remove the last 'S' part
+    # http://www.biomedcentral.com/content/supplementary/bcr1865-S3.doc : doi:10.1186/bcr1865
+    # http://www.biomedcentral.com/content/supplementary/bcr3584-S1.pdf : doi:10.1186/bcr3584
+    # http://www.biomedcentral.com/content/supplementary/1471-2105-11-300-S1.PDF : doi:10.1186/1471-2105-11-300
+    # http://www.biomedcentral.com/content/supplementary/1471-2164-12-343-S3.XLS : doi:10.1186/1471-2164-12-343
+    # http://www.biomedcentral.com/content/supplementary/1471-2164-14-S3-S7-S1.xlsx : doi:10.1186/1471-2164-14-S3-S7
+    # http://www.biomedcentral.com/content/supplementary/gb-2013-14-10-r108-S8.xlsx : doi:10.1186/gb-2013-14-10-r108
+    # style 2:
+    # http://www.biomedcentral.com/1471-2148/12/114 : doi:10.1186/1471-2164-12-114
+    # http://www.biomedcentral.com/1471-2164/15/707/table/T2 : doi:10.1186/1471-2164-15-707
+    # http://www.biomedcentral.com/1471-2164/14/S1/S11 doi:10.1186/1471-2164-14-S1-S11
+    # http://www.biomedcentral.com/1471-230X/11/31 doi:10.1186/1471-230X-11-31
+
+    if 'biomedcentral.com' not in link:
+        return None
+
+    # first, try to use the filename
+    if '/content/' in link:
+        filename = link.split('/')[-1]
+        if '.' in filename:
+            base = filename.split('.')[0]
+            if '/pdf/' in link:
+                return '10.1186/' + base
+            elif '/supplementary/' in link:
+                i1 = base.rfind('S')
+                i2 = base.rfind('s')
+                i = max(i1, i2)
+                return '10.1186/' + base[:i-1]
+    else:
+        parse_result = urlparse(link)
+        path = parse_result.path
+        keywords = ['abstract', 'figure', 'table']
+        for kw in keywords:
+            if kw in path:
+                i = path.find(kw)
+                path = path[:i-1]
+                break
+        if path[-1] == '/':
+            path = path[:-1]
+        if path[0] == '/':
+            path = path[1:]
+        return '10.1186/' + path.replace('/', '-')
 
 
 def get_jci_doi_from_link(url):

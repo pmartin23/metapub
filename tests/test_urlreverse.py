@@ -1,4 +1,6 @@
-from metapub.urlreverse.urlreverse import *
+from metapub import UrlReverse
+
+from metapub.urlreverse.methods import *
 
 import unittest
 
@@ -145,28 +147,35 @@ class TestUrlReverse(unittest.TestCase):
 
     def test_get_karger_doi_from_link(self):
         for url, doi in karger_samples.items():
-            assert doi == get_karger_doi_from_link(url)
+            urlrev = UrlReverse(url)
+            assert doi == urlrev.doi
 
     def test_get_spandidos_doi_from_link(self):
         for url, doi in spandidos_samples.items():
-            assert doi == get_spandidos_doi_from_link(url)
+            urlrev = UrlReverse(url)
+            assert doi == urlrev.doi
 
-    #def test_get_ahajournals_doi_from_link(self):
-    #    for url, doi in ahajournals_samples.items():
-    #        assert doi == get_ahajournals_doi_from_link(url)
+    def test_get_ahajournals_doi_from_link(self):
+        for url, doi in ahajournals_samples.items():
+            urlrev = UrlReverse(url)
+            assert doi == urlrev.doi
 
     def test_get_sciencedirect_doi_from_link(self):
         for url, doi in sciencedirect_samples.items():
-            assert doi == get_sciencedirect_doi_from_link(url)
+            urlrev = UrlReverse(url)
+            assert doi == urlrev.doi
 
     def test_get_cell_doi_from_link(self):
         for url, doi in cell_samples.items():
-            assert doi == get_cell_doi_from_link(url)
+            urlrev = UrlReverse(url)
+            assert doi == urlrev.doi
 
     def test_get_bmj_doi_from_link(self):
         for url, doi in bmj_samples.items():
-            assert doi == get_bmj_doi_from_link(url)
+            urlrev = UrlReverse(url)
+            assert doi == urlrev.doi
 
+    # TODO: UrlReverse.suppled_info
     #def test_get_vip_url_with_supplied_title(self):
     #    url = 'http://www.clinsci.org/content/ppclinsci/130/11/871'
     #    expected_doi = '10.1042/CS20150777',
@@ -177,4 +186,48 @@ class TestUrlReverse(unittest.TestCase):
         for url, doi in tough_cases.items():
             urlrev = UrlReverse(url)
             assert urlrev.doi == doi
+
+    def test_get_nature_doi_from_link(self):
+        doi = get_nature_doi_from_link('http://www.nature.com/ejhg/journal/v22/n11/extref/ejhg201416x6.doc')
+        assert doi == '10.1038/ejhg.2014.16'
+
+        doi = get_nature_doi_from_link('http://www.nature.com/neuro/journal/v13/n11/abs/nn.2662.html')
+        assert doi == '10.1038/nn.2662'
+
+        doi = get_nature_doi_from_link('http://www.nature.com/gim/journal/vaop/ncurrent/extref/gim2014176x1.xls')
+        assert doi == '10.1038/gim.2014.176'
+
+        doi = get_nature_doi_from_link('http://www.nature.com/jhg/journal/v57/n3/pdf/jhg2011139a.pdf?origin=publication_detail')
+        assert doi == '10.1038/jhg.2011.139'
+
+        doi = get_nature_doi_from_link('http://www.nature.com/onc/journal/v26/n57/full/1210594a.html')
+        assert doi == '10.1038/sj.onc.1210594'
+
+        doi = get_nature_doi_from_link('http://www.nature.com/articles/cddis201475')
+        assert doi == '10.1038/cddis.2014.75'
+
+        doi = get_nature_doi_from_link('http://www.nature.com/articles/nature03404')
+        assert doi == '10.1038/nature03404'
+
+        doi = get_nature_doi_from_link('http://www.nature.com/articles/ng.2223')
+        assert doi == '10.1038/ng.2223'
+
+        doi = get_nature_doi_from_link('http://www.nature.com/pr/journal/v49/n1/abs/pr200116a.html')
+        assert doi == '10.1203/00006450-200101000-00016'
+
+        #doi = get_nature_doi_from_link('http://www.nature.com/pr/journal/v49/n1/full/pr200126a.pdf')
+        #assert doi == '10.1203/00006450-200102000-00001'
+
+    def test_get_biomedcentral_doi_from_link(self):
+        doi = get_biomedcentral_doi_from_link('http://www.biomedcentral.com/content/pdf/bcr1282.pdf')
+        assert doi == '10.1186/bcr1282'
+
+        doi = get_biomedcentral_doi_from_link('http://www.biomedcentral.com/1471-2148/12/114')
+        assert doi == '10.1186/1471-2148-12-114'
+
+        doi = get_biomedcentral_doi_from_link('http://www.biomedcentral.com/content/supplementary/gb-2013-14-10-r108-S8.xlsx')
+        assert doi == '10.1186/gb-2013-14-10-r108'
+
+        doi = get_biomedcentral_doi_from_link('http://www.biomedcentral.com/1471-2164/15/707/table/T2')
+        assert doi == '10.1186/1471-2164-15-707'
 

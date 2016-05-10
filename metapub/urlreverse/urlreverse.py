@@ -15,7 +15,6 @@ from ..cache_utils import datetime_to_timestamp
 from ..text_mining import find_doi_in_string
 from ..config import DEFAULT_CACHE_DIR
 
-from .hostname2jrnl import HOSTNAME_TO_JOURNAL_MAP
 from .methods import re_pmcid, try_pmid_methods, try_doi_methods, try_vip_methods
 
 
@@ -71,18 +70,6 @@ def get_article_info_from_url(url):
         return vipdict
 
     return {'format': 'unknown'}
-
-
-def get_journal_name_from_url(url):
-    if not url.lower().startswith('http'):
-        url = 'http://' + url
-
-    hostname = hostname_of(url)
-
-    if hostname in HOSTNAME_TO_JOURNAL_MAP.keys():
-        return HOSTNAME_TO_JOURNAL_MAP[hostname]
-    else:
-        return None
 
 
 def _get_urlreverse_cache(cachedir=DEFAULT_CACHE_DIR):
@@ -302,12 +289,13 @@ class UrlReverse(object):
             coins['spage'] = None
 
         # bowlderize the title (remove urlencoded chars and punctuation)
-        title = asciify(remove_chars(coins['atitle'], urldecode=True).strip())
+        title = remove_chars(coins['atitle'], urldecode=True).strip()
 
         pmids = []
 
         # try this first. If we get one single result, that should be it.
         pmids = FETCH.pmids_for_query(title)
+
         if len(pmids) == 1:
             self.pmid = pmids[0]
             self.steps.append('FOUND via Pubmed Advanced Query;')
