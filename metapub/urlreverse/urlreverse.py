@@ -289,30 +289,35 @@ class UrlReverse(object):
             coins['spage'] = None
 
         # bowlderize the title (remove urlencoded chars and punctuation)
-        title = remove_chars(coins['atitle'], urldecode=True).strip()
+        # ps. some entries have no title (really!)
+        try:
+            title = remove_chars(coins.get('atitle', ''), urldecode=True).strip()
+        except KeyError:
+            self.steps.append('CrossRef result has no title. This bodes not well. (CrossRef result was %r)' % top_result)
 
         pmids = []
 
-        # try this first. If we get one single result, that should be it.
-        pmids = FETCH.pmids_for_query(title)
+        if title:
+            # try just searching by title first. If we get one single result, that should be it.
+            pmids = FETCH.pmids_for_query(title)
 
-        if len(pmids) == 1:
-            self.pmid = pmids[0]
-            self.steps.append('FOUND via Pubmed Advanced Query;')
-            return
+            if len(pmids) == 1:
+                self.pmid = pmids[0]
+                self.steps.append('FOUND via Pubmed Advanced Query;')
+                return
 
-        elif len(pmids) == 0:
-            self.pmid = None
-            self.steps.append('NO results for title "%s" in Pubmed, attempting coordinate match;' % title)
-            title = ''
+            elif len(pmids) == 0:
+                self.pmid = None
+                self.steps.append('NO results for title "%s" in Pubmed, attempting coordinate match;' % title)
+                title = ''
 
-        elif len(pmids) > 1 and len(title.split(' ')) < 3:
-            # title could be something like "Abstract" or "Pituitary" or "Endocrinology Yearbook" -- too vague.
-            self.steps.append('Title "%s" TOO VAGUE, attempting coordinate match;' % title)
-            title = ''
+            elif len(pmids) > 1 and len(title.split(' ')) < 3:
+                # title could be something like "Abstract" or "Pituitary" or "Endocrinology Yearbook" -- too vague.
+                self.steps.append('Title "%s" TOO VAGUE, attempting coordinate match;' % title)
+                title = ''
 
-        # we have ambiguous results -- let's try to narrow the field based on whether we have a viable
-        # title or not.
+        # we have ambiguous results (or no title at all) -- let's try to narrow the field based on
+        # whether we have a viable title or not.
 
         # Two paths diverged in a wood, and I...
 
@@ -324,7 +329,12 @@ class UrlReverse(object):
                       'PG': coins.get('spage', None),
                       'DP': coins.get('year', None),
                      }
-            pmids = FETCH.pmids_for_query(coins['jtitle'], **params)
+            try:
+                pmids = FETCH.pmids_for_query(coins['jtitle'], **params)
+            except KeyError:
+                # hrm, no title and no jtitle, eh... let's bail.
+                self.steps.append('NO result. CrossRef data unworkable (no jtitle). END OF LINE.')
+                return 
 
         else:
             if coins.get('volume') and coins.get('issue'):

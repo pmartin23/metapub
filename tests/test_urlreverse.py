@@ -117,62 +117,62 @@ class TestUrlReverse(unittest.TestCase):
 
     def test_get_pmids_for_pmc_links(self):
         for url, pmid in pmc_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert urlrev.pmid == pmid
 
     def test_get_pmids_for_pmid_links(self):
         for url, pmid in pmid_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert urlrev.pmid == pmid
 
     def test_early_samples(self):
         for url, doi in early_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert urlrev.doi == doi
 
     def test_get_jstage_doi_from_link(self):
         for url, doi in jstage_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert doi == urlrev.doi
 
     def test_try_doi_methods_for_wiley_samples(self):
         for url, doi in wiley_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert urlrev.doi == doi
 
     def test_try_doi_methods_for_springer_samples(self):
         for url, doi in springer_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert urlrev.doi == doi
 
     def test_get_karger_doi_from_link(self):
         for url, doi in karger_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert doi == urlrev.doi
 
     def test_get_spandidos_doi_from_link(self):
         for url, doi in spandidos_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert doi == urlrev.doi
 
     def test_get_ahajournals_doi_from_link(self):
         for url, doi in ahajournals_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert doi == urlrev.doi
 
     def test_get_sciencedirect_doi_from_link(self):
         for url, doi in sciencedirect_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert doi == urlrev.doi
 
     def test_get_cell_doi_from_link(self):
         for url, doi in cell_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert doi == urlrev.doi
 
     def test_get_bmj_doi_from_link(self):
         for url, doi in bmj_samples.items():
-            urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert doi == urlrev.doi
 
     # TODO: UrlReverse.suppled_info
@@ -185,6 +185,7 @@ class TestUrlReverse(unittest.TestCase):
     def test_urlreverse_on_tough_cases(self):
         for url, doi in tough_cases.items():
             urlrev = UrlReverse(url)
+            urlrev = UrlReverse(url, cachedir=None)
             assert urlrev.doi == doi
 
     def test_get_nature_doi_from_link(self):
