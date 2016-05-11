@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 # vip = Volume-Issue-Page format
 #       URLs that have the same format except for the host name
+#
+# TODO: early release format
 
 vip_format = 'http://{host}/content/{a.volume}/{a.issue}/{a.first_page}.full.pdf'
 
@@ -10,8 +12,13 @@ vip_journals = {
     'Am J Clin Pathol': {'host': 'ajcp.ascpjournals.org'},
     'Am J Hypertens': {'host': 'ajh.oxfordjournals.org'},
     'Am J Physiol Lung Cell Mol Physiol': {'host': 'ajplung.physiology.org'},
-    'Am J Physiol, Cell Physiol': {'host': 'ajpcell.physiology.org'},
-    'Angiology': {'host': 'ang.sagepub.com'},  # TODO: early release format
+    'Am J Physiol Cell Physiol': {'host': 'ajpcell.physiology.org'},
+    'Am J Physiol Gastrointest Liver Physiol': {'host': 'ajpgi.physiology.org'},
+    'Am J Physiol Heart Circ Physiol': {'host': 'ajpheart.physiology.org'},
+    'Am J Physiol Endocrinol Metab': {'host': 'ajpendo.physiology.org'},
+    'Am J Physiol Regul Integr Comp Physiol': {'host': 'ajpregu.physiology.org'},
+    # TODO: the rest of physiology.org. see: http://www.the-aps.org/mm/Publications/Journals
+    'Angiology': {'host': 'ang.sagepub.com'}, 
     'Ann Oncol': {'host': 'annonc.oxfordjournals.org'},
     # TODO: backup_url: pmid lookup strategy, e.g.
     # http://aac.asm.org/cgi/pmidlookup?view=long&pmid=7689822
