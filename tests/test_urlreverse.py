@@ -19,6 +19,7 @@ pmid_samples = {
 vip_samples = {
     'http://www.jbc.org/content/266/17/10880.full.pdf': '2040605',
     'http://cardiovascres.oxfordjournals.org/content/75/1/69': '17449018',
+    # 'http://rheumatology.oxfordjournals.org/content/48/6/704.2.full.pdf': '19304793',   # HTD
     'http://www.jbc.org/content/285/5/3076.full': '19920148',
     'http://www.bloodjournal.org/content/127/16/1967.full.pdf': '26932803', 
     'https://hmg.oxfordjournals.org/content/20/10/2048.full.pdf': '21378393',

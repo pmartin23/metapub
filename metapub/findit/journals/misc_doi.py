@@ -64,6 +64,7 @@ simple_formats_doi = {
     'Thyroid': doi_templates['liebert'],
     'Vector Borne Zoonotic Dis': doi_templates['liebert'],
 
+    # TODO: the rest of futuremed journals. see http://www.futuremedicine.com/
     'Pharmacogenomics': doi_templates['futuremed'],
 
     'Acta Orthop Scand': doi_templates['taylor_francis'],
