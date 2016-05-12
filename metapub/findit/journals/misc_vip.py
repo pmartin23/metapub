@@ -81,6 +81,7 @@ vip_journals = {
     'J Aging Health': {'host': 'jah.sagepub.com'},
     'J Am Soc Nephrol': {'host': 'jasn.asnjournals.org'},
     'J Antimicrob Chemother': {'host': 'jac.oxfordjournals.org'},
+    'J Appl Physiol': {'host': 'jap.physiology.org'},
     # TODO: backup_url: pmid lookup strategy,
     # http://jb.asm.org/cgi/pmidlookup?view=long&pmid=7683021
     'J Bacteriol': {'host': 'jb.asm.org'},
@@ -104,6 +105,7 @@ vip_journals = {
     'J Clin Microbiol': {'host': 'jcm.asm.org'},
     'J Mol Endocrinol': {'host': 'jme.endocrinology-journals.org'},
     'J Natl Cancer Inst': {'host': 'jnci.oxfordjournals.org'},
+    'J Neurophysiol': {'host': 'jb.physiology.org'},
     'J Neurosci': {'host': 'jneurosci.org'},
     # TODO:  backup_url: pmid lookup strategy,
     # http://jn.nutrition.org/cgi/pmidlookup?view=long&pmid=10736367
@@ -131,7 +133,10 @@ vip_journals = {
     'Pediatrics': {'host': 'pediatrics.aappublications.org'},
     # TODO: backup_url: pmid lookup strategy, e.g.
     # http://physiolgenomics.physiology.org/cgi/pmidlookup?view=long&pmid=15252189
+    'Physiology (Bethesda)': {'host': 'physiologyonline.physiology.org'},
     'Physiol Genomics': {'host': 'physiolgenomics.physiology.org'},
+    'Physiol Rep': {'host': 'physreports.physiology.org'},
+    'Physiol Rev': {'host': 'physrev.physiology.org'},
     # TODO:  backup_url: pmid lookup strategy, e.g.
     # http://www.plantcell.org/cgi/pmidlookup?view=long&pmid=9501112
     'Plant Cell': {'host': 'www.plantcell.org'},

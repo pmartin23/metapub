@@ -151,6 +151,7 @@ wiley_journals = [
         'Clin Transplant',
         'Cochrane Database Syst Rev',
         'Colorectal Dis',
+        'Compr Physiol', 
         'Congenit Anom (Kyoto)',
         'Congenit Heart Dis',
         'Congest Heart Fail',
