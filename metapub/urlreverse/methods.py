@@ -59,7 +59,6 @@ re_pnas_supplement = re.compile('.*?pnas.org\/content\/suppl\/(?P<year>\d+)\/(?P
 DXDOI = DxDOI()
 
 
-
 def get_journal_name_from_url(url):
     if not url.lower().startswith('http'):
         url = 'http://' + url
@@ -111,19 +110,28 @@ def get_bmj_doi_from_link(url):
     """
 
     out = '10.1136/'
+    doi = None
 
     BMJ_VIP_TO_DOI_DOMAINS = ['jmg']
     match = re_bmj_vip_to_doi.match(url)
     if match:
         parts = match.groupdict()
         if parts['subdomain'] in BMJ_VIP_TO_DOI_DOMAINS:
-            return out + '{subdomain}.{volume}.{issue}.{first_page}'.format(**parts)
+            doi = out + '{subdomain}.{volume}.{issue}.{first_page}'.format(**parts)
 
-    match = re_bmj.match(url)
-    if match:
-        parts = match.groupdict()
-        return out + parts['doi_suffix']
+    else:
+        match = re_bmj.match(url)
+        if match:
+            parts = match.groupdict()
+            doi = out + parts['doi_suffix']
 
+    # gotta test that doi. it might be a dud.
+    if doi:
+        try:
+            DXDOI.resolve(doi)
+            return doi
+        except (BadDOI, DxDOIError):
+            return None
     return None
 
 
