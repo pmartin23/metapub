@@ -12,7 +12,7 @@ from ..eutils_common import SQLiteCache, get_cache_path
 from ..dx_doi import DxDOI
 from ..convert import doi2pmid, pmid2doi, interpret_pmids_for_citation_results
 from ..exceptions import MetaPubError, DxDOIError, BadDOI
-from ..utils import hostname_of, remove_chars, asciify      #, kpick
+from ..utils import hostname_of, remove_chars, asciify
 from ..cache_utils import datetime_to_timestamp
 from ..text_mining import find_doi_in_string
 from ..config import DEFAULT_CACHE_DIR
@@ -95,11 +95,22 @@ class UrlReverse(object):
 
         urlrev = UrlReverse('http://jmg.bmj.com/content/43/2/97.full.pdf')
         print(urlrev.doi)       # 10.1136/jmg.2005.030833
-        print(urlrev.pmid)      # 
+        print(urlrev.pmid)      # 15879500
+
+    Human inspection can quickly verify that the above PDF definitely maps to this 
+    PubMed entry:
+
+        http://www.ncbi.nlm.nih.gov/pubmed/15879500
+
+    (Adding a machine-verification step might be a further development of UrlReverse;
+    however, it would add significant page-loading and processing time. Might be better
+    off as an external "wrapper" around the UrlReverse operations.)
 
     The "steps" attribute will be of most interest if you want to know how UrlReverse
-    arrived at its ID conclusions. In this case, while the URL might have typically been
-    "reversable" to a DOI from its constituent information, using DxDOI to verify whether
+    arrived at its ID conclusions. 
+
+    In the case of the above BMJ article URL, while the URL might have typically been
+    "reversible" to a DOI from its constituent information, using DxDOI to verify whether
     the resultant DOI -- "10.1136/bmj.43.2.97" -- was a real one resulted in a DxDOIError,
     indicating that we did not have the Real McCoy.
 
@@ -116,6 +127,11 @@ class UrlReverse(object):
 
     When ambiguous results are received, UrlReverse considers this a failure (see `steps`).
 
+
+    Args:
+
+        skip_cache: (default: False) whether to load results afresh, regardless of cache contents.
+
     Keyword args:
 
         expiry_date: (default: None) forces cache to reload results older than given date.
@@ -123,13 +139,12 @@ class UrlReverse(object):
         debug: (default: False) raises log level of 'metapub.UrlReverse' logger to logging.DEBUG
     """
 
-    def __init__(self, url, verify=True, skip_cache=False, **kwargs):
+    def __init__(self, url, skip_cache=False, **kwargs):
         if not url.lower().startswith('http'):
             url = 'http://' + url
 
         self.url = url
         self.steps = []
-        self.verify = verify
 
         self.pmid = None
         self.doi = None
@@ -152,6 +167,15 @@ class UrlReverse(object):
             self._urlreverse()
 
     def _urlreverse(self, verify=True):
+        """ the switchboard operator of the urlreverse methods.
+
+        mutates:
+            self.info
+            self.format
+            self.pmid
+            self.doi
+            self.steps
+        """
         self.info = get_article_info_from_url(self.url)
         self.format = self.info['format']
 
@@ -195,13 +219,13 @@ class UrlReverse(object):
         if self.doi and not self.pmid:
             self._try_backup_doi2pmid_methods()
 
-        if verify and self.doi:
+        if self.doi:
             try:
                 urlres = DXDOI.resolve(self.doi)
                 self.steps.append('VERIFY dx.doi.org: %s' % urlres)
             except (DxDOIError, BadDOI) as error:
                 self.doi = None
-                self.steps.append('VERIFY dx.doi.org: problem with DOI: %r' % error)
+                self.steps.append('VERIFY dx.doi.org: PROBLEM with DOI: %r' % error)
 
         # Finally: ADMIT DEFEAT
         if not self.doi and not self.pmid:
