@@ -138,18 +138,16 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
             reason = str(error)
 
     elif jrnl in springer_journals:
-        if pma.doi:
-            try:
-                url = the_springer_shag(pma, verify)
-            except MetaPubError as error:
-                reason = str(error)
+        try:
+            url = the_springer_shag(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     elif jrnl in wiley_journals:
-        if pma.doi:
-            try:
-                url = the_wiley_shuffle(pma, verify)
-            except MetaPubError as error:
-                reason = str(error)
+        try:
+            url = the_wiley_shuffle(pma, verify)
+        except MetaPubError as error:
+            reason = str(error)
 
     elif jrnl in jama_journals:
         try:
