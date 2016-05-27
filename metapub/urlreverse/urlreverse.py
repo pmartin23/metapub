@@ -166,7 +166,7 @@ class UrlReverse(object):
         else:
             self._urlreverse()
 
-    def _urlreverse(self, verify=True):
+    def _urlreverse(self):
         """ the switchboard operator of the urlreverse methods.
 
         mutates:
@@ -252,7 +252,6 @@ class UrlReverse(object):
             self.doi = cache_result['doi']
             self.steps = cache_result['steps']
             self.info = cache_result['info']
-            self.verify = cache_result['verify']
 
             if retry:
                 if 'END OF LINE' in ';'.join(self.steps):
