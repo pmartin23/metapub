@@ -84,6 +84,45 @@ def _get_urlreverse_cache(cachedir=DEFAULT_CACHE_DIR):
 
 class UrlReverse(object):
 
+    """ UrlReverse takes a url and performs the switchboard operations that hopefully lead
+    to the successful "reversal" of an article url into its origination DOI and/or PMID.
+
+    Whether the object is able to discover either or both of these identifiers depends 
+    highly on the information available in the URL and inferable from what is known about
+    the publisher or website that the article was found upon.
+
+    Example:
+
+        urlrev = UrlReverse('http://jmg.bmj.com/content/43/2/97.full.pdf')
+        print(urlrev.doi)       # 10.1136/jmg.2005.030833
+        print(urlrev.pmid)      # 
+
+    The "steps" attribute will be of most interest if you want to know how UrlReverse
+    arrived at its ID conclusions. In this case, while the URL might have typically been
+    "reversable" to a DOI from its constituent information, using DxDOI to verify whether
+    the resultant DOI -- "10.1136/bmj.43.2.97" -- was a real one resulted in a DxDOIError,
+    indicating that we did not have the Real McCoy.
+
+    Using print(urlrev.steps), we get the following:
+            
+        [u'FOUND PMID via PubmedFetcher.pmids_for_citation',
+         u'FOUND DOI via pmid2doi',
+         u'VERIFY dx.doi.org: http://jmg.bmj.com/content/43/2/97']
+
+    So, UrlReverse had to use a fallback method -- the pmids_for_citation approach, a 
+    relatively slower method, but which in this case got the job done. This approach
+    relies on the use of knowing a volume, first_page, and journal name, and 
+    (hopefully) receiving a single unambiguous result from the query.
+
+    When ambiguous results are received, UrlReverse considers this a failure (see `steps`).
+
+    Keyword args:
+
+        expiry_date: (default: None) forces cache to reload results older than given date.
+        cachedir: (default: ~/.cache) allows change of cachedir; set to None to disable cache.
+        debug: (default: False) raises log level of 'metapub.UrlReverse' logger to logging.DEBUG
+    """
+
     def __init__(self, url, verify=True, skip_cache=False, **kwargs):
         if not url.lower().startswith('http'):
             url = 'http://' + url
@@ -92,18 +131,11 @@ class UrlReverse(object):
         self.steps = []
         self.verify = verify
 
-        # TODO: UrlReverse.supplied_info 
-        # self.supplied_info = {'title': kwargs.get('title', None),
-        #                      'jtitle': kpick(kwargs, ['jtitle', 'journal', 'TA'], None),
-        #                      'aulast': kpick(kwargs, ['author1_last_fm', 'aulast'], None),
-        #                      'volume': kwargs.get('volume', None),
-        #                      'issue': kwargs.get('issue', None),
-        #                      'doi': kwargs.get('doi', None),
-        #                      }
-
         self.pmid = None
         self.doi = None
         self.info = None
+
+        self.expiry_date = kwargs.get('expiry_date', None)
 
         cachedir = kwargs.get('cachedir', DEFAULT_CACHE_DIR)
         self._cache = None if cachedir is None else _get_urlreverse_cache(cachedir)
@@ -188,8 +220,8 @@ class UrlReverse(object):
         cache_value['timestamp'] = time.time()
         self._cache[self._make_cache_key(self.url)] = cache_value
 
-    def _load_from_cache(self):
-        cache_result = self._query_cache(self.url)
+    def _load_from_cache(self, retry=False, expiry_date=None):
+        cache_result = self._query_cache(self.url, expiry_date)
 
         if cache_result:
             self.pmid = cache_result['pmid']
@@ -197,7 +229,11 @@ class UrlReverse(object):
             self.steps = cache_result['steps']
             self.info = cache_result['info']
             self.verify = cache_result['verify']
-            # TODO self.supplied_info = cache_result['supplied_info']
+
+            if retry:
+                if 'END OF LINE' in ';'.join(self.steps):
+                    self._urlreverse()
+                    self._store_cache()
 
         else:
             self._urlreverse()
@@ -262,8 +298,6 @@ class UrlReverse(object):
             return
 
         # 2) try CrossRef -- most effective when title available, but may work without it.
-        # TODO: UrlReverse.supplied_info 
-        # title = self.supplied_info['title'] or ''
         results = CRX.query('', params=self.info)
         if results:
             top_result = CRX.get_top_result(results, CRX.last_params)
@@ -361,10 +395,10 @@ class UrlReverse(object):
                 self.steps.append('AMBIGUOUS results for title "%s", trying with aulast')
                 pmids = FETCH.pmids_for_query(title, AU=coins['aulast'])
             elif coins.get('spage') and coins.get('aulast'):
-                self.steps.append('AMBIGOUS results for title "%s", trying with first_page')
+                self.steps.append('AMBIGUOUS results for title "%s", trying with first_page')
                 pmids = FETCH.pmids_for_query(title, PG=coins['spage'])     #, AU=coins['aulast'])
             elif coins.get('volume'):
-                self.steps.append('AMBIGOUS results for title "%s", trying with volume')
+                self.steps.append('AMBIGUOUS results for title "%s", trying with volume')
                 pmids = FETCH.pmids_for_query(title, VI=coins['volume'])
 
         # that should have narrowed the field substantially. we should give up if it's still ambiguous.
