@@ -44,6 +44,7 @@ simple_formats_doi = {
     'Inorg Chem': doi_templates['acs'],
     'J Agric Food Chem': doi_templates['acs'],
     'J Am Chem Soc': doi_templates['acs'],
+    'J Comb Chem': doi_templates['acs'],
     'J Med Chem': doi_templates['acs'],
     'J Phys Chem A': doi_templates['acs'],
     'Langmuir': doi_templates['acs'],
@@ -80,6 +81,7 @@ simple_formats_doi = {
     'Health Commun': doi_templates['taylor_francis'],
     'J Biomol Struct Dyn': doi_templates['taylor_francis'],
     'J Pers Assess': doi_templates['taylor_francis'],
+    'Pediatr Hematol Oncol': doi_templates['taylor_francis'],
     'Worm': doi_templates['taylor_francis'],
 
     'Endocrinology': 'http://press.endocrine.org/doi/pdf/{a.doi}',
