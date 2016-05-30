@@ -17,6 +17,7 @@ from .nature import nature_journals, nature_format
 from .misc_doi import doi_templates, simple_formats_doi
 from .misc_pii import simple_formats_pii
 from .misc_vip import vip_format, vip_journals, vip_journals_nonstandard
+from .scielo import scielo_journals, scielo_format
 from .sciencedirect import sciencedirect_journals, sciencedirect_url
 from .springer import springer_journals
 from .spandidos import spandidos_format, spandidos_journals

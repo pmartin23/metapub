@@ -17,6 +17,7 @@ PUBMED_SWITCHBOARD = {
     'aaas':     {'journals': aaas_journals, 'dance': the_aaas_tango,        },
     'spandidos': {'journals': spandidos_journals, 'dance': the_spandidos_lambada, },
     'jci':      {'journals': jci_journals, 'dance': the_jci_jig,            },
+    'scielo':   {'journals': scielo_journals, 'dance': the_scielo_chula,    },
     'najms':    {'journals': najms_journals, 'dance': the_najms_mazurka,    },
     'biomchemsoc': {'journals': biochemsoc_journals, 'dance': the_biochemsoc_saunter,   },
     'nature':   {'journals': nature_journals, 'dance': the_nature_ballet,   },

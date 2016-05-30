@@ -38,6 +38,7 @@ simple_formats_doi = {
 
     'Anal Chem': doi_templates['acs'],
     'ACS Appl Mater': doi_templates['acs'],
+    'ACS Chem Biol': doi_templates['acs'],
     'ACS Nano': doi_templates['acs'],
     'Biochemistry': doi_templates['acs'],
     'Chem Res Toxicol': doi_templates['acs'],
@@ -77,6 +78,7 @@ simple_formats_doi = {
     'Biosci Biotechnol Biochem': doi_templates['taylor_francis'],
     'Cancer Biol Ther': doi_templates['taylor_francis'],
     'Cell Cycle': doi_templates['taylor_francis'],
+    'Drug Metab Rev': doi_templates['taylor_francis'],
     'Environ Technol': doi_templates['taylor_francis'],
     'Health Commun': doi_templates['taylor_francis'],
     'J Biomol Struct Dyn': doi_templates['taylor_francis'],
