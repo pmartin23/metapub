@@ -97,3 +97,4 @@
 2/17/2016, 0.4.0, PYTHON 2/3 COMPATIBILITY
 2/29/2016, 0.4.0.1, PubMedArticle: bugfix for to_dict method, added test for to_dict function. (Thanks Tim Laurent!)
 4/18/2016, 0.4.1, ClinvarFetcher / ClinVarVariant debut. See README for basic usage.
+5/30/2016, 0.4.2, UrlReverse debut. Also some FindIt improvements, including the_scielo_chula for SciELO journals.
