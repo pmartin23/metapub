@@ -432,6 +432,7 @@ sciencedirect_journals = [
         'J Inorg Biochem',
         'J Insect Physiol',
         'J Invertebr Pathol',
+        'J Invest Dermatol',
         'J Lab Clin Med',
         'J Magn Reson',
         'J Magn Reson B',

@@ -73,3 +73,10 @@ class TestFindItDances(unittest.TestCase):
         source = FindIt(pmid)
         assert source.url == 'http://www.scielo.br/pdf/ag/v52n4/0004-2803-ag-52-04-00278.pdf'
 
+    def test_jid_pmid(self):
+        # J Invest Dermatol -- can work through multiple paths (nature, sciencedirect)...
+        pmid = 10201537
+        source = FindIt(pmid)
+        assert source.url == 'http://www.jidonline.org/article/S0022-202X(15)40457-9/pdf'
+
+

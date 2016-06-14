@@ -88,6 +88,26 @@ def get_pnas_doi_from_link(url):
     return None
 
 
+def get_elifesciences_doi_from_link(url):
+    """ eLIFE / https://elifesciences.org
+
+    Examples:
+        https://elifesciences.org/content/5/e12203 --> 10.7554/eLife.12203
+        https://elifesciences.org/content/4/e11205 --> 10.7554/eLife.11205
+           * https://elifesciences.org/content/4/e11205-download.pdf
+           * http://cdn.elifesciences.org/elife-articles/11205/figures-pdf/elife11205-figures.pdf?xxxx
+    :param url: (str)
+    :return: doi (str) or None
+    """
+    re_elifesciences = re.compile('(^|https?:\/\/)elifesciences.org\/content\/(?P<volume>\d+)\/e(?P<ident>\d+)')
+    out = '10.7554/eLife.'
+    match = re_elifesciences.match(url)
+    if match:
+        doi_suffix = match.groupdict()['ident']
+        return out + doi_suffix
+    return None
+
+
 def get_bmj_doi_from_link(url):
     """ BMJ and subsidiaries use a VIP-ish format that can *sometimes* be mapped to their real
     DOIs. In the case that this process fails, use of the VIP->citation routines should work.
@@ -575,7 +595,16 @@ def get_plos_doi_from_link(url):
 
 
 # == DOI search method registry... order matters! don't screw around with it unless you know what you're doing. :) == #
-DOI_METHODS = [get_plos_doi_from_link,
+#
+# Comments to the right of each method denote which "expensive" operations they use:
+#       * "scrape": loading the page to read text off it (usually to get the DOI)
+#       * "DxDOI": loading the DOI in dx.doi.org to verify that it is a real DOI.
+#
+# Some URLs can be reversed to DOIs using 2 or 3 different methods. We're trying to use the least "expensive"
+# method that gets the job done, while making sure to avoid false positives.
+
+DOI_METHODS = [get_elifesciences_doi_from_link,
+               get_plos_doi_from_link,
                get_early_release_doi_from_link,
                get_cell_doi_from_link,
                get_jci_doi_from_link,
