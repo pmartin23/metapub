@@ -39,7 +39,8 @@ re_jci = re.compile('.*?jci\.org\/articles\/view\/(?P<jci_id>\d+)', re.I)
 re_karger = re.compile('.*?(?P<hostname>karger\.com)\/Article\/(Abstract|Pdf)\/(?P<kid>\d+)', re.I)
 #re_ahajournals = re.compile('\/(?P<doi_suffix>\w+\.\d+\.\d+\.\w+)', re.I)
 re_ahajournals = re.compile('\/(?P<doi_suffix>[a-z0-9]+\.\d+\.\d+\.[a-z0-9]+)', re.I)
-re_elifesciences = re.compile('(^|https?:\/\/)elifesciences.org\/content\/(?P<volume>\d+)\/e(?P<ident>\d+)')
+re_elifesciences = re.compile('(^|https?:\/\/)elifesciences.org\/content\/(?P<volume>\d+)\/e(?P<ident>\d+)', re.I)
+re_elifesciences_figures = re.compile('elifesciences\.org\/elife-articles\/(?P<ident>\d+)\/figures-pdf\/', re.I)
 
 re_bmj = re.compile('(^|https?:\/\/)(?P<subdomain>\w+)\.bmj.com\/content\/(?P<volume>\d+)\/(?P<doi_suffix>bmj.\w+)', re.I)
 re_bmj_vip_to_doi = re.compile('(^|https?:\/\/)(?P<subdomain>\w+).bmj.com\/content\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\w+)', re.I)
@@ -100,11 +101,19 @@ def get_elifesciences_doi_from_link(url):
     :param url: (str)
     :return: doi (str) or None
     """
+    if 'elifesciences.org' not in url:
+        return None
+
     out = '10.7554/eLife.'
-    match = re_elifesciences.match(url)
-    if match:
-        doi_suffix = match.groupdict()['ident']
-        return out + doi_suffix
+    patterns = [re_elifesciences,
+                re_elifesciences_figures]
+
+    for pattern in patterns:
+        match = pattern.match(url)
+        if match:
+            doi_suffix = match.groupdict()['ident']
+            return out + doi_suffix
+
     return None
 
 
@@ -128,6 +137,9 @@ def get_bmj_doi_from_link(url):
     :param url: (str)
     :return: doi (str) or None
     """
+    
+    if 'bmj.com' not in url:
+        return None
 
     out = '10.1136/'
     doi = None
@@ -225,6 +237,9 @@ def get_sciencedirect_doi_from_link(url):
     :param url: (str)
     :return: doi or None
     """
+    if 'sciencedirect.com' not in url:
+        return None
+
     out = '10.1016/'
 
     try:
@@ -269,11 +284,11 @@ def get_cell_doi_from_link(url):
     :param url: (str)
     :return: doi or None
     """
+    if 'cell.com' not in url:
+        return None
+
     out = '10.1016/'
     pii = ''
-
-    if not 'cell.com' in url:
-        return None
 
     # Try "official" pii format first
     match = re_cell_pii_official.match(url)
@@ -488,7 +503,7 @@ def get_ahajournals_doi_from_link(url):
     :param url: (str)
     :return: doi or None
     """
-    if not 'ahajournals.org' in url:
+    if 'ahajournals.org' not in url:
         return None
 
     out = '10.1161/'
@@ -581,7 +596,7 @@ def get_plos_doi_from_link(url):
     :param url: (str)
     :return: doi (str) or None
     """
-    if not 'plos.org' in url:
+    if 'plos.org' not in url:
         return None
 
     doi = find_doi_in_string(url)
