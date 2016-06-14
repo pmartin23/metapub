@@ -39,6 +39,7 @@ re_jci = re.compile('.*?jci\.org\/articles\/view\/(?P<jci_id>\d+)', re.I)
 re_karger = re.compile('.*?(?P<hostname>karger\.com)\/Article\/(Abstract|Pdf)\/(?P<kid>\d+)', re.I)
 #re_ahajournals = re.compile('\/(?P<doi_suffix>\w+\.\d+\.\d+\.\w+)', re.I)
 re_ahajournals = re.compile('\/(?P<doi_suffix>[a-z0-9]+\.\d+\.\d+\.[a-z0-9]+)', re.I)
+re_elifesciences = re.compile('(^|https?:\/\/)elifesciences.org\/content\/(?P<volume>\d+)\/e(?P<ident>\d+)')
 
 re_bmj = re.compile('(^|https?:\/\/)(?P<subdomain>\w+)\.bmj.com\/content\/(?P<volume>\d+)\/(?P<doi_suffix>bmj.\w+)', re.I)
 re_bmj_vip_to_doi = re.compile('(^|https?:\/\/)(?P<subdomain>\w+).bmj.com\/content\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\w+)', re.I)
@@ -99,7 +100,6 @@ def get_elifesciences_doi_from_link(url):
     :param url: (str)
     :return: doi (str) or None
     """
-    re_elifesciences = re.compile('(^|https?:\/\/)elifesciences.org\/content\/(?P<volume>\d+)\/e(?P<ident>\d+)')
     out = '10.7554/eLife.'
     match = re_elifesciences.match(url)
     if match:
