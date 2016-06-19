@@ -65,5 +65,18 @@ class TestFindItDances(unittest.TestCase):
 
     def test_jstage_dive(self):
         pmid = 21297370
-        source = FindIt(pmid=pmid)
+        source = FindIt(pmid)
         assert source.url == 'https://www.jstage.jst.go.jp/article/yakushi/131/2/131_2_247/_pdf'
+
+    def test_scielo_chula(self):
+        pmid = 26840468
+        source = FindIt(pmid)
+        assert source.url == 'http://www.scielo.br/pdf/ag/v52n4/0004-2803-ag-52-04-00278.pdf'
+
+    def test_jid_pmid(self):
+        # J Invest Dermatol -- can work through multiple paths (nature, sciencedirect)...
+        pmid = 10201537
+        source = FindIt(pmid)
+        assert source.url == 'http://www.jidonline.org/article/S0022-202X(15)40457-9/pdf'
+
+

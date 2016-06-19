@@ -296,6 +296,51 @@ def the_biomed_calypso(pma, verify=False):
     return url
 
 
+def the_scielo_chula(pma, verify=True):
+    '''SciELO: The Scientific Electronic Library Online
+
+    SciELO is an electronic library covering a selected collection of Brazilian
+    scientific journals.
+
+    Examples:
+        23657305: pii = S0004-28032013000100035
+            http://www.scielo.br/scielo.php?script=sci_arttext&pid=S0004-28032013000100035
+            http://www.scielo.br/pdf/ag/v50n1/0004-2803-ag-50-01-35.pdf
+    '''
+    page_text = None
+    baseurl_pii = 'http://www.scielo.br/scielo.php?script=sci_arttext&pid=%s'
+    if pma.pii:
+        response = requests.get(baseurl_pii % pma.pii)
+        if response.ok:
+            page_text = response.content
+
+    if page_text is None:
+        if pma.doi:
+            response = requests.get(the_doi_2step(pma.doi))
+            if response.ok:
+                page_text = response.content
+        else:
+            raise NoPDFLink('MISSING: pii or doi needed for SciELO lookup.')
+
+    if page_text:
+        pdf_url = None
+        head = etree.fromstring(page_text, HTMLParser()).getchildren()[0]
+        for elem in head.findall('meta'):
+            if elem.get('name') == 'citation_pdf_url':
+                pdf_url = elem.get('content')
+
+        if pdf_url:
+            if verify:
+                verify_pdf_url(pdf_url)
+            return pdf_url
+        else:
+            #TODO: some other fallback manoeuvre?
+            raise NoPDFLink('TXERROR: SciELO article page lacks PDF url. (See %s)' % response.url)
+
+    else:
+        raise NoPDFLink('TXERROR: SciELO page load responded with not-ok status: %i' % response.status_code)
+
+
 def the_aaas_tango(pma, verify=True):
     '''Note: "verify" param recommended here (page navigation usually necessary).
     

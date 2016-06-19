@@ -14,6 +14,10 @@ from metapub import FindIt
 import logging
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("eutils").setLevel(logging.WARNING)
+
+ch = logging.StreamHandler()
+logging.getLogger("metapub").setLevel(logging.INFO)
+logging.getLogger("metapub").addHandler(ch)
 ####
 
 try:

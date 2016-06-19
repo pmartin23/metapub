@@ -7,4 +7,8 @@ spandidos_journals = {
     'Int J Mol Med': {'ja': 'ijmm'},
     'Oncol Lett': {'ja': 'ol'},
     'Oncol Rep': {'ja': 'or'},
+    'Mol Med Rep': {'ja': 'mmr'},
+    'Biomed Rep': {'ja': 'br'},
+    'Exp Ther Med': {'ja': 'etm'},
+    'Mol Clin Oncol': {'ja': 'mco'},
 }

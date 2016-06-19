@@ -4,7 +4,6 @@ __doc__='mildly-experimental mashups of various services to get needed IDs.'
 
 from .pubmedfetcher import PubMedFetcher
 from .crossref import CrossRef
-from .text_mining import re_doi
 from .exceptions import *
 
 crossref = None   #CrossRef()
@@ -19,6 +18,7 @@ def _start_engines():
         crossref = CrossRef()
         pm_fetch = PubMedFetcher()
 
+
 def _protected_crossref_query(**kwargs):
     pma = kwargs.get('pma', None)
     pmid = kwargs.get('pmid', None)
@@ -31,6 +31,20 @@ def _protected_crossref_query(**kwargs):
     except CrossRefConnectionError:
         return None
     return crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
+
+
+def interpret_pmids_for_citation_results(pmids):
+    if len(pmids) == 1:
+        if pmids[0] == 'NOT_FOUND':
+            return None
+        elif pmids[0].startswith('AMBIGUOUS'):
+            return 'AMBIGUOUS'
+        return str(pmids[0])
+    elif len(pmids) == 0:
+        return None
+    else:
+        return 'AMBIGUOUS'
+
 
 def PubMedArticle2doi(pma, use_best_guess=False, min_score=2.0):
     '''starting with a PubMedArticle object, use CrossRef to find a DOI for given article.
@@ -74,6 +88,7 @@ def PubMedArticle2doi_with_score(pma, use_best_guess=False, min_score=2.0):
     else:
         return (None, 0.0)
 
+
 def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
     '''starting with a pubmed ID, lookup article in pubmed. If DOI found in PubMedArticle object,
         return it.  Otherwise, use CrossRef to find the DOI for given article.
@@ -95,6 +110,7 @@ def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
     if pma.doi:
         return pma.doi
     return PubMedArticle2doi(pma, use_best_guess, min_score=2.0)
+
 
 def pmid2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
     '''Starting with a pubmed ID, lookup article in pubmed. 
@@ -121,7 +137,8 @@ def pmid2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
         return (pma.doi, 10.0)
     return PubMedArticle2doi_with_score(pma, use_best_guess, min_score=2.0)
 
-def doi2pmid(doi, use_best_guess=False, min_score=2.0):
+
+def doi2pmid(doi, use_best_guess=False, min_score=2.0, debug=False):
     '''uses CrossRef and PubMed eutils to lookup a PMID given a known doi.
 
     Warning: NO validation of input DOI performed here. Use
@@ -147,10 +164,29 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     doi = doi.strip()
     try:
         pma = pm_fetch.article_by_doi(doi)
+        if debug:
+            print('Found PubMedArticle via eutils fetch')
         return pma.pmid
     except:
         pass
 
+    # Try doing a DOI lookup right in an advanced query string. Sometimes works and has
+    # benefit of being a cached query so it is quick to do again, should we need.
+    pmids = pm_fetch.pmids_for_query(doi)
+    if len(pmids) == 1:
+        # we need to cross-check; pubmed sometimes screws us over by giving us an article
+        # with a SIMILAR doi. *facepalm*
+        pma = pm_fetch.article_by_pmid(pmids[0])
+        if pma.doi == doi:
+            if debug:
+                print('Found PMID via PubMed advanced query for DOI')
+            return pma.pmid
+        if debug:
+            print('PubMed advanced query gave us a wonky result:')
+            print('     Search: %s' % doi)
+            print('     Return: %s' % pma.doi)
+
+    # Look up the DOI in CrossRef, then feed results to pubmed citation query tool.
     try:
         results = crossref.query(doi)
     except CrossRefConnectionError:
@@ -159,14 +195,10 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0):
     if results:
         top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
         pmids = pm_fetch.pmids_for_citation(**top_result['slugs'])
-        if len(pmids) == 1:
-            if pmids[0] == 'NOT_FOUND':
-                return None
-            return str(pmids[0])
-        elif len(pmids) == 0:
-            return None
-        else:
-            return 'AMBIGUOUS'
+        if debug:
+            print('CrossRef results: %r' % top_result)
+            print('PMIDs: %r' % pmids)
+        return interpret_pmids_for_citation_results(pmids)
     else:
         return None
 

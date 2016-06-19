@@ -8,6 +8,27 @@ from ..exceptions import MetaPubError
 
 from .dances import *
 
+
+PUBMED_SWITCHBOARD = {
+    'jstage':   {'journals': jstage_journals, 'dance': the_jstage_dive,     },
+    'springer': {'journals': springer_journals, 'dance': the_springer_shag, },
+    'wiley':    {'journals': wiley_journals, 'dance': the_wiley_shuffle,    },
+    'jama':     {'journals': jama_journals, 'dance': the_jama_dance,        },
+    'aaas':     {'journals': aaas_journals, 'dance': the_aaas_tango,        },
+    'spandidos': {'journals': spandidos_journals, 'dance': the_spandidos_lambada, },
+    'jci':      {'journals': jci_journals, 'dance': the_jci_jig,            },
+    'scielo':   {'journals': scielo_journals, 'dance': the_scielo_chula,    },
+    'najms':    {'journals': najms_journals, 'dance': the_najms_mazurka,    },
+    'biomchemsoc': {'journals': biochemsoc_journals, 'dance': the_biochemsoc_saunter,   },
+    'nature':   {'journals': nature_journals, 'dance': the_nature_ballet,   },
+    'cell':     {'journals': cell_journals, 'dance': the_cell_pogo,         },
+    'lancet':   {'journals': lancet_journals, 'dance': the_lancet_tango,    },
+    'sciencedirect': {'journals': sciencedirect_journals, 'dance': the_sciencedirect_disco, },
+    'karger':   {'journals': karger_journals, 'dance': the_karger_conga,    },
+    'wolterskluwer': {'journals': wolterskluwer_journals, 'dance': the_wolterskluwer_volta, },
+}
+
+
 """ findit/logic.py
 
         The get_pdf_from_pma function selects possible PDF links for the
@@ -124,107 +145,25 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
 
     # === PUBLISHER BASED LISTS === #
 
-    if jrnl in jstage_journals:
-        try:
-            url = the_jstage_dive(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl.find('BMC') == 0 or jrnl in BMC_journals:
-        # Many Biomed Central journals start with "BMC", but many more don't.
+    # Many Biomed Central journals start with "BMC", but many more don't.
+    if jrnl.find('BMC') == 0 or jrnl in BMC_journals:
         try:
             url = the_biomed_calypso(pma, verify)
         except MetaPubError as error:
             reason = str(error)
 
-    elif jrnl in springer_journals:
-        if pma.doi:
+    for publisher in list(PUBMED_SWITCHBOARD.keys()):
+        if jrnl in PUBMED_SWITCHBOARD[publisher]['journals']:
             try:
-                url = the_springer_shag(pma, verify)
+                url = PUBMED_SWITCHBOARD[publisher]['dance'](pma)
             except MetaPubError as error:
                 reason = str(error)
 
-    elif jrnl in wiley_journals:
-        if pma.doi:
-            try:
-                url = the_wiley_shuffle(pma, verify)
-            except MetaPubError as error:
-                reason = str(error)
+    if url:
+        return (url, reason)
 
-    elif jrnl in jama_journals:
-        try:
-            url = the_jama_dance(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in aaas_journals.keys():
-        try:
-            url = the_aaas_tango(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in spandidos_journals.keys():
-        try:
-            url = the_spandidos_lambada(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in jci_journals:
-        try:
-            url = the_jci_jig(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in najms_journals:
-        try:
-            url = the_najms_mazurka(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in biochemsoc_journals.keys():
-        try:
-            the_biochemsoc_saunter(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in nature_journals.keys():
-        try:
-            url = the_nature_ballet(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in cell_journals.keys():
-        try:
-            url = the_cell_pogo(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in lancet_journals.keys():
-        try:
-            url = the_lancet_tango(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in sciencedirect_journals:
-        try:
-            url = the_sciencedirect_disco(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in karger_journals:
-        try:
-            url = the_karger_conga(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in wolterskluwer_journals:
-        try:
-            url = the_wolterskluwer_volta(pma, verify)
-        except MetaPubError as error:
-            reason = str(error)
-
-    elif jrnl in paywall_journals:
-        reason = 'PAYWALL: this journal has been marked in a list as "never free"'
+    #if jrnl in paywall_journals:
+    #    reason = 'PAYWALL: this journal has been marked in a list as "never free"'
 
     elif jrnl in todo_journals:
         reason = 'TODO: format example: %s' % todo_journals[jrnl]['example']
@@ -234,7 +173,7 @@ def find_article_from_pma(pma, verify=True, use_nih=False):
 
     # aka if url is STILL None...
     if not url and not reason:
-        reason = 'NOFORMAT: No URL format for Journal %s' % jrnl
+        reason = 'NOFORMAT: No URL format for journal "%s"' % jrnl
 
     return (url, reason)
 

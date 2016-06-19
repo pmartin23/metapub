@@ -38,16 +38,21 @@ simple_formats_doi = {
 
     'Anal Chem': doi_templates['acs'],
     'ACS Appl Mater': doi_templates['acs'],
+    'ACS Chem Biol': doi_templates['acs'],
     'ACS Nano': doi_templates['acs'],
     'Biochemistry': doi_templates['acs'],
     'Chem Res Toxicol': doi_templates['acs'],
     'Inorg Chem': doi_templates['acs'],
     'J Agric Food Chem': doi_templates['acs'],
     'J Am Chem Soc': doi_templates['acs'],
+    'J Comb Chem': doi_templates['acs'],
     'J Med Chem': doi_templates['acs'],
     'J Phys Chem A': doi_templates['acs'],
     'Langmuir': doi_templates['acs'],
     'Nano Lett': doi_templates['acs'],
+
+    'BMJ Open Gastroenterol': 'http://bmjopengastro.bmj.com/doi/pdf/{a.doi}',
+    'Microbiol Spectr': 'http://www.asmscience.org/content/journal/microbiolspec/{a.doi}', #10.1128/microbiolspec.VMBF-0028-2015
 
     # http://www.bioone.org/action/showPublications?type=byAlphabet
     # TODO: 'http://www.bioone.org/doi/pdf/{a.doi}',
@@ -61,6 +66,7 @@ simple_formats_doi = {
     'Thyroid': doi_templates['liebert'],
     'Vector Borne Zoonotic Dis': doi_templates['liebert'],
 
+    # TODO: the rest of futuremed journals. see http://www.futuremedicine.com/
     'Pharmacogenomics': doi_templates['futuremed'],
 
     'Acta Orthop Scand': doi_templates['taylor_francis'],
@@ -72,10 +78,12 @@ simple_formats_doi = {
     'Biosci Biotechnol Biochem': doi_templates['taylor_francis'],
     'Cancer Biol Ther': doi_templates['taylor_francis'],
     'Cell Cycle': doi_templates['taylor_francis'],
+    'Drug Metab Rev': doi_templates['taylor_francis'],
     'Environ Technol': doi_templates['taylor_francis'],
     'Health Commun': doi_templates['taylor_francis'],
     'J Biomol Struct Dyn': doi_templates['taylor_francis'],
     'J Pers Assess': doi_templates['taylor_francis'],
+    'Pediatr Hematol Oncol': doi_templates['taylor_francis'],
     'Worm': doi_templates['taylor_francis'],
 
     'Endocrinology': 'http://press.endocrine.org/doi/pdf/{a.doi}',

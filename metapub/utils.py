@@ -5,6 +5,13 @@ import unicodedata
 import six
 from unidecode import unidecode
 
+#py3k / py2k compatibility
+if six.PY2:
+    from urlparse import urlparse
+    from urllib2 import unquote
+else:
+    from urllib.parse import urlparse, unquote
+
 PUNCS_WE_DONT_LIKE = "[],.()<>'/?;:\"&"
 
 
@@ -15,10 +22,59 @@ def kpick(args, options, default=None):
     return default
 
 
-def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE):
+def remove_chars(inp, chars=PUNCS_WE_DONT_LIKE, urldecode=False):
+    """ Remove target characters from input string.
+
+    :param inp: (str)
+    :param chars: (str) characters to remove [default: utils.PUNCS_WE_DONT_LIKE]
+    :param urldecode: (bool) whether to first urldecode the input string [default: False]
+    """
+    if urldecode:
+        inp = unquote(inp)
+
     for char in chars:
         inp = inp.replace(char, '')
     return inp
+
+
+def hostname_of(url):
+    """ Takes a url (may or may not contain protocol prefix) and returns the simplest base form of the 
+    hostname in the supplied URL.
+    
+    If hostname starts with 'www.', this will be stripped out.
+
+    Examples: 
+        http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> nature.com
+        https://webhome.weizmann.ac.il --> webhome.weizmann.ac.il
+        http://www.ncbi.nlm.nih.gov/pubmed/17108762 --> ncbi.nlm.nih.gov
+
+    :param url: (str)
+    :return hostname: (str)
+    """
+    if url.startswith('http'):
+        hostname = urlparse(url).hostname
+    else:
+        hostname = urlparse('http://' + url).hostname
+
+    if hostname.startswith('www'):
+        hostname = hostname.replace('www.', '')
+    return hostname
+
+
+def rootdomain_of(url):
+    """ Returns the root domain of hostname of supplied URL. 
+
+    Examples:
+        http://blood.oxfordjournals.org --> oxfordjournals.org
+        https://webhome.weizmann.ac.il --> ac.il
+        https://regex101.com/ --> regex101.com
+        http://www.ncbi.nlm.nih.gov/pubmed/17108762 --> nih.gov
+
+    :param url: (str)
+    :return rootdomain: (str)
+    """
+    hostname = hostname_of(url)
+    return '.'.join(hostname.split('.')[-2:])
 
 
 def asciify(inp):
