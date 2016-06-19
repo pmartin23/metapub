@@ -1,5 +1,4 @@
-from metapub.text_mining import re_doi, findall_dois_in_text, find_doi_in_string, \
-    get_biomedcentral_doi_from_link, get_nature_doi_from_link
+from metapub.text_mining import re_doi, findall_dois_in_text, find_doi_in_string
 
 import unittest
 

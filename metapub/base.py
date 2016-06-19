@@ -15,14 +15,28 @@ def parse_elink_response(xmlstr):
     """
     dom = etree.fromstring(xmlstr)
     ids = []
-    if dom.find('LinkSet/LinkSetDb/LinkName').text:
-        linkset = dom.find('LinkSet/LinkSetDb')
-        for link in linkset.getchildren():
-            if link.find('Id') is not None:
+
+    linkname_elem = dom.find('LinkSet/LinkSetDb/LinkName')
+    if linkname_elem:
+        if linkname_elem.text:
+            linkset = dom.find('LinkSet/LinkSetDb')
+            for link in linkset.getchildren():
+                if link.find('Id') is not None:
+                    ids.append(link.find('Id').text)
+            return ids
+
+    # Medgen->Pubmed elink result with "0" in IDList
+    """ <eLinkResult><LinkSet><DbFrom>medgen</DbFrom><IdList><Id>0</Id></IdList></LinkSet></eLinkResult> """
+    idlist_elem = dom.find('LinkSet/IdList')
+    if (idlist_elem.getchildren()) > 0:
+        for item in idlist_elem.getchildren():
+            if item.find('Id') is not None:
                 ids.append(link.find('Id').text)
-        return ids
-    else:
-        return None
+        if len(ids)==1 and ids[0]=='0':
+            return []
+        else:
+            return ids
+    return None
 
 
 class MetaPubObject(object):
@@ -72,6 +86,7 @@ class MetaPubObject(object):
             return elem.text
         return None
 
+
 # singleton class used by the fetchers.
 class Borg(object):
     """ singleton class backing cache engine objects. """
@@ -79,3 +94,4 @@ class Borg(object):
 
     def __init__(self):
         self.__dict__ = self._shared_state
+
