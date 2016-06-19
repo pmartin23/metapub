@@ -21,11 +21,11 @@ logging.getLogger("eutils").setLevel(logging.INFO)
 
 fetch = MedGenFetcher()
 uids = fetch.uids_by_term(term)
-print(uids)
+print('Found %i Medgen concepts for term "%s"' % (len(uids), term))
 
 # TODO: Term Hierarchy Children (only 1 tier below), Term Hierarchy Parents (only 1 tier above)
 
-headers = ['CUI', 'Hugo', 'Title', 'Semantic Type', 'MedGenUID', 
+headers = ['CUI', 'Title', 'Semantic Type', 'MedGenUID', 
            'OMIM ID', 'Modes of Inheritance', 'Assoc Genes', 'PMIDS' ]
 
 table = []
@@ -46,14 +46,14 @@ for this_id in uids:
         continue
     #print concept.to_dict()
     assert concept.medgen_uid == this_id
-    line = [concept.CUI, term, concept.title, concept.semantic_type, concept.medgen_uid]
+    line = [concept.CUI, concept.title, concept.semantic_type, concept.medgen_uid]
 
     line.append(_join_or_NA(concept.OMIM))
     line.append(_join_or_NA(concept.modes_of_inheritance, 'name'))
     line.append(_join_or_NA(concept.associated_genes, 'hgnc')) 
 
     pmids = fetch.pubmeds_for_uid(this_id)
-    line.append(';'.join(pmids))
+    line.append('%i' % len(pmids))
 
     table.append(line)
 
