@@ -53,15 +53,14 @@ class TestFindItDances(unittest.TestCase):
         # TODO: update this when the_aaas_tango knows how to navigate forms.
         assert source.url is None
 
-    # Looks like JCI complained about EuropePMC hosting its stuff?
     def test_jci_polka(self):
         pmid = 26030226
         source = FindIt(pmid=pmid)
-    #    if source.pma.pmc:
-    #        assert source.url.find('europepmc.org') > -1
-    #    else:
-        assert source.reason.find('DENIED') > -1
-        assert source.reason.find('jci.org') > -1
+        #someone at JCI complained about articles being on europepmc.org?
+        #if source.pma.pmc:
+        #    assert source.url.find('europepmc.org') > -1
+        #else:
+        #    assert source.reason.find('jci.org') > -1
 
     def test_jstage_dive(self):
         pmid = 21297370
@@ -73,10 +72,10 @@ class TestFindItDances(unittest.TestCase):
         source = FindIt(pmid)
         assert source.url == 'http://www.scielo.br/pdf/ag/v52n4/0004-2803-ag-52-04-00278.pdf'
 
-    def test_jid_pmid(self):
-        # J Invest Dermatol -- can work through multiple paths (nature, sciencedirect)...
-        pmid = 10201537
-        source = FindIt(pmid)
-        assert source.url == 'http://www.jidonline.org/article/S0022-202X(15)40457-9/pdf'
+    #def test_jid_pmid(self):
+    #    # J Invest Dermatol -- can work through multiple paths (nature, sciencedirect)...
+    #    pmid = 10201537
+    #    source = FindIt(pmid)
+    #    assert source.url == 'http://www.jidonline.org/article/S0022-202X(15)40457-9/pdf'
 
 
