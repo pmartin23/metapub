@@ -10,7 +10,7 @@ from .eutils_common import get_cache_path, get_eutils_client
 from .pubmedarticle import PubMedArticle
 from .pubmedcentral import get_pmid_for_otherid
 from .pubmed_clinicalqueries import *
-from .utils import kpick, parameterize, lowercase_keys
+from .utils import kpick, parameterize, lowercase_keys, remove_chars
 from .text_mining import re_pmid
 from .exceptions import MetaPubError, EutilsRequestError, InvalidPMID
 from .base import Borg
@@ -328,13 +328,16 @@ class PubMedFetcher(Borg):
             aulast (first author's last name) or author1_first_lastfm (as produced by PubMedArticle class)
 
         (Note that these arguments were made to match the tokens that arise from CrossRef's result['slugs'].)
+
+        Strings submitted for journal/jtitle will be run through metapub.utils.remove_chars to deal with HTML-
+        encoded characters and to remove punctuation.
         '''
         # output format in return:
         # journal_title|year|volume|first_page|author_name|your_key|
         base_uri = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/ecitmatch.cgi?db=pubmed&retmode=xml&bdata={journal_title}|{year}|{volume}|{first_page}|{author_name}|metapub|'
 
         kwargs = lowercase_keys(kwargs)
-        journal_title = kpick(kwargs, options=['jtitle', 'journal', 'journal_title'], default='')
+        journal_title = remove_chars(kpick(kwargs, options=['jtitle', 'journal', 'journal_title'], default=''), urldecode=True)
         author_name = _reduce_author_string(kpick(kwargs, 
                         options=['aulast', 'author1_last_fm', 'author', 'authors'], default=''))
         first_page = kpick(kwargs, options=['spage', 'first_page'], default='')
@@ -347,6 +350,10 @@ class PubMedFetcher(Borg):
                      'first_page': str(first_page),
                      'author_name': parameterize(author_name, '+'),
                    }
+
+        if kwargs.get('debug', False):
+            print('Submitted to pmids_for_citation: %r' % inp_dict)
+
 
         # clean up any "n/a" values.  eutils doesn't understand them.
         for k in inp_dict:

@@ -194,9 +194,10 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0, debug=False):
 
     if results:
         top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
-        pmids = pm_fetch.pmids_for_citation(**top_result['slugs'])
+        pmids = pm_fetch.pmids_for_citation(debug=debug, **top_result['slugs'])
         if debug:
-            print('CrossRef results: %r' % top_result)
+            print('Submitted slugs: %r' % top_result['slugs'])
+            #print('CrossRef results: %r' % top_result)
             print('PMIDs: %r' % pmids)
         return interpret_pmids_for_citation_results(pmids)
     else:
