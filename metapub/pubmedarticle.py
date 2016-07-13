@@ -11,11 +11,12 @@ import six
 from .base import MetaPubObject
 from .exceptions import MetaPubError
 from .text_mining import re_numbers
+from .pubmedauthor import PubMedAuthor
 
 
 class PubMedArticle(MetaPubObject):
     """This PubMedArticle class receives an XML string as its required argument
-    and parses it into its constituent parts, exposing them as attributes. 
+    and parses it into its constituent parts, exposing them as attributes.
 
     Usage:
         paper = PubMedArticle(xml_string)
@@ -27,7 +28,7 @@ class PubMedArticle(MetaPubObject):
     depending on whether PubmedBookArticle or PubmedArticle headings are found in the supplied
     xmlstr at instantiation.
 
-    Since this class needs to work seamlessly in production whether it's a book 
+    Since this class needs to work seamlessly in production whether it's a book
     or an article, the PubmedArticle attributes will always be available (set to None in many
     cases for PubmedBookArticle, e.g. volume, issue, journal), but PubmedBookArticle
     attributes will only be set when pubmed_type='book'.
@@ -40,7 +41,7 @@ class PubMedArticle(MetaPubObject):
         * book_id (default: None) - string from IdType="bookaccession", e.g. "NBK1403"
         * book_title (default: None) - string with name of book (as differentiated from ArticleTitle)
         * book_publisher (default: None) - dict containing {'name': string, 'location': string}
-        * book_sections (default: []) - dict with key->value pairs as section_name->SectionTitle 
+        * book_sections (default: []) - dict with key->value pairs as section_name->SectionTitle
         * book_contribution_date (default: None) - python datetime date
         * book_date_revised (default: None) - python datetime date
         * book_history (default: [])  - dictionary with key->value pairs as PubStatus -> python datetime
@@ -68,16 +69,17 @@ class PubMedArticle(MetaPubObject):
             super(PubMedArticle, self).__init__(xmlstr, None, args, kwargs)
 
         pmt = self.pubmed_type
-        
+
         # shared between book and article types:
         self.pmid = self._get_pmid()
         self.url  = self._get_url()
         self.authors = self._get_authors() if pmt == 'article' else self._get_book_authors()
+        self.author_list = self._get_author_list() if pmt == 'article' else self._get_book_author_list()
         self.title = self._get_title() if pmt == 'article' else self._get_book_articletitle()
         self.authors_str = self._get_authors_str()
-        self.author1_last_fm = self._get_author1_last_fm()        
+        self.author1_last_fm = self._get_author1_last_fm()
         self.author1_lastfm = self._get_author1_lastfm()
-    
+
         # 'article' only (not shared):
         self.pages = None if pmt == 'book' else self._get_pages()
         self.first_page = None if pmt == 'book' else self._get_first_page()
@@ -122,7 +124,7 @@ class PubMedArticle(MetaPubObject):
         self.abstract = self._get_abstract() if pmt == 'article' else self._get_book_abstract()
         self.journal = self.book_title if pmt == 'book' else self._get_journal()
         self.year = self._get_book_year() if pmt == 'book' else self._get_year()
-    
+
         self.history = self._get_article_history()
 
     def to_dict(self):
@@ -229,6 +231,10 @@ class PubMedArticle(MetaPubObject):
         authors = [_au_to_last_fm(au) for au in self.content.findall('BookDocument/AuthorList/Author')]
         return authors
 
+    def _get_book_author_list(self):
+        authors = [PubMedAuthor(au) for au in self.content.findall('BookDocument/AuthorList/Author')]
+        return authors
+
     def _get_book_publisher(self):
         return self._get('BookDocument/Book/Publisher/PublisherName')
 
@@ -320,8 +326,12 @@ class PubMedArticle(MetaPubObject):
         authors = [_au_to_last_fm(au) for au in self.content.findall(self._root+'/Article/AuthorList/Author')]
         return authors
 
+    def _get_author_list(self):
+        authors = [PubMedAuthor(au) for au in self.content.findall(self._root+'/Article/AuthorList/Author')]
+        return authors
+
     def _get_authors_str(self):
-        return '; '.join(self.authors) 
+        return '; '.join(self.authors)
 
     def _get_author1_last_fm(self):
         """ return first author's name, in format Last INITS (space between surname and initials)"""
@@ -345,7 +355,7 @@ class PubMedArticle(MetaPubObject):
         return j
 
     def _get_pages(self):
-        return self._get(self._root+'/Article/Pagination/MedlinePgn') 
+        return self._get(self._root+'/Article/Pagination/MedlinePgn')
 
     def _get_first_page(self):
         try:
@@ -358,7 +368,7 @@ class PubMedArticle(MetaPubObject):
             lastnum = self.pages.split('-')[1]
         except (IndexError, AttributeError):
             return None
-        try: 
+        try:
             # Return true last page from pages attribute, i.e if self.pages is
             # "148-52", return "152".  If self.pages is "291-4", return "294".
             if int(lastnum) < int(self.first_page):
@@ -369,7 +379,7 @@ class PubMedArticle(MetaPubObject):
             return lastnum
 
     def _get_title(self):
-        return self._get(self._root+'/Article/ArticleTitle') 
+        return self._get(self._root+'/Article/ArticleTitle')
 
     def _get_volume(self):
         try:
@@ -387,7 +397,7 @@ class PubMedArticle(MetaPubObject):
         ji = self.content.find(self._root+'/Article/Journal/JournalIssue')
         try:
             return '%s(%s)' % (ji.find('Volume').text, ji.find('Issue').text)
-                               
+
         except AttributeError:
             pass
         try:
@@ -459,7 +469,7 @@ class PubMedArticle(MetaPubObject):
         for chem in chemicals:
             substance = chem.find('NameOfSubstance')
             regnum = chem.find('RegistryNumber').text  # very often this is '0'
-            outd[substance.get('UI')] = { 
+            outd[substance.get('UI')] = {
                     'substance_name': substance.text,
                     'registry_number': regnum
                 }
@@ -471,7 +481,7 @@ class PubMedArticle(MetaPubObject):
         for pt in pubtypes:
             outd[pt.get('UI')] = pt.text
         return outd
-    
+
     def _get_grantlist(self):
         outl = []
         grants = self.content.findall('MedlineCitation/GrantList')
@@ -498,7 +508,7 @@ def _au_to_last_fm(au):
     except AttributeError:
         pass
     try:
-        return au.find('CollectiveName').text 
+        return au.find('CollectiveName').text
     except AttributeError:
         pass
     try:
@@ -538,7 +548,7 @@ def determine_pubmed_xml_type(xmlstr):
     """
     # The real purpose of this function is to pull the py2/3 compatibility code
     # away from the PubMedArticle class. This sucks and I (@nthmost) hate it,
-    # but it solves all of the problems of trying to inspect an XML document 
+    # but it solves all of the problems of trying to inspect an XML document
     # that may have arrived as bytes (from requests) or as a native string, which
     # when you use unicode_literals in 2.7 gives you even more problems.
     #
