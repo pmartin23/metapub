@@ -101,10 +101,7 @@ class FindIt(object):
 
     def __init__(self, pmid=None, fetcher=None, **kwargs):
 
-        if fetcher is None:
-            self.fetcher = PubMedFetcher()
-        else:
-            self.fetcher = fetcher
+        self.fetcher = fetcher or PubMedFetcher()
 
         self.pmid = pmid if pmid else kwargs.get('pmid', None)
         self.doi = kwargs.get('doi', None)

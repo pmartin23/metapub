@@ -138,9 +138,13 @@ class UrlReverse(object):
         debug: (default: False) raises log level of 'metapub.UrlReverse' logger to logging.DEBUG
     """
 
-    def __init__(self, url, skip_cache=False, **kwargs):
+    def __init__(self, url, skip_cache=False, fetcher=None, dxdoi=None, crossref=None, **kwargs):
         if not url.lower().startswith('http'):
             url = 'http://' + url
+
+        self.fetcher = fetcher or PubMedFetcher()
+        self.dxdoi = dxdoi or DxDOI()
+        self.cr = crossref or CrossRef()
 
         self.url = url
         self.steps = []
