@@ -9,7 +9,12 @@ PKGNAME = 'metapub'
 TMPDIR = '/tmp'
 
 # default cache directory for SQLite cache engines
-DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'),'.cache')
+DEFAULT_CACHE_DIR = os.path.join(os.path.expanduser('~'), '.cache')
+if not os.access(DEFAULT_CACHE_DIR, os.W_OK):
+    # default cache dir is not writeable
+    # therefore ask the os for a temp directory
+    import tempfile
+    DEFAULT_CACHE_DIR = tempfile.gettempdir()
 
 # email address submitted to eutils with requests (as required by their api).
 DEFAULT_EMAIL = os.getenv('EUTILS_EMAIL', 'metapub@nthmost.com')
