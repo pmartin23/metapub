@@ -55,8 +55,6 @@ from ..cache_utils import datetime_to_timestamp
     using any FindIt functionality.
 """
 
-FETCH = PubMedFetcher()
-
 CACHE_FILENAME = 'findit-cache.db'
 
 FINDIT_CACHE = None
@@ -101,7 +99,13 @@ class FindIt(object):
         result".
     """
 
-    def __init__(self, pmid=None, **kwargs):
+    def __init__(self, pmid=None, fetcher=None, **kwargs):
+
+        if fetcher is None:
+            self.fetcher = PubMedFetcher()
+        else:
+            self.fetcher = fetcher
+
         self.pmid = pmid if pmid else kwargs.get('pmid', None)
         self.doi = kwargs.get('doi', None)
         self.url = kwargs.get('url', None)
@@ -278,7 +282,7 @@ class FindIt(object):
             self.doi_score (10.0 if doi found in self.pma, else crossref score)
         """
 
-        self.pma = FETCH.article_by_pmid(self.pmid)
+        self.pma = self.fetcher.article_by_pmid(self.pmid)
 
         if self.pma.doi:
             self.doi = self.pma.doi
@@ -303,7 +307,7 @@ class FindIt(object):
         """
         self.pmid = doi2pmid(self.doi)
         if self.pmid:
-            self.pma = FETCH.article_by_pmid(self.pmid)
+            self.pma = self.fetcher.article_by_pmid(self.pmid)
             self.doi_score = 10.0
         else:
             raise MetaPubError('Could not get a pmid for doi %s' % self.doi)
