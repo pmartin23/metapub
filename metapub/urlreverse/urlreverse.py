@@ -20,10 +20,6 @@ from ..config import DEFAULT_CACHE_DIR
 from .methods import re_pmcid, try_pmid_methods, try_doi_methods, try_vip_methods
 
 
-FETCH = PubMedFetcher()
-CRX = CrossRef()
-DXDOI = DxDOI()
-
 # UrlReverse cacheing engine globals
 URLREVERSE_CACHE = None
 CACHE_FILENAME = 'urlreverse-cache.db'
@@ -224,7 +220,7 @@ class UrlReverse(object):
 
         if self.doi:
             try:
-                urlres = DXDOI.resolve(self.doi)
+                urlres = self.dxdoi.resolve(self.doi)
                 self.steps.append('VERIFY dx.doi.org: %s' % urlres)
             except (DxDOIError, BadDOI) as error:
                 self.doi = None
@@ -313,7 +309,7 @@ class UrlReverse(object):
 
     def _try_citation_methods(self):
         # 1) try pubmed citation match.
-        pmids = FETCH.pmids_for_citation(**self.info)
+        pmids = self.fetcher.pmids_for_citation(**self.info)
         pmid = interpret_pmids_for_citation_results(pmids)
         if pmid and pmid != 'AMBIGUOUS':
             self.pmid = pmid
@@ -324,14 +320,14 @@ class UrlReverse(object):
             return
 
         # 2) try CrossRef -- most effective when title available, but may work without it.
-        results = CRX.query('', params=self.info)
+        results = self.cr.query('', params=self.info)
         if results:
-            top_result = CRX.get_top_result(results, CRX.last_params)
+            top_result = self.cr.get_top_result(results, self.cr.last_params)
 
             # we may have disqualified all the results at this point as being irrelevant, so we have to test here.
             if top_result:
                 self.doi = find_doi_in_string(top_result['doi'])
-                pmids = FETCH.pmids_for_citation(**top_result['slugs'])
+                pmids = self.fetcher.pmids_for_citation(**top_result['slugs'])
                 pmid = interpret_pmids_for_citation_results(pmids)
                 if pmid and pmid != 'AMBIGUOUS':
                     self.pmid = pmid
@@ -347,11 +343,11 @@ class UrlReverse(object):
         """
 
         # All hinges on whether CrossRef can give us a good result. If not, fail out early.
-        results = CRX.query(self.doi)
+        results = self.cr.query(self.doi)
         coins = None
 
         if results:
-            top_result = CRX.get_top_result(results, CRX.last_params)
+            top_result = self.cr.get_top_result(results, self.cr.last_params)
             if top_result:
                 coins = top_result['slugs'].copy()
 
@@ -376,7 +372,7 @@ class UrlReverse(object):
 
         if title:
             # try just searching by title first. If we get one single result, that should be it.
-            pmids = FETCH.pmids_for_query(title)
+            pmids = self.fetcher.pmids_for_query(title)
 
             if len(pmids) == 1:
                 self.pmid = pmids[0]
@@ -407,7 +403,7 @@ class UrlReverse(object):
                       'DP': coins.get('year', None),
                      }
             try:
-                pmids = FETCH.pmids_for_query(coins['jtitle'], **params)
+                pmids = self.fetcher.pmids_for_query(coins['jtitle'], **params)
             except KeyError:
                 # hrm, no title and no jtitle, eh... let's bail.
                 self.steps.append('NO PMID. CrossRef data unworkable (no jtitle). END OF LINE.')
@@ -416,16 +412,16 @@ class UrlReverse(object):
         else:
             if coins.get('volume') and coins.get('issue'):
                 self.steps.append('AMBIGUOUS results for title "%s", trying with volume/issue')
-                pmids = FETCH.pmids_for_query(title, VI=coins['volume'], IP=coins['issue'])
+                pmids = self.fetcher.pmids_for_query(title, VI=coins['volume'], IP=coins['issue'])
             elif coins.get('volume') and coins.get('aulast'):
                 self.steps.append('AMBIGUOUS results for title "%s", trying with aulast')
-                pmids = FETCH.pmids_for_query(title, AU=coins['aulast'])
+                pmids = self.fetcher.pmids_for_query(title, AU=coins['aulast'])
             elif coins.get('spage') and coins.get('aulast'):
                 self.steps.append('AMBIGUOUS results for title "%s", trying with first_page')
-                pmids = FETCH.pmids_for_query(title, PG=coins['spage'])     #, AU=coins['aulast'])
+                pmids = self.fetcher.pmids_for_query(title, PG=coins['spage'])     #, AU=coins['aulast'])
             elif coins.get('volume'):
                 self.steps.append('AMBIGUOUS results for title "%s", trying with volume')
-                pmids = FETCH.pmids_for_query(title, VI=coins['volume'])
+                pmids = self.fetcher.pmids_for_query(title, VI=coins['volume'])
 
         # that should have narrowed the field substantially. we should give up if it's still ambiguous.
         if len(pmids) == 1:
