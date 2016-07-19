@@ -58,7 +58,14 @@ re_early_release = re.compile('(^|(https?):\/\/)(?P<hostname>.*?)\/content(\/\w+
 re_pnas_supplement = re.compile('.*?pnas.org\/content\/suppl\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<ident>.*?)\/', re.I)
 
 # dx.doi.org self-cacheing lookup engine.
-DXDOI = DxDOI()
+DXDOI_INSTANCE = None
+
+
+@property
+def DXDOI():
+    if not DXDOI_INSTANCE:
+        DXDOI_INSTANCE = DxDOI()
+    return DXDOI_INSTANCE
 
 
 def get_journal_name_from_url(url):
