@@ -28,7 +28,7 @@ def parse_elink_response(xmlstr):
     # Medgen->Pubmed elink result with "0" in IDList
     """ <eLinkResult><LinkSet><DbFrom>medgen</DbFrom><IdList><Id>0</Id></IdList></LinkSet></eLinkResult> """
     idlist_elem = dom.find('LinkSet/IdList')
-    if idlist_elem is not None and (idlist_elem.getchildren()) > 0:
+    if idlist_elem is not None and len(idlist_elem.getchildren()) > 0:
         for item in idlist_elem.getchildren():
             if item.find('Id') is not None:
                 ids.append(link.find('Id').text)

@@ -13,8 +13,10 @@ class PubMedAuthor(MetaPubObject):
     Usage:
         author = PubMedAuthor(xml_elem)
 
-    To retrieve the standard represenation of a author name use the __str__()
-    or __unicode__() function.
+    To retrieve the standard represenation of a author name, use the __str__ method.
+
+    (About unicode: metapub uses unicode_literals in both py3 and py2, so the str() function
+    returns unicode, unless called by a py2k "str()" statement in which unicode_literals is off.)
     """
 
     def __init__(self, xmlelem, *args, **kwargs):
@@ -61,7 +63,7 @@ class PubMedAuthor(MetaPubObject):
             pass
 
         try:
-            self.affiliations = [unicode(aff.text) for aff in self.content.find('AffiliationInfo').findall('Affiliation')]
+            self.affiliations = [str(aff.text) for aff in self.content.find('AffiliationInfo').findall('Affiliation')]
         except AttributeError:
             pass
 
@@ -78,5 +80,3 @@ class PubMedAuthor(MetaPubObject):
         else:
             return 'Unnamed Author'
 
-    def __unicode__(self):
-        return unicode(self.__str__())
