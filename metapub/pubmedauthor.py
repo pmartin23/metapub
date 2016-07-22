@@ -63,7 +63,7 @@ class PubMedAuthor(MetaPubObject):
             pass
 
         try:
-            self.affiliations = [str(aff.text) for aff in self.content.find('AffiliationInfo').findall('Affiliation')]
+            self.affiliations = [aff.text for aff in self.content.find('AffiliationInfo').findall('Affiliation')]
         except AttributeError:
             pass
 
