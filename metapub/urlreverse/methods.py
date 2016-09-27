@@ -25,7 +25,7 @@ re_pubmed_pmid = re.compile('.*?ncbi.nlm.nih.gov\/pubmed\/(?P<pmid>\d+)')
 # PMCID in url
 re_pmcid = re.compile('.*?(?P<hostname>ncbi.nlm.nih.gov|europepmc.org)\/.*?(?P<pmcid>PMC\d+)', re.I)
 
-# PII -- see httpss://en.wikipedia.org/wiki/Publisher_Item_Identifier
+# PII -- see http://en.wikipedia.org/wiki/Publisher_Item_Identifier
 pii_official = '(?P<pii>S\d{4}-\d{4}\(\d{2}\)\d{5}-\w{1})'
 re_sciencedirect_pii_simple = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/(?P<pii>S\d+\w?)', re.I)
 re_sciencedirect_pii_official = re.compile('.*?(?P<hostname>sciencedirect\.com)\/science\/article\/pii\/' + pii_official, re.I)
@@ -39,21 +39,21 @@ re_jci = re.compile('.*?jci\.org\/articles\/view\/(?P<jci_id>\d+)', re.I)
 re_karger = re.compile('.*?(?P<hostname>karger\.com)\/Article\/(Abstract|Pdf)\/(?P<kid>\d+)', re.I)
 #re_ahajournals = re.compile('\/(?P<doi_suffix>\w+\.\d+\.\d+\.\w+)', re.I)
 re_ahajournals = re.compile('\/(?P<doi_suffix>[a-z0-9]+\.\d+\.\d+\.[a-z0-9]+)', re.I)
-re_elifesciences = re.compile('(^|httpss?:\/\/)elifesciences.org\/content\/(?P<volume>\d+)\/e(?P<ident>\d+)', re.I)
+re_elifesciences = re.compile('(^|http?:\/\/)elifesciences.org\/content\/(?P<volume>\d+)\/e(?P<ident>\d+)', re.I)
 re_elifesciences_figures = re.compile('elifesciences\.org\/elife-articles\/(?P<ident>\d+)\/figures-pdf\/', re.I)
 
-re_bmj = re.compile('(^|httpss?:\/\/)(?P<subdomain>\w+)\.bmj.com\/content\/(?P<volume>\d+)\/(?P<doi_suffix>bmj.\w+)', re.I)
-re_bmj_vip_to_doi = re.compile('(^|httpss?:\/\/)(?P<subdomain>\w+).bmj.com\/content\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\w+)', re.I)
+re_bmj = re.compile('(^|http?:\/\/)(?P<subdomain>\w+)\.bmj.com\/content\/(?P<volume>\d+)\/(?P<doi_suffix>bmj.\w+)', re.I)
+re_bmj_vip_to_doi = re.compile('(^|http?:\/\/)(?P<subdomain>\w+).bmj.com\/content\/(?P<volume>\d+)\/(?P<issue>\d+)\/(?P<first_page>\w+)', re.I)
 
 # Early release formats
-re_early_release = re.compile('(^|(httpss?):\/\/)(?P<hostname>.*?)\/content(\/\w+)?\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract|$)')
+re_early_release = re.compile('(^|(http?):\/\/)(?P<hostname>.*?)\/content(\/\w+)?\/early\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<doi_suffix>.*?)(\.full|\.pdf|\.abstract|$)')
 
 
 # TODO: Common supplement URL format
 #re_supplement_common = re.compile()
-# https://jmg.bmj.com/content/suppl/2012/05/09/jmedgenet-2012-100892.DC1/Otocephaly_Supplementary_Table_3.pdf
-# https://www.pnas.org/content/suppl/2013/07/08/1305207110.DCSupplemental/sapp.pdf
-# https://jmg.bmj.com/content/suppl/2015/07/17/jmedgenet-2015-103132.DC1/jmedgenet-2015-103132supp.pdf
+# http://jmg.bmj.com/content/suppl/2012/05/09/jmedgenet-2012-100892.DC1/Otocephaly_Supplementary_Table_3.pdf
+# http://www.pnas.org/content/suppl/2013/07/08/1305207110.DCSupplemental/sapp.pdf
+# http://jmg.bmj.com/content/suppl/2015/07/17/jmedgenet-2015-103132.DC1/jmedgenet-2015-103132supp.pdf
 
 re_pnas_supplement = re.compile('.*?pnas.org\/content\/suppl\/(?P<year>\d+)\/(?P<month>\d+)\/(?P<day>\d+)\/(?P<ident>.*?)\/', re.I)
 
@@ -69,8 +69,8 @@ def DXDOI():
 
 
 def get_journal_name_from_url(url):
-    if not url.lower().startswith('https'):
-        url = 'https://' + url
+    if not url.lower().startswith('http'):
+        url = 'http://' + url
 
     hostname = hostname_of(url)
 
@@ -84,7 +84,7 @@ def get_pnas_doi_from_link(url):
     """ PNAS (proceedings of the national academy of sciences of the USA)
 
     Examples:
-        https://www.pnas.org/content/suppl/2013/07/08/1305207110.DCSupplemental/sapp.pdf --> 10.1073/pnas.1305207110
+        http://www.pnas.org/content/suppl/2013/07/08/1305207110.DCSupplemental/sapp.pdf --> 10.1073/pnas.1305207110
 
     :param url: (str)
     :return: doi (str) or None
@@ -98,13 +98,14 @@ def get_pnas_doi_from_link(url):
 
 
 def get_elifesciences_doi_from_link(url):
-    """ eLIFE / httpss://elifesciences.org
+    """ eLIFE / http://elifesciences.org
 
     Examples:
-        httpss://elifesciences.org/content/5/e12203 --> 10.7554/eLife.12203
-        httpss://elifesciences.org/content/4/e11205 --> 10.7554/eLife.11205
-           * httpss://elifesciences.org/content/4/e11205-download.pdf
-           * https://cdn.elifesciences.org/elife-articles/11205/figures-pdf/elife11205-figures.pdf?xxxx
+        * http://elifesciences.org/content/5/e12203 --> 10.7554/eLife.12203
+        * http://elifesciences.org/content/4/e11205 --> 10.7554/eLife.11205
+        * http://elifesciences.org/content/4/e11205-download.pdf
+        * http://cdn.elifesciences.org/elife-articles/11205/figures-pdf/elife11205-figures.pdf?xxxx
+
     :param url: (str)
     :return: doi (str) or None
     """
@@ -128,18 +129,18 @@ def get_bmj_doi_from_link(url):
     """ BMJ and subsidiaries use a VIP-ish format that can *sometimes* be mapped to their real
     DOIs. In the case that this process fails, use of the VIP->citation routines should work.
 
-    List of BMJ Journals: https://journals.bmj.com/
+    List of BMJ Journals: http://journals.bmj.com/
 
     Examples:
-        https://jmg.bmj.com/content/39/6/e31.full --> 10.1136/jmg.39.6.e31
-        https://www.bmj.com/content/353/bmj.i2195 --> 10.1136/bmj.i2195
-        https://www.bmj.com/content/353/bmj.i2139 --> 10.1136/bmj.i2139
+        http://jmg.bmj.com/content/39/6/e31.full --> 10.1136/jmg.39.6.e31
+        http://www.bmj.com/content/353/bmj.i2195 --> 10.1136/bmj.i2195
+        http://www.bmj.com/content/353/bmj.i2139 --> 10.1136/bmj.i2139
 
     Returns None (should be caught by find_doi_in_string):
-        https://bmjopengastro.bmj.com/doi/full/10.1136/bmjgast-2015-000075 --> 10.1136/bmjgast-2015-000075
+        http://bmjopengastro.bmj.com/doi/full/10.1136/bmjgast-2015-000075 --> 10.1136/bmjgast-2015-000075
 
     Returns None (must use VIP->citation routines):
-        https://gut.bmj.com/content/65/5/767.abstract --> 10.1136/gutjnl-2015-311246
+        http://gut.bmj.com/content/65/5/767.abstract --> 10.1136/gutjnl-2015-311246
 
     :param url: (str)
     :return: doi (str) or None
@@ -179,9 +180,9 @@ def get_spandidos_doi_from_link(url):
     some changes recently. For now, let's just scrape the page for the first available DOI.
 
     Examples:
-        https://www.spandidos-publications.com/or/30/2/553 --> 10.3892/or.2013.2535
-        httpss://www.spandidos-publications.com/10.3892/or.2016.4700 --> 10.3892/or.2013.2535
-        httpss://www.spandidos-publications.com/10.3892/or.2013.2535/abstract --> 10.3892/or.2013.2535
+        http://www.spandidos-publications.com/or/30/2/553 --> 10.3892/or.2013.2535
+        http://www.spandidos-publications.com/10.3892/or.2016.4700 --> 10.3892/or.2013.2535
+        http://www.spandidos-publications.com/10.3892/or.2013.2535/abstract --> 10.3892/or.2013.2535
 
     :param url: (str)
     :return: doi (str) or None
@@ -199,8 +200,8 @@ def get_karger_doi_from_link(url):
     ID is 10.1159
 
     e.g.
-       httpss://www.karger.com/Article/Abstract/329047 --> 10.1159/000329047
-       httpss://www.karger.com/Article/Abstract/83388 --> 10.1159/000083388
+       http://www.karger.com/Article/Abstract/329047 --> 10.1159/000329047
+       http://www.karger.com/Article/Abstract/83388 --> 10.1159/000083388
 
     :param url: (str)
     :return: doi (str) or None
@@ -236,7 +237,7 @@ def get_sciencedirect_doi_from_link(url):
     character separaters into the PII numbers.
 
     Example:
-        https://www.sciencedirect.com/science/article/pii/S0094576599000673
+        http://www.sciencedirect.com/science/article/pii/S0094576599000673
 
         PII = S0094576599000673
         DOI = 10.1016/S0094-5765(99)00067-3
@@ -266,7 +267,7 @@ def get_sciencedirect_doi_from_link(url):
         pass
 
     # use URL scrape
-    return scrape_doi_from_article_page('https://www.sciencedirect.com/science/article/pii/%s' % pii)
+    return scrape_doi_from_article_page('http://www.sciencedirect.com/science/article/pii/%s' % pii)
 
 
 def get_cell_doi_from_link(url):
@@ -274,19 +275,19 @@ def get_cell_doi_from_link(url):
     types for Cell abstracts and PDFs (much like biomedcentral).
 
     Examples:
-        https://www.cell.com/pdf/0092867480906212.pdf --> 10.1016/0092-8674(80)90621-2
-        https://www.cell.com/cancer-cell/pdf/S1535610806002844.pdf --> 10.1016/j.ccr.2006.09.010
-        https://www.cell.com/molecular-cell/abstract/S1097-2765(00)80321-4 --> 10.1016/S1097-2765(00)80321-4
-        https://www.cell.com/current-biology/fulltext/S0960-9822%2816%2930170-1 --> 10.1016/j.cub.2016.03.002
-        https://www.cell.com/cell-reports/pdfExtended/S2211-1247(15)01030-X --> 10.1016/j.celrep.2015.09.019
-        https://www.cell.com/ajhg/pdfExtended/S0002-9297(16)30051-9 --> 10.1016/j.ajhg.2016.03.016
-        https://www.cell.com/ajhg/pdf/S0002-9297(16)00050-1.pdf --> 10.1016/j.ajhg.2016.03.016
+        http://www.cell.com/pdf/0092867480906212.pdf --> 10.1016/0092-8674(80)90621-2
+        http://www.cell.com/cancer-cell/pdf/S1535610806002844.pdf --> 10.1016/j.ccr.2006.09.010
+        http://www.cell.com/molecular-cell/abstract/S1097-2765(00)80321-4 --> 10.1016/S1097-2765(00)80321-4
+        http://www.cell.com/current-biology/fulltext/S0960-9822%2816%2930170-1 --> 10.1016/j.cub.2016.03.002
+        http://www.cell.com/cell-reports/pdfExtended/S2211-1247(15)01030-X --> 10.1016/j.celrep.2015.09.019
+        http://www.cell.com/ajhg/pdfExtended/S0002-9297(16)30051-9 --> 10.1016/j.ajhg.2016.03.016
+        http://www.cell.com/ajhg/pdf/S0002-9297(16)00050-1.pdf --> 10.1016/j.ajhg.2016.03.016
 
     Unsolved cases:
-        https://www.cell.com/cms/attachment/2020150130/2039963519/mmc1.pdf --> 10.1016/j.neuron.2014.09.027
-        https://www.cell.com/cms/attachment/2024895080/2044576473/mmc1.pdf --> 10.1016/j.ajhg.2009.01.009
-        https://www.cell.com/cms/attachment/2030360419/2047969851/mmc1.xlsx --> ?
-        https://www.cell.com/cms/attachment/2030360419/2047969852/mmc2.xlsx --> ?
+        http://www.cell.com/cms/attachment/2020150130/2039963519/mmc1.pdf --> 10.1016/j.neuron.2014.09.027
+        http://www.cell.com/cms/attachment/2024895080/2044576473/mmc1.pdf --> 10.1016/j.ajhg.2009.01.009
+        http://www.cell.com/cms/attachment/2030360419/2047969851/mmc1.xlsx --> ?
+        http://www.cell.com/cms/attachment/2030360419/2047969852/mmc2.xlsx --> ?
 
     :param url: (str)
     :return: doi or None
@@ -334,23 +335,23 @@ def get_nature_doi_from_link(link):
     """ Custom method to get a DOI from a nature.com URL
 
     Examples:
-        https://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx -->
-        https://www.nature.com/onc/journal/v26/n57/full/1210594a.html --> 10.1038/sj.onc.1210594
-        https://www.nature.com/pr/journal/v79/n5/full/pr201635a.html --> 10.1038/pr.2016.35
+        http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx -->
+        http://www.nature.com/onc/journal/v26/n57/full/1210594a.html --> 10.1038/sj.onc.1210594
+        http://www.nature.com/pr/journal/v79/n5/full/pr201635a.html --> 10.1038/pr.2016.35
 
     Older articles may have very different DOIs, so at the tail end of this process we do a lookup
     in dx.doi.org.  If the DOI is invalid, we should use scrape_doi_from_article_page and return
     that instead.
 
     Example of older-style DOI from Pediatric Research journal ('pr'):
-        https://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
+        http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
 
     :param link: the URL
     :return: a string containing a DOI, if one was resolved, or None
     """
     # TODO: check validity of DOI before returning.
     # Some older articles need to have their pages loaded and doi scraped.
-    # example: https://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
+    # example: http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> 10.1203/00006450-200101000-00008
 
     if 'nature.com' not in link:
         return None
@@ -359,7 +360,7 @@ def get_nature_doi_from_link(link):
     style1journals = ['gimo', 'nature', 'nbt', 'ncb', 'nchembio', 'ncomms', 'ng', 'nm', 'nn',
                       'nrc', 'nrm', 'nsmb', 'srep']
 
-    # example: link:https://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx
+    # example: link:http://www.nature.com/modpathol/journal/vaop/ncurrent/extref/modpathol2014160x3.xlsx
     #          doi:10.1038/modpathol.2014.160
     style2journals = ['aps', 'bjc', 'cddis', 'cr', 'ejhg', 'gim', 'jcbfm', 'jhg', 'jid', 'labinvest', 'leu',
                       'modpathol', 'mp', 'onc', 'oncsis', 'pr']
@@ -374,7 +375,7 @@ def get_nature_doi_from_link(link):
             print('Warning: Unable to extract journal abbrev from link {}'.format(link))
             journal_abbrev = None
 
-    # Example: https://www.nature.com/neuro/journal/v13/n11/abs/nn.2662.html
+    # Example: http://www.nature.com/neuro/journal/v13/n11/abs/nn.2662.html
     if journal_abbrev == 'neuro':
         journal_abbrev = 'nn'
 
@@ -394,11 +395,11 @@ def get_nature_doi_from_link(link):
             num = doi_suffix[len(journal_abbrev)+4:]
             return '10.1038/{}.{}.{}'.format(journal_abbrev, year, num)
 
-    # https://www.nature.com/articles/cr2009141 :
-    # https://www.nature.com/articles/cddis201475
-    # https://www.nature.com/articles/nature03404
-    # https://www.nature.com/articles/ng.2223
-    # https://www.nature.com/articles/nsmb.2666
+    # http://www.nature.com/articles/cr2009141 :
+    # http://www.nature.com/articles/cddis201475
+    # http://www.nature.com/articles/nature03404
+    # http://www.nature.com/articles/ng.2223
+    # http://www.nature.com/articles/nsmb.2666
     match = re.search(r'articles/(([a-z]+)\.{0,1}(\d+))', link)
     if match:
         full_match = match.group(0)
@@ -410,8 +411,8 @@ def get_nature_doi_from_link(link):
         else:
             return '10.1038/{}.{}.{}'.format(journal_abbrev, num[:4], num[4:])
 
-    # https://www.nature.com/leu/journal/v19/n11/abs/2403943a.html : 10.1038/sj.leu.2403943
-    # https://www.nature.com/onc/journal/v26/n57/full/1210594a.html :  doi:10.1038/sj.onc.1210594
+    # http://www.nature.com/leu/journal/v19/n11/abs/2403943a.html : 10.1038/sj.leu.2403943
+    # http://www.nature.com/onc/journal/v26/n57/full/1210594a.html :  doi:10.1038/sj.onc.1210594
     match = re.search(r'full/\d+|abs/\d+', link)
     if match:
         num = match.group(0).split('/')[1]
@@ -430,23 +431,23 @@ def get_biomedcentral_doi_from_link(link):
     :return: doi (str) or None
     """
     # style 1:
-    # https://www.biomedcentral.com/content/pdf/bcr1282.pdf : doi:10.1186/bcr1282
-    # https://www.biomedcentral.com/content/pdf/1465-9921-12-49.pdf : doi:10.1186/1465-9921-12-49
-    # https://www.biomedcentral.com/content/pdf/1471-2164-16-S1-S3.pdf : doi:10.1186/1471-2164-16-S1-S3
-    # https://www.biomedcentral.com/content/pdf/1753-6561-4-s2-o22.pdf : doi:10.1186/1753-6561-4-S2-O22
-    # https://genomebiology.com/content/pdf/gb-2013-14-10-r108.pdf : doi:10.1186/gb-2013-14-10-r108
+    # http://www.biomedcentral.com/content/pdf/bcr1282.pdf : doi:10.1186/bcr1282
+    # http://www.biomedcentral.com/content/pdf/1465-9921-12-49.pdf : doi:10.1186/1465-9921-12-49
+    # http://www.biomedcentral.com/content/pdf/1471-2164-16-S1-S3.pdf : doi:10.1186/1471-2164-16-S1-S3
+    # http://www.biomedcentral.com/content/pdf/1753-6561-4-s2-o22.pdf : doi:10.1186/1753-6561-4-S2-O22
+    # http://genomebiology.com/content/pdf/gb-2013-14-10-r108.pdf : doi:10.1186/gb-2013-14-10-r108
     # for supplementary, must remove the last 'S' part
-    # https://www.biomedcentral.com/content/supplementary/bcr1865-S3.doc : doi:10.1186/bcr1865
-    # https://www.biomedcentral.com/content/supplementary/bcr3584-S1.pdf : doi:10.1186/bcr3584
-    # https://www.biomedcentral.com/content/supplementary/1471-2105-11-300-S1.PDF : doi:10.1186/1471-2105-11-300
-    # https://www.biomedcentral.com/content/supplementary/1471-2164-12-343-S3.XLS : doi:10.1186/1471-2164-12-343
-    # https://www.biomedcentral.com/content/supplementary/1471-2164-14-S3-S7-S1.xlsx : doi:10.1186/1471-2164-14-S3-S7
-    # https://www.biomedcentral.com/content/supplementary/gb-2013-14-10-r108-S8.xlsx : doi:10.1186/gb-2013-14-10-r108
+    # http://www.biomedcentral.com/content/supplementary/bcr1865-S3.doc : doi:10.1186/bcr1865
+    # http://www.biomedcentral.com/content/supplementary/bcr3584-S1.pdf : doi:10.1186/bcr3584
+    # http://www.biomedcentral.com/content/supplementary/1471-2105-11-300-S1.PDF : doi:10.1186/1471-2105-11-300
+    # http://www.biomedcentral.com/content/supplementary/1471-2164-12-343-S3.XLS : doi:10.1186/1471-2164-12-343
+    # http://www.biomedcentral.com/content/supplementary/1471-2164-14-S3-S7-S1.xlsx : doi:10.1186/1471-2164-14-S3-S7
+    # http://www.biomedcentral.com/content/supplementary/gb-2013-14-10-r108-S8.xlsx : doi:10.1186/gb-2013-14-10-r108
     # style 2:
-    # https://www.biomedcentral.com/1471-2148/12/114 : doi:10.1186/1471-2164-12-114
-    # https://www.biomedcentral.com/1471-2164/15/707/table/T2 : doi:10.1186/1471-2164-15-707
-    # https://www.biomedcentral.com/1471-2164/14/S1/S11 doi:10.1186/1471-2164-14-S1-S11
-    # https://www.biomedcentral.com/1471-230X/11/31 doi:10.1186/1471-230X-11-31
+    # http://www.biomedcentral.com/1471-2148/12/114 : doi:10.1186/1471-2164-12-114
+    # http://www.biomedcentral.com/1471-2164/15/707/table/T2 : doi:10.1186/1471-2164-15-707
+    # http://www.biomedcentral.com/1471-2164/14/S1/S11 doi:10.1186/1471-2164-14-S1-S11
+    # http://www.biomedcentral.com/1471-230X/11/31 doi:10.1186/1471-230X-11-31
 
     if 'biomedcentral.com' not in link:
         return None
@@ -484,8 +485,8 @@ def get_jci_doi_from_link(url):
     reconstruct the article's DOI.
 
     Example:
-        httpss://www.jci.org/articles/view/32496 --> 10.1172/JCI32496
-        httpss://www.jci.org/articles/view/8154/version/1/pdf/render --> 10.1172/JCI8154
+        http://www.jci.org/articles/view/32496 --> 10.1172/JCI32496
+        http://www.jci.org/articles/view/8154/version/1/pdf/render --> 10.1172/JCI8154
 
     :param url: (str)
     :return: doi or None
@@ -503,9 +504,9 @@ def get_ahajournals_doi_from_link(url):
     of 10.1161 and pieces of the URL identifying the article.
 
     Example:
-        https://circimaging.ahajournals.org/content/suppl/2013/04/02/CIRCIMAGING.112.000333.DC1/000333_Supplemental_Material.pdf
+        http://circimaging.ahajournals.org/content/suppl/2013/04/02/CIRCIMAGING.112.000333.DC1/000333_Supplemental_Material.pdf
                 --> 10.1161/CIRCIMAGING.112.000333
-        https://jaha.ahajournals.org/content/4/12/e002395.full.pdf --> 10.1161/JAHA.115.002395 
+        http://jaha.ahajournals.org/content/4/12/e002395.full.pdf --> 10.1161/JAHA.115.002395 
 
     :param url: (str)
     :return: doi or None
@@ -525,11 +526,11 @@ def get_ahajournals_doi_from_link(url):
 def get_early_release_doi_from_link(url):
     """
     Examples:
-        https://cancerres.aacrjournals.org/content/early/2015/12/30/0008-5472.CAN-15-0295.full.pdf --> 10.1158/0008-5472.CAN-15-0295
-        https://ajcn.nutrition.org/content/early/2016/04/20/ajcn.115.123752.abstract --> 10.3945/ajcn.115.123752
-        https://www.mcponline.org/content/early/2016/04/25/mcp.O115.055467.full.pdf+html --> 10.1074/mcp.O115.055467
-        https://nar.oxfordjournals.org/content/early/2013/11/21/nar.gkt1163.full.pdf --> 10.1093/nar/gkt1163
-        https://jmg.bmj.com/content/early/2008/07/08/jmg.2008.058297 --> 10.1136/jmg.2008.058297
+        http://cancerres.aacrjournals.org/content/early/2015/12/30/0008-5472.CAN-15-0295.full.pdf --> 10.1158/0008-5472.CAN-15-0295
+        http://ajcn.nutrition.org/content/early/2016/04/20/ajcn.115.123752.abstract --> 10.3945/ajcn.115.123752
+        http://www.mcponline.org/content/early/2016/04/25/mcp.O115.055467.full.pdf+html --> 10.1074/mcp.O115.055467
+        http://nar.oxfordjournals.org/content/early/2013/11/21/nar.gkt1163.full.pdf --> 10.1093/nar/gkt1163
+        http://jmg.bmj.com/content/early/2008/07/08/jmg.2008.058297 --> 10.1136/jmg.2008.058297
 
     :param url: (str)
     :return: doi or None
@@ -559,9 +560,9 @@ def get_generic_doi_from_link(url):
     """ Covers many publisher URLs such as wiley and springer.
 
     Examples:
-        https://onlinelibrary.wiley.com/doi/10.1111/j.1582-4934.2011.01476.x/full --> 10.1111/j.1582-4934.2011.01476.x
+        http://onlinelibrary.wiley.com/doi/10.1111/j.1582-4934.2011.01476.x/full --> 10.1111/j.1582-4934.2011.01476.x
         link.springer.com/article/10.1186/1471-2164-7-243 --> 10.1186/1471-2164-7-243
-        https://link.springer.com/article/10.1007/s004399900122 --> 10.1007/s004399900122
+        http://link.springer.com/article/10.1007/s004399900122 --> 10.1007/s004399900122
 
     :param url: (str)
     :return: doi or None
@@ -595,10 +596,10 @@ def get_plos_doi_from_link(url):
     returned from this function should be the one pointing to the parent article.
 
     Examples:
-        https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0154075 --> 10.1371/journal.pone.0154075
-        https://journals.plos.org/plosone/article?id=info%3Adoi%2F10.1371%2Fjournal.pone.0153994 --> 10.1371/journal.pone.0153994
-        https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0152441#pone-0152441-t002 --> 10.1371/journal.pone.0152441
-        https://journals.plos.org/plosone/article/asset?unique&id=info:doi/10.1371/journal.pone.0094554.s002 --> 10.1371/journal.pone.0094554
+        http://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0154075 --> 10.1371/journal.pone.0154075
+        http://journals.plos.org/plosone/article?id=info%3Adoi%2F10.1371%2Fjournal.pone.0153994 --> 10.1371/journal.pone.0153994
+        http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0152441#pone-0152441-t002 --> 10.1371/journal.pone.0152441
+        http://journals.plos.org/plosone/article/asset?unique&id=info:doi/10.1371/journal.pone.0094554.s002 --> 10.1371/journal.pone.0094554
 
     :param url: (str)
     :return: doi (str) or None
@@ -685,7 +686,7 @@ def try_pmid_methods(url):
 
     Examples:
         https://www.ncbi.nlm.nih.gov/pubmed/22253870 --> 22253870
-        https://aac.asm.org/cgi/pmidlookup?view=long&pmid=7689822 --> 7689822
+        http://aac.asm.org/cgi/pmidlookup?view=long&pmid=7689822 --> 7689822
 
     :param url: (str)
     :return: pmid or None
