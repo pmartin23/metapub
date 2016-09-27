@@ -27,7 +27,7 @@ class PubMedAuthor(MetaPubObject):
         self.collective_name = None
         self.affiliations = []
 
-        if not xmlelem:
+        if xmlelem is None:
             return
 
         self.content = xmlelem
@@ -39,7 +39,7 @@ class PubMedAuthor(MetaPubObject):
         return outd
 
     def _parse_xml(self):
-        if not self.content:
+        if self.content is None:
             return
 
         try:
