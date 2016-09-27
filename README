@@ -243,6 +243,7 @@ articles from as many different publishers of PubMed content as possible.
 Any article that is Open Access, whether it is in PubmedCentral or not, can potentially
 be "FindIt-able".  Usage is simple::
 
+  from metapub import FindIt
   src = FindIt('18381613')
   print(src.url)
 
@@ -251,13 +252,17 @@ You can start FindIt from a DOI instead of a PMID by instantiating with FindIt(d
 If FindIt couldn't get a URL, you can take a look at the "reason" attribute to find out why. 
 For example:
 
-  src = FindIt('1234566')
+  src = FindIt('1234567')
   if src.url is None:
       print(src.reason) 
 
 The FindIt object is cached (keyed to PMID), so while initialization the first time around 
 for a given PMID or DOI may take a few seconds, the second time this information is requested
 it will take far less time.
+
+If you see a FindIt "reason" that starts with NOFORMAT, this is a great place to contribute
+some help to metapub!  Feel free to dive in and submit a pull request, or contact the author
+(naomi@nthmost.com) for advice on how to fill in these gaps.
 
 
 UrlReverse
@@ -272,6 +277,7 @@ state for all of the information gathered and steps used to gather that informat
 
 Usage is very similar to FindIt::
 
+  from metapub import UrlReverse
   urlrev = UrlReverse('http://onlinelibrary.wiley.com/doi/10.1002/humu.20708/pdf')
   print(urlrev.pmid)
   print(urlrev.doi)
