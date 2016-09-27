@@ -96,7 +96,7 @@ class UrlReverse(object):
     Human inspection can quickly verify that the above PDF definitely maps to this 
     PubMed entry:
 
-        http://www.ncbi.nlm.nih.gov/pubmed/15879500
+        https://www.ncbi.nlm.nih.gov/pubmed/15879500
 
     (Adding a machine-verification step might be a further development of UrlReverse;
     however, it would add significant page-loading and processing time. Might be better

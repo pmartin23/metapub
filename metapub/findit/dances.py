@@ -532,7 +532,7 @@ def the_nature_ballet(pma, verify=True):
     return url
 
 
-PMC_PDF_URL = 'http://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
+PMC_PDF_URL = 'https://www.ncbi.nlm.nih.gov/pmc/articles/pmid/{a.pmid}/pdf'
 EUROPEPMC_PDF_URL = 'http://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC{a.pmc}&blobtype=pdf'
 def the_pmc_twist(pma, verify=True, use_nih=False):
     '''Look up article in EuropePMC.org.  If not found there, fall back to NIH (if use_nih

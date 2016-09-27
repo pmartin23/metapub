@@ -34,7 +34,7 @@ class PubMedAuthor(MetaPubObject):
         self._parse_xml()
 
     def to_dict(self):
-        outd = self.__dict__
+        outd = self.__dict__.copy()
         outd.pop(content)
         return outd
 

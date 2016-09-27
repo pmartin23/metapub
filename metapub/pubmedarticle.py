@@ -164,7 +164,7 @@ class PubMedArticle(MetaPubObject):
         McNally, EM, et al. Genetic mutations and mechanisms in dilated cardiomyopathy. Journal of Clinical Investigation. 2013; 123(1):19-26. doi: 10.1172/JCI62862.
 
         GeneReviews Example:
-        Tranebjarg, L, et al. Jervell and Lange-Nielsen syndrome. 2002 Jul 29 (Updated 2014 Nov 20). In: Pagon, RA, et al., editors. GeneReviews (Internet). Seattle (WA): University of Washington, Seattle; 1993-2015. Available from: http://www.ncbi.nlm.nih.gov/books/NBK1405/.
+        Tranebjarg, L, et al. Jervell and Lange-Nielsen syndrome. 2002 Jul 29 (Updated 2014 Nov 20). In: Pagon, RA, et al., editors. GeneReviews (Internet). Seattle (WA): University of Washington, Seattle; 1993-2015. Available from: https://www.ncbi.nlm.nih.gov/books/NBK1405/.
         """
 
         article_cit_fmt = '{author}. {title}. {journal}. {a.year}; {a.volume_issue}:{a.pages}.{doi}'
@@ -305,7 +305,7 @@ class PubMedArticle(MetaPubObject):
         return self._get(self._root+'/PMID')
 
     def _get_url(self):
-        return 'http://ncbi.nlm.nih.gov/pubmed/'+str(self.pmid)
+        return 'https://ncbi.nlm.nih.gov/pubmed/'+str(self.pmid)
 
     def _get_abstract(self):
         abstracts = self.content.findall(self._root + '/Article/Abstract/AbstractText')
@@ -350,7 +350,7 @@ class PubMedArticle(MetaPubObject):
     def _get_journal(self):
         j = self._get(self._root+'/Article/Journal/ISOAbbreviation')
         if j is None:
-            # e.g., http://www.ncbi.nlm.nih.gov/pubmed?term=21242195
+            # e.g., https://www.ncbi.nlm.nih.gov/pubmed?term=21242195
             j = self._get(self._root+'/Article/Journal/Title')
         return j
 
@@ -405,7 +405,7 @@ class PubMedArticle(MetaPubObject):
         except AttributeError:
             pass
         # electronic pubs may not have volume or issue
-        # e.g., http://www.ncbi.nlm.nih.gov/pubmed?term=20860988
+        # e.g., https://www.ncbi.nlm.nih.gov/pubmed?term=20860988
         return None
 
     def _get_article_history(self):

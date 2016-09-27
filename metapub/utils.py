@@ -46,7 +46,7 @@ def hostname_of(url):
     Examples: 
         http://www.nature.com/pr/journal/v49/n1/full/pr20018a.html --> nature.com
         https://webhome.weizmann.ac.il --> webhome.weizmann.ac.il
-        http://www.ncbi.nlm.nih.gov/pubmed/17108762 --> ncbi.nlm.nih.gov
+        https://www.ncbi.nlm.nih.gov/pubmed/17108762 --> ncbi.nlm.nih.gov
 
     :param url: (str)
     :return hostname: (str)
@@ -68,7 +68,7 @@ def rootdomain_of(url):
         http://blood.oxfordjournals.org --> oxfordjournals.org
         https://webhome.weizmann.ac.il --> ac.il
         https://regex101.com/ --> regex101.com
-        http://www.ncbi.nlm.nih.gov/pubmed/17108762 --> nih.gov
+        https://www.ncbi.nlm.nih.gov/pubmed/17108762 --> nih.gov
 
     :param url: (str)
     :return rootdomain: (str)

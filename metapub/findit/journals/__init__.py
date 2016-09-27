@@ -58,7 +58,7 @@ doi2step_journals = (
 )
 
 todo_journals = {
-    'Pharmacol Rep': {'example': 'http://www.ncbi.nlm.nih.gov/pubmed/?term=23238479[uid] --> www.if-pan.krakow.pl/pjp/pdf/2012/5_1234.pdf'},
+    'Pharmacol Rep': {'example': 'https://www.ncbi.nlm.nih.gov/pubmed/?term=23238479[uid] --> www.if-pan.krakow.pl/pjp/pdf/2012/5_1234.pdf'},
     'Med Sci Monit': {'example': 'http://www.medscimonit.com/download/index/idArt/869530'},
     'Asian Pac J Cancer Prev': {'example': 'http://www.apocpcontrol.org/paper_file/issue_abs/Volume12_No7/1771-1776%20c%206.9%20Lei%20Zhong.pdf'},
     'Rev Esp Cardiol': {'example': 'http://www.revespcardiol.org/en/linkresolver/articulo-resolver/13131646/'},

@@ -43,7 +43,7 @@ class ClinVarFetcher(Borg):
         pmids = clinvar.pmids_for_hgvs('NM_017547.3:c.1289A>G')
 
     For more info, see the ClinVar eutils page:
-    http://www.ncbi.nlm.nih.gov/clinvar/docs/maintenance_use/
+    https://www.ncbi.nlm.nih.gov/clinvar/docs/maintenance_use/
     """
 
     _cache_filename = 'clinvar-cache.db'

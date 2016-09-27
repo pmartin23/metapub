@@ -5,7 +5,7 @@ from __future__ import absolute_import, unicode_literals
 # forming advanced queries according to the specs on the
 # following page:
 #
-# http://www.ncbi.nlm.nih.gov/books/NBK3827/#pubmedhelp.Clinical_Queries_Filters
+# https://www.ncbi.nlm.nih.gov/books/NBK3827/#pubmedhelp.Clinical_Queries_Filters
 #
 
 clinical_query_map = { 
