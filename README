@@ -250,11 +250,10 @@ be "FindIt-able".  Usage is simple::
 You can start FindIt from a DOI instead of a PMID by instantiating with FindIt(doi='10.1234/some.doi').  
 
 If FindIt couldn't get a URL, you can take a look at the "reason" attribute to find out why. 
-For example:
+For example::
 
   src = FindIt('1234567')
-  if src.url is None:
-      print(src.reason) 
+  if src.url is None: print(src.reason) 
 
 The FindIt object is cached (keyed to PMID), so while initialization the first time around 
 for a given PMID or DOI may take a few seconds, the second time this information is requested
@@ -342,16 +341,13 @@ Hart, which you can check out here:
 
 http://bitbucket.org/biocommons/eutils
 
-Metapub just turned 1 year old as of November 15, 2015, and has come quite a long
+Metapub has been in development since November 15, 2014, and has come quite a long
 way in a short time. Metapub has been deployed in production at many bioinformatics 
 facilities (please tell me your story if you are among them!).
 
-Plans for the next 3-6 months include Python 3.x compatibility (for version 0.4) and 
-ClinVar abstraction (version 0.4.something).
-
 Feel free to use the library with confidence that each released version is well tested 
 and battle-hardened from extensive use, but until (say) version 0.5, don't expect 
-consistency between versions.
+total consistency between versions.
 
 YMMV, At your own risk, etc.  Please do report bugs and bring your comments and 
 suggestions to the bitbucket home for metapub at:
