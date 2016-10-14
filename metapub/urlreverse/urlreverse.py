@@ -439,6 +439,7 @@ class UrlReverse(object):
         outd = {}
         for key in self.__dict__:
             if not key.startswith('_'):
-                outd[key] = self.__dict__[key]
+                if not key in ['dxdoi', 'cr', 'fetcher']:
+                    outd[key] = self.__dict__[key]
         return outd
 

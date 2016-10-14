@@ -60,9 +60,8 @@ re_pnas_supplement = re.compile('.*?pnas.org\/content\/suppl\/(?P<year>\d+)\/(?P
 # dx.doi.org self-cacheing lookup engine.
 DXDOI_INSTANCE = None
 
-
-@property
 def DXDOI():
+    global DXDOI_INSTANCE
     if not DXDOI_INSTANCE:
         DXDOI_INSTANCE = DxDOI()
     return DXDOI_INSTANCE
@@ -168,7 +167,7 @@ def get_bmj_doi_from_link(url):
     # gotta test that doi. it might be a dud.
     if doi:
         try:
-            DXDOI.resolve(doi)
+            DXDOI().resolve(doi)
             return doi
         except (BadDOI, DxDOIError):
             return None
@@ -260,7 +259,7 @@ def get_sciencedirect_doi_from_link(url):
             return None
     doi = out + pii
     try:
-        DXDOI.resolve(doi)
+        DXDOI().resolve(doi)
         return doi
     except DxDOIError:
         # some
@@ -577,7 +576,7 @@ def get_generic_doi_from_link(url):
 
     # we had better check ourselves before we wreck ourselves.
     try:
-        DXDOI.resolve(doi)
+        DXDOI().resolve(doi)
         return doi
     except (BadDOI, DxDOIError):
         return None

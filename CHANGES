@@ -101,3 +101,4 @@
 7/6/2016, 0.4.2a1, PubMedFetcher.pmids_for_citation success rate++ by removing urlencoded chars from journal title.
 7/22/2016, 0.4.2a2, PubMedAuthor debut (many thanks to Martin Peters / FreakyBytes). Bugfixes for py2/3 compatibility.
 9/26/2016, 0.4.3, Updates for NCBI switch to https. UrlReverse and PubMedAuthor ready for primetime.
+10/14/2016, 0.4.3.5, UrlReverse: Critical bugfixes.
