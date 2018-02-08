@@ -24,8 +24,8 @@ def get_eutils_client(cache_path, email=DEFAULT_EMAIL):
     """
     import eutils.client as ec
     if cache_path is None:
-        return ec.QueryService(tool=PKGNAME, email=email, cache_path=None)
-    return ec.QueryService(tool=PKGNAME, email=email, cache_path=cache_path)
+        return ec.QueryService(tool=PKGNAME, email=email)
+    return ec.QueryService(tool=PKGNAME, email=email, cache=cache_path)
 
 
 def get_cache_path(cachedir, filename='metapub-cache.db'):

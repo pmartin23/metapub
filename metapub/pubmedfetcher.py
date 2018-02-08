@@ -76,8 +76,7 @@ class PubMedFetcher(Borg):
         self._cache_path = None
 
         if method == 'eutils':
-            if api_key:
-                self.api_key = api_key
+            self.api_key = api_key
             self._cache_path = get_cache_path(cachedir, self._cache_filename)
             self.qs = get_eutils_client(self._cache_path, email=email)
             self.article_by_pmid = self._eutils_article_by_pmid
