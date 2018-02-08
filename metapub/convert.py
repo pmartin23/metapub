@@ -138,7 +138,7 @@ def pmid2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
     return PubMedArticle2doi_with_score(pma, use_best_guess, min_score=2.0)
 
 
-def doi2pmid(doi, use_best_guess=False, min_score=2.0, debug=False):
+def doi2pmid(doi, advanced_search = True, use_best_guess=False, min_score=2.0, debug=False):
     '''uses CrossRef and PubMed eutils to lookup a PMID given a known doi.
 
     Warning: NO validation of input DOI performed here. Use
@@ -146,12 +146,17 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0, debug=False):
 
     If a PMID can be found, return it. Otherwise return None.
 
+    Set advanced_search = False if you have already tried to resolve the PMID by submitting the doi to
+    pubmed advanced search (see: PubMedFetcher.batch_query_doi()) to avoid making redundant requests
+
+
     In very rare cases, use of the CrossRef->pubmed citation method used
     here may result in more than one pubmed ID. In this case, this function
     will return instead the word 'AMBIGUOUS'.
 
     Args:
-        pmid (str or int)
+        doi (str)
+        advanced_search(bool): default=False
         use_best_guess (bool): default=False
         min_score (float): minimum score to accept from CrossRef for given doi. default=2.0
 
@@ -170,21 +175,22 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0, debug=False):
     except:
         pass
 
-    # Try doing a DOI lookup right in an advanced query string. Sometimes works and has
-    # benefit of being a cached query so it is quick to do again, should we need.
-    pmids = pm_fetch.pmids_for_query(doi)
-    if len(pmids) == 1:
-        # we need to cross-check; pubmed sometimes screws us over by giving us an article
-        # with a SIMILAR doi. *facepalm*
-        pma = pm_fetch.article_by_pmid(pmids[0])
-        if pma.doi == doi:
+    if advanced_search:
+        # Try doing a DOI lookup right in an advanced query string. Sometimes works and has
+        # benefit of being a cached query so it is quick to do again, should we need.
+        pmids = pm_fetch.pmids_for_query(doi)
+        if len(pmids) == 1:
+            # we need to cross-check; pubmed sometimes screws us over by giving us an article
+            # with a SIMILAR doi. *facepalm*
+            pma = pm_fetch.article_by_pmid(pmids[0])
+            if pma.doi == doi:
+                if debug:
+                    print('Found PMID via PubMed advanced query for DOI')
+                return pma.pmid
             if debug:
-                print('Found PMID via PubMed advanced query for DOI')
-            return pma.pmid
-        if debug:
-            print('PubMed advanced query gave us a wonky result:')
-            print('     Search: %s' % doi)
-            print('     Return: %s' % pma.doi)
+                print('PubMed advanced query gave us a wonky result:')
+                print('     Search: %s' % doi)
+                print('     Return: %s' % pma.doi)
 
     # Look up the DOI in CrossRef, then feed results to pubmed citation query tool.
     try:
@@ -202,4 +208,5 @@ def doi2pmid(doi, use_best_guess=False, min_score=2.0, debug=False):
         return interpret_pmids_for_citation_results(pmids)
     else:
         return None
+
 
