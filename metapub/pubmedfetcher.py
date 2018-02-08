@@ -143,7 +143,7 @@ class PubMedFetcher(Borg):
 
         # We use the advanced query token [AID] to match against article IDs (in this case, DOIs)
         # Using the 'OR' operator allows us to do a batch search and retrieve many results in one request
-        query = ' OR '.join(['"'+doi["DOI"]+'"[AID]' for doi in dois])
+        query = ' OR '.join(['"'+doi+'"[AID]' for doi in dois])
 
         print(query)
 
