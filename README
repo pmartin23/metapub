@@ -1,7 +1,7 @@
 =======
 Metapub
 =======
-
+Original repo may be found here: https://bitbucket.org/metapub/metapub
 Metapub is a Python library that provides python objects fetched via eutils 
 that represent papers and concepts found within the NLM.
 
