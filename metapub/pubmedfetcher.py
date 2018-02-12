@@ -385,6 +385,8 @@ class PubMedFetcher(Borg):
         first_page = kpick(kwargs, options=['spage', 'first_page', 'first-page'], default='')
         year = kpick(kwargs, options=['year', 'date', 'pdat'], default='')
         volume = kpick(kwargs, options=['volume'], default='')
+        if '(' in volume:
+            volume = ''
 
         inp_dict = {'journal_title': journal_title,
                     'year': str(year),
