@@ -385,8 +385,6 @@ class PubMedFetcher(Borg):
         first_page = kpick(kwargs, options=['spage', 'first_page', 'first-page'], default='')
         year = kpick(kwargs, options=['year', 'date', 'pdat'], default='')
         volume = kpick(kwargs, options=['volume'], default='')
-        if '(' in volume:
-            volume = ''
 
         inp_dict = {'journal_title': journal_title,
                     'year': str(year),
@@ -431,7 +429,6 @@ class PubMedFetcher(Borg):
         params = {'db': 'pubmed', 'retmode': 'xml', 'bdata': '', 'api_key': self.api_key}
         joined = []
         for citation in citations:
-
             citation = lowercase_keys(citation)
             # accept 'journal-title' key from CrossRef
             journal_title = remove_chars(
@@ -463,14 +460,22 @@ class PubMedFetcher(Borg):
             joined.append('{journal_title}|{year}|{volume}|{first_page}|{author_name}|'.format(**inp_dict))
         for j in joined:
             print(j)
-        params['bdata'] = '\r'.join(joined)
-        content = requests.get(base_uri, params=params).text
         pmids = []
-        print(content)
-        for item in content.split('\n'):
-            if item.strip():
-                pmid = item.split('|')[-1]
-                pmids.append(pmid.strip())
+        while True:
+            params['bdata'] = ''
+            while len(params['bdata']) < 1900 and len(joined) > 0:
+                params['bdata']+= joined[-1]+'\r'
+                joined.pop()
+            req = requests.get(base_uri, params=params)
+            if req.status_code == 200:
+                content = req.text
+                print(content)
+                for item in content.split('\n'):
+                    if item.strip():
+                        pmid = item.split('|')[-1]
+                        pmids.append(pmid.strip())
+            if len(joined) == 0:
+                break
         return pmids
 
     def related_pmids(self, pmid):
