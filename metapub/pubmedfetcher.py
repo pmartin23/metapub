@@ -124,7 +124,7 @@ class PubMedFetcher(Borg):
         return self._eutils_article_by_pmid(pmid)
 
 
-    def _eutils_pmids_for_dois(self, dois,  retstart=0, retmax=500):
+    def _eutils_pmids_for_dois(self, dois,  retstart=0, retmax=500, debug=False):
         '''batch search for article pmids given a list of dois
 
         NOTE: this only returns a list of pmids and does not indicate which pmids match the DOIs you supply
@@ -145,7 +145,8 @@ class PubMedFetcher(Borg):
         # Using the 'OR' operator allows us to do a batch search and retrieve many results in one request
         query = ' OR '.join(['"'+doi+'"[AID]' for doi in dois])
 
-        print(query)
+        if debug:
+            print(query)
 
         result = self.qs.esearch({'db': 'pubmed', 'term': query,
                                   'retmax': retmax, 'retstart': retstart,'api_key':self.api_key})
@@ -284,8 +285,8 @@ class PubMedFetcher(Borg):
         if pmc_only:
             query += ' "pubmed pmc"[sb]'
 
-        # if kwargs.get('debug', False):
-        print(query)
+        if kwargs.get('debug', False):
+            print(query)
 
         result = self.qs.esearch({'db': 'pubmed', 'term': query,
                                   'retmax': retmax, 'retstart': retstart,'api_key':self.api_key})
@@ -410,7 +411,7 @@ class PubMedFetcher(Borg):
                 pmids.append(pmid.strip())
         return pmids
 
-    def batch_pmids_for_citation(self, citations):
+    def batch_pmids_for_citation(self, citations, debug=False):
         '''returns list of pmids for batch of citations. requires at least 3/5 of these keyword arguments:
             jtitle or journal (journal title)
             year or date
@@ -450,7 +451,7 @@ class PubMedFetcher(Borg):
                         'first_page': str(first_page),
                         'author_name': author_name.encode('utf-8', 'ignore').decode('utf-8'),
                         }
-            if citation.get('debug', False):
+            if debug:
                 print('Submitted to pmids_for_citation: %r' % inp_dict)
 
             # clean up any "n/a" values.  eutils doesn't understand them.
@@ -458,8 +459,9 @@ class PubMedFetcher(Borg):
                 if inp_dict[k].lower() == 'n/a':
                     inp_dict[k] = ''
             joined.append('{journal_title}|{year}|{volume}|{first_page}|{author_name}|'.format(**inp_dict))
-        for j in joined:
-            print(j)
+        if debug:
+            for j in joined:
+                print(j)
         pmids = []
         while True:
             params['bdata'] = ''
@@ -469,7 +471,8 @@ class PubMedFetcher(Borg):
             req = requests.get(base_uri, params=params)
             if req.status_code == 200:
                 content = req.text
-                print(content)
+                if debug:
+                    print(content)
                 for item in content.split('\n'):
                     if item.strip():
                         pmid = item.split('|')[-1]
