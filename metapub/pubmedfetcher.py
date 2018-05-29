@@ -89,7 +89,7 @@ class PubMedFetcher(Borg):
     def _eutils_article_by_pmid(self, pmid):
         pmid = str(pmid)
         try:
-            result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
+            result = self.qs.efetch('pubmed', pmid)
         except EutilsRequestError:
             raise MetaPubError('Invalid ID "%s" (rejected by Eutils); please check the number and try again.' % pmid)
 
@@ -147,8 +147,7 @@ class PubMedFetcher(Borg):
         if debug:
             print(query)
 
-        result = self.qs.esearch({'db': 'pubmed', 'term': query,
-                                  'retmax': retmax, 'retstart': retstart})
+        result = self.qs.esearch('pubmed', query)
 
         return get_uids_from_esearch_result(result)
 
@@ -287,8 +286,7 @@ class PubMedFetcher(Borg):
         if kwargs.get('debug', False):
             print(query)
 
-        result = self.qs.esearch({'db': 'pubmed', 'term': query,
-                                  'retmax': retmax, 'retstart': retstart})
+        result = self.qs.esearch('pubmed',  query)
         return get_uids_from_esearch_result(result)
 
     def pmids_for_clinical_query(self, query, category, optimization='broad',
