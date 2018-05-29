@@ -16,16 +16,6 @@ from .exceptions import MetaPubError, EutilsRequestError, InvalidPMID
 from .base import Borg
 from .config import DEFAULT_EMAIL
 
-
-def get_uids_from_esearch_result(xmlstr):
-    dom = etree.fromstring(xmlstr)
-    uids = []
-    idlist = dom.find('IdList')
-    for item in idlist.findall('Id'):
-        uids.append(item.text.strip())
-    return uids
-
-
 def parse_related_pmids_result(xmlstr):
     outd = {}
     dom = etree.fromstring(xmlstr)
@@ -92,14 +82,11 @@ class PubMedFetcher(Borg):
             result = self.qs.efetch('pubmed', pmid)
         except EutilsRequestError:
             raise MetaPubError('Invalid ID "%s" (rejected by Eutils); please check the number and try again.' % pmid)
-
         if result is None:
             return None
-
         # if result.find('ERROR') > -1:
         #    raise MetaPubError('PMID %s returned ERROR; cannot construct PubMedArticle' % pmid)
-
-        pma = PubMedArticle(result)
+        pma = iter(result).next()
         if pma.pmid is None:
             raise InvalidPMID('Pubmed ID "%s" not found' % pmid)
         return pma
@@ -148,8 +135,7 @@ class PubMedFetcher(Borg):
             print(query)
 
         result = self.qs.esearch('pubmed', query)
-
-        return get_uids_from_esearch_result(result)
+        return result.ids
 
 
     def _eutils_pmids_for_query(self, query='', since=None, until=None, retstart=0, retmax=250,
@@ -287,7 +273,7 @@ class PubMedFetcher(Borg):
             print(query)
 
         result = self.qs.esearch('pubmed',  query)
-        return get_uids_from_esearch_result(result)
+        return result.ids
 
     def pmids_for_clinical_query(self, query, category, optimization='broad',
                                  since=None, until=None, retstart=0, retmax=250, pmc_only=False, **kwargs):
