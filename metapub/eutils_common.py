@@ -16,16 +16,17 @@ logging.getLogger('requests').setLevel(logging.ERROR)
 # ==
 
 
-def get_eutils_client(cache_path, email=DEFAULT_EMAIL):
+def get_eutils_client(cache_path, email=DEFAULT_EMAIL, api_key=None):
     """
     :param cache_path: valid filesystem path to SQLite cache file
     :param email: (optional) email address to submit with cache queries
     :return: eutils QueryService client object
     """
-    import eutils.client as ec
+    from eutils import Client
     if cache_path is None:
-        return ec.QueryService(tool=PKGNAME, email=email)
-    return ec.QueryService(tool=PKGNAME, email=email, cache=cache_path)
+        return Client(api_key=api_key)
+    return Client(cache=cache_path, api_key=api_key)
+
 
 
 def get_cache_path(cachedir, filename='metapub-cache.db'):

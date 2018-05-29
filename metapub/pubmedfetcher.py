@@ -76,9 +76,8 @@ class PubMedFetcher(Borg):
         self._cache_path = None
 
         if method == 'eutils':
-            self.api_key = api_key
             self._cache_path = get_cache_path(cachedir, self._cache_filename)
-            self.qs = get_eutils_client(self._cache_path, email=email)
+            self.qs = get_eutils_client(self._cache_path, email=email, api_key=api_key)
             self.article_by_pmid = self._eutils_article_by_pmid
             self.article_by_pmcid = self._eutils_article_by_pmcid
             self.article_by_doi = self._eutils_article_by_doi
@@ -90,7 +89,7 @@ class PubMedFetcher(Borg):
     def _eutils_article_by_pmid(self, pmid):
         pmid = str(pmid)
         try:
-            result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid, 'api_key':self.api_key})
+            result = self.qs.efetch(args={'db': 'pubmed', 'id': pmid})
         except EutilsRequestError:
             raise MetaPubError('Invalid ID "%s" (rejected by Eutils); please check the number and try again.' % pmid)
 
@@ -149,7 +148,7 @@ class PubMedFetcher(Borg):
             print(query)
 
         result = self.qs.esearch({'db': 'pubmed', 'term': query,
-                                  'retmax': retmax, 'retstart': retstart,'api_key':self.api_key})
+                                  'retmax': retmax, 'retstart': retstart})
 
         return get_uids_from_esearch_result(result)
 
@@ -289,7 +288,7 @@ class PubMedFetcher(Borg):
             print(query)
 
         result = self.qs.esearch({'db': 'pubmed', 'term': query,
-                                  'retmax': retmax, 'retstart': retstart,'api_key':self.api_key})
+                                  'retmax': retmax, 'retstart': retstart})
         return get_uids_from_esearch_result(result)
 
     def pmids_for_clinical_query(self, query, category, optimization='broad',
@@ -373,7 +372,7 @@ class PubMedFetcher(Borg):
         # journal_title|year|volume|first_page|author_name|your_key|
 
         base_uri = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/ecitmatch.cgi?'
-        params = {'db': 'pubmed', 'retmode': 'xml', 'bdata': '', 'api_key': self.api_key}
+        params = {'db': 'pubmed', 'retmode': 'xml', 'bdata': ''}
         kwargs = lowercase_keys(kwargs)
 
         # accept 'journal-title' key from CrossRef
@@ -427,7 +426,7 @@ class PubMedFetcher(Borg):
         # output format in return:
         # journal_title|year|volume|first_page|author_name|your_key|
         base_uri = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/ecitmatch.cgi?'
-        params = {'db': 'pubmed', 'retmode': 'xml', 'bdata': '', 'api_key': self.api_key}
+        params = {'db': 'pubmed', 'retmode': 'xml', 'bdata': ''}
         joined = []
         for citation in citations:
             citation = lowercase_keys(citation)
@@ -495,7 +494,7 @@ class PubMedFetcher(Borg):
         https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi?retmode=xml&dbfrom=pubmed&id=14873513&cmd=neighbor
         '''
         outd = {}
-        xmlstr = self.qs.elink({'dbfrom': 'pubmed', 'id': pmid, 'cmd': 'neighbor','api_key':self.api_key})
+        xmlstr = self.qs.elink({'dbfrom': 'pubmed', 'id': pmid, 'cmd': 'neighbor'})
         outd = parse_related_pmids_result(xmlstr)
         return outd
 
