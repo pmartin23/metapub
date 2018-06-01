@@ -76,7 +76,7 @@ def PubMedArticle2doi_with_score(pma, use_best_guess=False, min_score=2.0):
         pma (PubMedArticle)
         use_best_guess (bool): default=False
         min_score (float): default=2.0
-    
+
     Returns:
         tuple (doi string, score) or (None, 0.0)
     '''
@@ -113,9 +113,9 @@ def pmid2doi(pmid, use_best_guess=False, min_score=2.0):
 
 
 def pmid2doi_with_score(pmid, use_best_guess=False, min_score=2.0):
-    '''Starting with a pubmed ID, lookup article in pubmed. 
-    
-    If DOI found in PubMedArticle object, that doi and 10.0 for the doi_score, 
+    '''Starting with a pubmed ID, lookup article in pubmed.
+
+    If DOI found in PubMedArticle object, that doi and 10.0 for the doi_score,
     i.e. the tuple (doi, 10.0).
 
     Otherwise, use CrossRef to find the DOI for given article and return (doi, crossref_doi_score).
@@ -251,12 +251,12 @@ def batch_doi2pmid(dois, use_best_guess=False, min_score=2.0, debug=False):
             pass
         if results:
             top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
-            doi_citations.append(top_result)
+            doi_citations.append(top_result['slugs'])
     if doi_citations:
         pmids = pm_fetch.batch_pmids_for_citation(doi_citations, debug=debug)
         if debug:
             print('PMIDs: %r' % pmids)
-        return interpret_pmids_for_citation_results(pmids)
+        return pmids
     else: return None
 
 
