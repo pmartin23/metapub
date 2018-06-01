@@ -210,3 +210,54 @@ def doi2pmid(doi, advanced_search = True, use_best_guess=False, min_score=2.0, d
         return None
 
 
+def batch_doi2pmid(dois, use_best_guess=False, min_score=2.0, debug=False):
+    '''uses CrossRef and PubMed eutils to lookup a PMID given a known doi.
+
+    Warning: NO validation of input DOI performed here. Use
+             metapub.text_mining.find_doi_in_string beforehand if needed.
+
+    If a PMID can be found, return it. Otherwise return None.
+
+    Set advanced_search = False if you have already tried to resolve the PMID by submitting the doi to
+    pubmed advanced search (see: PubMedFetcher.batch_query_doi()) to avoid making redundant requests
+
+
+    In very rare cases, use of the CrossRef->pubmed citation method used
+    here may result in more than one pubmed ID. In this case, this function
+    will return instead the word 'AMBIGUOUS'.
+
+    Args:
+        doi (str)
+        advanced_search(bool): default=False
+        use_best_guess (bool): default=False
+        min_score (float): minimum score to accept from CrossRef for given doi. default=2.0
+
+    Returns:
+        pmid (str) if found; 'AMBIGUOUS' if citation count > 1; None if no results.
+    '''
+    # for PMA, skip the validation; some pubmed XML has weird partial strings for DOI.
+    # We should allow people to search using these oddball strings.
+    _start_engines()
+
+    dois = [doi.strip() for doi in dois]
+    doi_citations = []
+
+    # Look up the DOI in CrossRef, then feed results to pubmed citation query tool.
+    for doi in dois:
+        results = None
+        try:
+            results = crossref.query(doi)
+        except CrossRefConnectionError:
+            pass
+        if results:
+            top_result = crossref.get_top_result(results, crossref.last_params, use_best_guess, min_score=min_score)
+            doi_citations.append(top_result)
+    if doi_citations:
+        pmids = pm_fetch.batch_pmids_for_citation(doi_citations, debug=debug)
+        if debug:
+            print('PMIDs: %r' % pmids)
+        return interpret_pmids_for_citation_results(pmids)
+    else: return None
+
+
+
